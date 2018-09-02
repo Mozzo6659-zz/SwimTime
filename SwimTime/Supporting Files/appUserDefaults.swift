@@ -10,36 +10,36 @@ import Foundation
 
 class appUserDefaults {
     //var nextMemberId = 0
-    var nextEventId = 1
+    
     var defaults = UserDefaults.standard
     let nextMemberKey = "NextMemberID"
     let nextEventKey = "NextEventID"
+    let nextRaceNoKey = "NextRaceNo"
     
+    func getNextId(thisKey : String) -> Int {
+        var nextId : Int = 1
+        if let defId  = defaults.object(forKey: thisKey) as? Int {
+            nextId = defId + 1
+        }
+        
+        
+        defaults.set(nextId, forKey: thisKey)
+        
+        return nextId
+        
+    }
     func getNextMemberId() -> Int {
         
-        var nextMemberId : Int = 1
-        
-        if let defMemberId  = defaults.object(forKey: nextMemberKey) as? Int {
-            nextMemberId = defMemberId + 1
-        }
-
-        
-        defaults.set(nextMemberId, forKey: nextMemberKey)
-        
-        return nextMemberId
+        return getNextId(thisKey: nextMemberKey)
     }
     
     func getNextEventId() -> Int {
+         return getNextId(thisKey: nextEventKey)
+       
+    }
+    
+    func getNextRaceNo() -> Int {
+        return getNextId(thisKey: nextRaceNoKey)
         
-        var nextEventId : Int = 1
-        
-        if let defEventId  = defaults.object(forKey: nextEventKey) as? Int {
-            nextEventId = defEventId + 1
-        }
-        
-        
-        defaults.set(nextEventId, forKey: nextEventKey)
-        
-        return nextEventId
     }
 }

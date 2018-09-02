@@ -7,19 +7,21 @@
 //
 
 import UIKit
+import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
+    let realm = try! Realm()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        let myDEF = appUserDefaults()
-        
-        let nextmem = myDEF.getNextMemberId()
-        print("\(nextmem)")
+//        let myDEF = appUserDefaults()
+//
+//        let nextmem = myDEF.getNextMemberId()
+//        print("\(nextmem)")
+        addGroups()
         return true
     }
 
@@ -45,6 +47,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
+    //MARK: - my Data manipulation
+    
+    func addGroups() {
+        var groupArray : Results<Group>
+        
+        groupArray = realm.objects(Group.self)
+        
+        if groupArray.count == 0 {
+            addGroup(id: 0, groupname: "None")
+            addGroup(id: 1, groupname: "Beginner")
+            addGroup(id: 2, groupname: "Explorer")
+            addGroup(id: 3, groupname: "Performer")
+        }
+   
+    }
+    
+    func addGroup(id : Int,groupname : String) {
+        let grp = Group()
+        grp.groupID = id
+        grp.groupName = groupname
+        do {
+                
+                try realm.write {
+                    realm.add(grp)
+                }
+            }catch {
+                print("Error encoding Item array")
+            }
 
+    }
 }
 
