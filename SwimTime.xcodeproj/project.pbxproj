@@ -8,20 +8,28 @@
 
 /* Begin PBXBuildFile section */
 		6F0146D1213B52C500CE3E88 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0146D0213B52C500CE3E88 /* AppDelegate.swift */; };
-		6F0146D3213B52C500CE3E88 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0146D2213B52C500CE3E88 /* ViewController.swift */; };
+		6F0146D3213B52C500CE3E88 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0146D2213B52C500CE3E88 /* MainViewController.swift */; };
 		6F0146D6213B52C500CE3E88 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0146D4213B52C500CE3E88 /* Main.storyboard */; };
 		6F0146D8213B52C700CE3E88 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F0146D7213B52C700CE3E88 /* Assets.xcassets */; };
 		6F0146DB213B52C700CE3E88 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0146D9213B52C700CE3E88 /* LaunchScreen.storyboard */; };
+		6F3F16E8213B5B4C007862B1 /* appUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3F16E7213B5B4C007862B1 /* appUserDefaults.swift */; };
+		6F3F16EA213B65D8007862B1 /* appButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3F16E9213B65D8007862B1 /* appButtons.swift */; };
+		CE378E1EF6F8A804A5B899A8 /* Pods_SwimTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B178A293D22BCB9A413BC73D /* Pods_SwimTime.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E66FC90FBCAC6220F2B0E31 /* Pods-SwimTime.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwimTime.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SwimTime/Pods-SwimTime.debug.xcconfig"; sourceTree = "<group>"; };
 		6F0146CD213B52C500CE3E88 /* SwimTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwimTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F0146D0213B52C500CE3E88 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		6F0146D2213B52C500CE3E88 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		6F0146D2213B52C500CE3E88 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		6F0146D5213B52C500CE3E88 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		6F0146D7213B52C700CE3E88 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6F0146DA213B52C700CE3E88 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6F0146DC213B52C700CE3E88 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6F3F16E7213B5B4C007862B1 /* appUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appUserDefaults.swift; sourceTree = "<group>"; };
+		6F3F16E9213B65D8007862B1 /* appButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appButtons.swift; sourceTree = "<group>"; };
+		B178A293D22BCB9A413BC73D /* Pods_SwimTime.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwimTime.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D109A052910927502EA5AEF7 /* Pods-SwimTime.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwimTime.release.xcconfig"; path = "Pods/Target Support Files/Pods-SwimTime/Pods-SwimTime.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,17 +37,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE378E1EF6F8A804A5B899A8 /* Pods_SwimTime.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		49D0C8C3B59F8F3B771A76BE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				1E66FC90FBCAC6220F2B0E31 /* Pods-SwimTime.debug.xcconfig */,
+				D109A052910927502EA5AEF7 /* Pods-SwimTime.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		67901B6F7BF0DF0B4C2657C7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B178A293D22BCB9A413BC73D /* Pods_SwimTime.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		6F0146C4213B52C500CE3E88 = {
 			isa = PBXGroup;
 			children = (
 				6F0146CF213B52C500CE3E88 /* SwimTime */,
 				6F0146CE213B52C500CE3E88 /* Products */,
+				49D0C8C3B59F8F3B771A76BE /* Pods */,
+				67901B6F7BF0DF0B4C2657C7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,14 +82,40 @@
 		6F0146CF213B52C500CE3E88 /* SwimTime */ = {
 			isa = PBXGroup;
 			children = (
+				6F3F16E6213B5B21007862B1 /* Model */,
+				6F3F16E5213B5B0A007862B1 /* Supporting Files */,
+				6F0146E2213B52E200CE3E88 /* Views */,
 				6F0146D0213B52C500CE3E88 /* AppDelegate.swift */,
-				6F0146D2213B52C500CE3E88 /* ViewController.swift */,
 				6F0146D4213B52C500CE3E88 /* Main.storyboard */,
 				6F0146D7213B52C700CE3E88 /* Assets.xcassets */,
 				6F0146D9213B52C700CE3E88 /* LaunchScreen.storyboard */,
 				6F0146DC213B52C700CE3E88 /* Info.plist */,
 			);
 			path = SwimTime;
+			sourceTree = "<group>";
+		};
+		6F0146E2213B52E200CE3E88 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				6F0146D2213B52C500CE3E88 /* MainViewController.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		6F3F16E5213B5B0A007862B1 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				6F3F16E7213B5B4C007862B1 /* appUserDefaults.swift */,
+				6F3F16E9213B65D8007862B1 /* appButtons.swift */,
+			);
+			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		6F3F16E6213B5B21007862B1 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -71,9 +125,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6F0146DF213B52C700CE3E88 /* Build configuration list for PBXNativeTarget "SwimTime" */;
 			buildPhases = (
+				CF5FC69C9CA500FA430E3F38 /* [CP] Check Pods Manifest.lock */,
 				6F0146C9213B52C500CE3E88 /* Sources */,
 				6F0146CA213B52C500CE3E88 /* Frameworks */,
 				6F0146CB213B52C500CE3E88 /* Resources */,
+				427CAC2497BA15E40FDD2206 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -130,13 +186,62 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		427CAC2497BA15E40FDD2206 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-SwimTime/Pods-SwimTime-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
+				"${BUILT_PRODUCTS_DIR}/ProgressHUD/ProgressHUD.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ChameleonFramework.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ProgressHUD.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SwimTime/Pods-SwimTime-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CF5FC69C9CA500FA430E3F38 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SwimTime-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		6F0146C9213B52C500CE3E88 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6F0146D3213B52C500CE3E88 /* ViewController.swift in Sources */,
+				6F3F16E8213B5B4C007862B1 /* appUserDefaults.swift in Sources */,
+				6F0146D3213B52C500CE3E88 /* MainViewController.swift in Sources */,
 				6F0146D1213B52C500CE3E88 /* AppDelegate.swift in Sources */,
+				6F3F16EA213B65D8007862B1 /* appButtons.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,6 +383,7 @@
 		};
 		6F0146E0213B52C700CE3E88 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1E66FC90FBCAC6220F2B0E31 /* Pods-SwimTime.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -290,12 +396,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = HammerheadSoftware.SwimTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
 		6F0146E1213B52C700CE3E88 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D109A052910927502EA5AEF7 /* Pods-SwimTime.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -308,7 +415,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = HammerheadSoftware.SwimTime;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};

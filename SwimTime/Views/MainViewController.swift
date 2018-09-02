@@ -7,12 +7,15 @@
 //
 
 import UIKit
+import ChameleonFramework
+class MainViewController: UIViewController {
 
-class ViewController: UIViewController {
-
+    //@IBOutlet weak var myButton: UIButton!
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        self.view.backgroundColor = GradientColor(.leftToRight, frame: self.view.frame, colors: [FlatSkyBlue(),FlatSkyBlueDark()])
+        
     }
 
     override func didReceiveMemoryWarning() {
