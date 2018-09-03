@@ -17,7 +17,18 @@ class Member : Object {
     @objc dynamic var gender : String = "Male"
     @objc dynamic var onekSeconds : Int = 0
     @objc dynamic var emailAddress : String = ""
+    @objc dynamic var selectedForEvent : Bool = false
     var myGroup = LinkingObjects(fromType: Group.self, property: "members")
     
+    var age:Int {
+    
+        
+        let components = Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date())
+        return components.year!
+        
+        
+        
+        
+    }
 }
 

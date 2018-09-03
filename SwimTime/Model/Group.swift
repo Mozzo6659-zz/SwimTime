@@ -14,5 +14,5 @@ class Group : Object {
     @objc dynamic var groupName : String = ""
     let members = List<Member>()
 
-    //var parentCategory = LinkingObjects(fromType: Category.self, property: "items")
+    
 }

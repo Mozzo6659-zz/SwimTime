@@ -22,6 +22,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        let nextmem = myDEF.getNextMemberId()
 //        print("\(nextmem)")
         addGroups()
+        
+        //addMembers()
         return true
     }
 
@@ -76,6 +78,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("Error encoding Item array")
             }
 
+    }
+    
+    func addMembers() {
+        //temp process
+        let appDef = appUserDefaults()
+        let mem = Member()
+        let grp = realm.objects(Group.self).first!
+        print(grp.groupName)
+        mem.memberID = appDef.getNextMemberId()
+        mem.memberName = "Joe Blow"
+        mem.gender = "Male"
+        mem.onekSeconds = 1800
+        
+        let calendar = Calendar.current
+        
+        mem.dateOfBirth = calendar.date(byAdding: .year, value: -30, to: Date())!
+        
+        
+        do {
+            
+            try self.realm.write {
+                
+                self.realm.add(mem)
+                grp.members.append(mem)
+            }
+        }catch {
+            print("Error encoding Item array")
+        }
+        //mem.dateOfBirth =
     }
 }
 
