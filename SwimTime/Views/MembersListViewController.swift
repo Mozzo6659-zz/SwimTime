@@ -109,7 +109,7 @@ class MembersListViewController: UITableViewController {
         
         let lh = membersList![indexPath.row + indexPath.section]
         
-        print(lh.memberName + " at \(indexPath.row) gender \(lh.gender) id=\(lh.memberID)")
+        //print(lh.memberName + " at \(indexPath.row) gender \(lh.gender) id=\(lh.memberID)")
         
         //cell.backgroundColor = UIColor.white
         //cell.tintColor = UIColor.white
@@ -187,9 +187,26 @@ class MembersListViewController: UITableViewController {
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            
+            //need t tsake member out of th club and any event results
             let mem = membersList![indexPath.row + indexPath.section]
+            let memClub = mem.myClub.first
+            
+            let evResults = mem.eventResults
+            
             do {
                 try realm.write {
+                    
+                    //remove from the club
+                    if let mxm = memClub?.members.index(of: mem) {
+                         memClub?.members.remove(at: mxm)
+                    }
+                    
+                    //delete the event results
+                    if evResults.count != 0 {
+                        realm.delete(evResults)
+                    }
+                    //delete the member
                     realm.delete(mem)
                 }
             } catch {

@@ -22,7 +22,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        let nextmem = myDEF.getNextMemberId()
 //        print("\(nextmem)")
         addGroups()
-        
+        addInitSwimClub()
+        //checkExplorer()
         //addMembers()
         return true
     }
@@ -50,7 +51,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     //MARK: - my Data manipulation
+    func checkExplorer() {
+        let groupArray : Results<Group> = realm.objects(Group.self).filter("groupID = 2")
+        
+        print(groupArray[0].members.count)
+        
+        for mem in groupArray[0].members {
+            print(mem.memberName)
+        }
+    }
     
+    func addInitSwimClub() {
+        let clubArray : Results<SwimClub> = realm.objects(SwimClub.self)
+        
+        if clubArray.count != 0 {
+            let defsc = SwimClub()
+            defsc.clubName = "Seas the Limit"
+            defsc.clubID = 1
+            do {
+                
+                try realm.write {
+                    realm.add(defsc)
+                }
+            }catch {
+                print("Error encoding Item array")
+            }
+
+        }
+        
+        
+        
+    }
     func addGroups() {
         var groupArray : Results<Group>
         

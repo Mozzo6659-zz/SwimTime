@@ -40,6 +40,8 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     var photoUpdated = false
     var selectedMember = Member()
     var selectedGroup = Group()
+    var defSwimClub = SwimClub()
+    
     let imagePicker = UIImagePickerController()
     
     override func viewDidLoad() {
@@ -89,6 +91,10 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         
     }
 
+    func getDefSwimClub() {
+        let scArray : Results<SwimClub> = realm.objects(SwimClub.self).filter("clubID = 1")
+        defSwimClub = scArray.first!
+    }
     //MARK: - Picker data stuff
     
     func loadPickerData() {
@@ -221,35 +227,43 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
                     
                         if selectedMember.myGroup.count != 0 {
                             let memberGroup = selectedMember.myGroup.first!
-                            var index : Int = 0
-//                            print(memberGroup.groupName)
-//                            print(selectedGroup.groupName)
+
                             if selectedGroup.groupName != memberGroup.groupName {
                                 if  memberGroup.members.count != 0 {
+                                    let mxm = memberGroup.members.index(of: selectedMember)
+                                    memberGroup.members.remove(at: mxm!)
+                                }
+                            }
+                        }
+                    
+                    
+        /*old delete method
+                                if  memberGroup.members.count != 0 {
+                                    let mxm = memberGroup.members.index(of: selectedMember)
+                                    memberGroup.members.remove(at: mxm!)
                                     for mem in memberGroup.members {
                                         if mem.memberID == selectedMember.memberID {
-                                            
+
                                             memberGroup.members.remove(at: index)
-                                           
+
                                             continue
                                         }else{
                                             index += 1
                                         }
-                                        
-                                    }
+
+                                  }
                                 }
+ 
                             }
                         
                     }
-                    //taking this out to see if it makes a diff
+ */
                     selectedGroup.members.append(selectedMember)
                     
-                    //print("\(selectedMember.memberID)")
-                    //print("\(selectedMember.myGroup.count)")
                     if selectedMember.memberID == 0 {
                         selectedMember.memberID = myDefs.getNextMemberId()
+                        defSwimClub.members.append(selectedMember)
                         realm.add(selectedMember)
-                       // print(newMember.memberName)
                     }
                 }
                 

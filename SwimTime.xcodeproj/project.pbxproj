@@ -12,6 +12,9 @@
 		6F0146D6213B52C500CE3E88 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0146D4213B52C500CE3E88 /* Main.storyboard */; };
 		6F0146D8213B52C700CE3E88 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6F0146D7213B52C700CE3E88 /* Assets.xcassets */; };
 		6F0146DB213B52C700CE3E88 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0146D9213B52C700CE3E88 /* LaunchScreen.storyboard */; };
+		6F0B0188213F43400034CC2B /* SwimClub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0B0187213F43400034CC2B /* SwimClub.swift */; };
+		6F0B018A213F46680034CC2B /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0B0189213F46680034CC2B /* Event.swift */; };
+		6F0B018C213F4A940034CC2B /* EvenResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0B018B213F4A940034CC2B /* EvenResult.swift */; };
 		6F1A6CA7213C97B700A69AC9 /* appFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1A6CA6213C97B700A69AC9 /* appFunctions.swift */; };
 		6F1A6CA9213CC9D400A69AC9 /* MembersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1A6CA8213CC9D400A69AC9 /* MembersViewController.swift */; };
 		6F3F16E8213B5B4C007862B1 /* appUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3F16E7213B5B4C007862B1 /* appUserDefaults.swift */; };
@@ -30,6 +33,9 @@
 		6F0146D7213B52C700CE3E88 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6F0146DA213B52C700CE3E88 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6F0146DC213B52C700CE3E88 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6F0B0187213F43400034CC2B /* SwimClub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwimClub.swift; sourceTree = "<group>"; };
+		6F0B0189213F46680034CC2B /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		6F0B018B213F4A940034CC2B /* EvenResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvenResult.swift; sourceTree = "<group>"; };
 		6F1A6CA6213C97B700A69AC9 /* appFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appFunctions.swift; sourceTree = "<group>"; };
 		6F1A6CA8213CC9D400A69AC9 /* MembersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersViewController.swift; sourceTree = "<group>"; };
 		6F3F16E7213B5B4C007862B1 /* appUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appUserDefaults.swift; sourceTree = "<group>"; };
@@ -126,6 +132,9 @@
 			children = (
 				6F3F16EB213B972B007862B1 /* Member.swift */,
 				6F3F16ED213B9915007862B1 /* Group.swift */,
+				6F0B0187213F43400034CC2B /* SwimClub.swift */,
+				6F0B0189213F46680034CC2B /* Event.swift */,
+				6F0B018B213F4A940034CC2B /* EvenResult.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -254,9 +263,12 @@
 				6F1A6CA7213C97B700A69AC9 /* appFunctions.swift in Sources */,
 				6F3F16E8213B5B4C007862B1 /* appUserDefaults.swift in Sources */,
 				6F0146D3213B52C500CE3E88 /* MainViewController.swift in Sources */,
+				6F0B018A213F46680034CC2B /* Event.swift in Sources */,
+				6F0B018C213F4A940034CC2B /* EvenResult.swift in Sources */,
 				6F3F16F0213BA3C5007862B1 /* MembersListViewController.swift in Sources */,
 				6F0146D1213B52C500CE3E88 /* AppDelegate.swift in Sources */,
 				6F3F16EE213B9915007862B1 /* Group.swift in Sources */,
+				6F0B0188213F43400034CC2B /* SwimClub.swift in Sources */,
 				6F3F16EC213B972B007862B1 /* Member.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
