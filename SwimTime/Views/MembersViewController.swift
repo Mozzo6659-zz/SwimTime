@@ -10,7 +10,7 @@ import UIKit
 import ChameleonFramework
 import RealmSwift
 
-class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UIImagePickerControllerDelegate,UINavigationControllerDelegate {
 
     
     
@@ -35,12 +35,12 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     let realm = try! Realm()
     var myfunc = appFunctions()
     var myDefs = appUserDefaults()
-    
+    var selectedGender = 1
     var pickerItems : Results<Group>?
-    
+    var photoUpdated = false
     var selectedMember = Member()
     var selectedGroup = Group()
-    
+    let imagePicker = UIImagePickerController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,15 +71,20 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     func configureView() {
     
         txtName.becomeFirstResponder()
-    
+        
+        //uncommet when runnign on simulator or it blows up
+        imagePicker.delegate = self
+        imagePicker.sourceType = .camera
+        imagePicker.allowsEditing = true
+
     //[vwExtraDetails setHidden:quickEntry];
     
         loadPickerData()
         pickerView.delegate = self
         pickerView.dataSource = self
     
-        pickerView.isHidden = true
-    
+        pickerView.isHidden = true        
+        
         self.view.bringSubview(toFront: pickerView)
         
     }
@@ -112,32 +117,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         pickerView.isHidden = true
         
         //Im gonna remove the member from the list
-        if selectedMember.memberID != 0 {
-            if selectedMember.myGroup.count != 0 {
-                let memberGroup = selectedMember.myGroup.first!
-                var index : Int = 0
-                
-                if  memberGroup.members.count != 0 {
-                    for mem in memberGroup.members {
-                        if mem.memberID == selectedMember.memberID {
-                            do {
-                                try realm.write {
-                                    memberGroup.members.remove(at: index)
-                                }
-                            }catch{
-                                
-                            }
-                            continue
-                        }else{
-                            index += 1
-                        }
-                        
-                    }
-                }
-            }
-            
-            
-        }
+        
         
         
     }
@@ -152,25 +132,49 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         pickerView.isHidden = false
     }
     
+    @IBAction func takePhoto(_ sender: UIButton) {
+        
+        present(imagePicker, animated: true, completion: nil)
+
+    }
     
     @IBAction func goBack(_ sender: UIBarButtonItem) {
+        //let myList = realm.objects(Member.self)
         
+//        for mem in myList {
+//            print(mem.memberName)
+//        }
         self.navigationController?.popViewController(animated: true)
     }
     @IBAction func btnGenderClicked(_ sender: UIButton) {
+        //let imgclosed = getTickedImage()
+        //
+        //let imgpen = getUnTickedImage()
+        sender.isSelected = false
         
         if sender.tag == 1 {
+//            btnMale.imageView?.image = getTickedImage()
+//            btnFemale.imageView?.image = getUnTickedImage()
+
             btnMale.setImage(getTickedImage(), for: .normal)
-            
+
             btnFemale.setImage(getUnTickedImage(), for: .normal)
             
-            selectedMember.gender = "Male"
         }else{
-            btnMale.setImage(getUnTickedImage(), for: .normal)
             
+//            btnMale.imageView?.image = getUnTickedImage()
+//            btnFemale.imageView?.image = getTickedImage()
+
+            btnMale.setImage(getUnTickedImage(), for: .normal)
+
             btnFemale.setImage(getTickedImage(), for: .normal)
-            selectedMember.gender = "Female"
+            
         }
+        //btnMale.imageView?.setNeedsDisplay()
+        //btnFemale.imageView?.setNeedsDisplay()
+        
+        selectedGender = sender.tag
+        
     }
     
     func getTickedImage() -> UIImage {
@@ -200,24 +204,72 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
             
             do {
                 try realm.write {
-                    if selectedMember.memberID == 0 {
-                        selectedMember.memberID = myDefs.getNextMemberId()
-                        selectedGroup.members.append(selectedMember)
-                    }
+                    
+                    //var newMember = Member()
+                    
+                    selectedMember.gender = selectedGender == 1 ? "Male":"Female"
+                    //print(newMember.gender)
                     
                     selectedMember.emailAddress = txtEmail.text!
                     selectedMember.memberName = txtName.text!
+                    //print(selectedMember.memberName)
                     selectedMember.onekSeconds = myfunc.convertTimeToSeconds(thetimeClock: thetime)
+                    //print("\(selectedMember.onekSeconds)")
+                    
                     selectedMember.dateOfBirth = dateFormatter.date(from: DOB)!
                     
+                    
+                        if selectedMember.myGroup.count != 0 {
+                            let memberGroup = selectedMember.myGroup.first!
+                            var index : Int = 0
+//                            print(memberGroup.groupName)
+//                            print(selectedGroup.groupName)
+                            if selectedGroup.groupName != memberGroup.groupName {
+                                if  memberGroup.members.count != 0 {
+                                    for mem in memberGroup.members {
+                                        if mem.memberID == selectedMember.memberID {
+                                            
+                                            memberGroup.members.remove(at: index)
+                                           
+                                            continue
+                                        }else{
+                                            index += 1
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        
+                    }
+                    //taking this out to see if it makes a diff
+                    selectedGroup.members.append(selectedMember)
+                    
+                    //print("\(selectedMember.memberID)")
+                    //print("\(selectedMember.myGroup.count)")
+                    if selectedMember.memberID == 0 {
+                        selectedMember.memberID = myDefs.getNextMemberId()
+                        realm.add(selectedMember)
+                       // print(newMember.memberName)
+                    }
                 }
                 
                 
+                if photoUpdated && imgPhoto.image != nil {
+                    
+                    myfunc.writePhoto(memberid: selectedMember.memberID, img: imgPhoto.image!)
+                    
+                }
+                
             }catch{
                 //come back here
-                print("Couldnt save data")
+                showError(errmsg: "Couldnt save data")
             }
+            
+            startNewMember()
         }
+        
+        
+        
     }
     
     func getIntValueFromTextField(txt: UITextField) -> Int {
@@ -239,10 +291,13 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         txtEmail.text = selectedMember.emailAddress
         
         if selectedMember.gender == "Male" {
+            
+            
             btnMale.setImage(getTickedImage(), for: .normal)
             btnFemale.setImage(getUnTickedImage(), for: .normal)
    
         }else{
+            
             btnMale.setImage(getUnTickedImage(), for: .normal)
             btnFemale.setImage(getTickedImage(), for: .normal)
     
@@ -270,10 +325,12 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         
         lblGroup.text = selectedMember.myGroup.first?.groupName
     
+        if selectedMember.myGroup.count != 0 {
+            selectedGroup = selectedMember.myGroup.first!
+        }
         //NSString *photoname = [mysettings makePhotoName:selectedMember.memberid];
         if selectedMember.memberID != 0 {
             let imgFilePath = myfunc.getFullPhotoPath(memberid: selectedMember.memberID)
-    
             imgPhoto.image = UIImage(contentsOfFile:imgFilePath)
     
         }
@@ -293,22 +350,22 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     
   
         imgPhoto.image = nil
+        photoUpdated = false
         
         txtName.becomeFirstResponder()
-    
+        selectedGender = 1
+        
+        btnMale.setImage(getTickedImage(), for: .normal)
+        btnFemale.setImage(getUnTickedImage(), for: .normal)
+        
         selectedGroup = realm.objects(Group.self).first!
         lblGroup.text = selectedGroup.groupName
+        selectedMember = Member()
+        
     }
 
     //MARK: Erors
-    func showError(errmsg:String) {
-        let alert = UIAlertController(title: "Error", message: "errmsg", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-        
-        present(alert, animated: true, completion: nil)
-        
-        
-    }
+    
     
     func validateEventDetails() -> Bool {
         
@@ -373,6 +430,34 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         return (errmsg=="");
     }
 
+    //MARK: - Photo stuff
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        if let imagePicked = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            
+            //imageView.image = imagePicked
+            
+            //guard let ciImagePicked = CIImage(image: imagePicked) else {fatalError("Bad image")}
+            
+            imgPhoto.image = imagePicked
+            photoUpdated = true
+        }
+        
+        imagePicker.dismiss(animated: true, completion: nil)
+        
+        
+        
+    }
+    
+    func showError(errmsg:String) {
+        let alert = UIAlertController(title: "Error", message: errmsg, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+        
+        
+    }
     /*
     // MARK: - Navigation
 

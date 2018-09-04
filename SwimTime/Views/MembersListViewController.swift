@@ -36,6 +36,9 @@ class MembersListViewController: UITableViewController {
             if loadMembers() {
                 tableView.reloadData()
             }
+            
+            selectedMember = Member() //reset this or ot stays for th secnd time
+            
             backFromMember = false
         }
     }
@@ -59,6 +62,7 @@ class MembersListViewController: UITableViewController {
     func loadMembers() -> Bool{
         var found : Bool = false
         membersList = realm.objects(Member.self)
+
         if (membersList?.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
             
@@ -102,10 +106,14 @@ class MembersListViewController: UITableViewController {
     
     func configureCell(cell:UITableViewCell, atIndexPath indexPath:IndexPath) {
     
-    
-        let lh = membersList![indexPath.row]
-    
-        cell.backgroundColor = FlatGray()
+        
+        let lh = membersList![indexPath.row + indexPath.section]
+        
+        print(lh.memberName + " at \(indexPath.row) gender \(lh.gender) id=\(lh.memberID)")
+        
+        //cell.backgroundColor = UIColor.white
+        //cell.tintColor = UIColor.white
+        
         
         cell.textLabel?.font = UIFont(name:"Helvetica", size:40.0)
      
@@ -114,12 +122,10 @@ class MembersListViewController: UITableViewController {
     cell.detailTextLabel?.font = UIFont(name:"Helvetica", size:20.0);
     
     cell.detailTextLabel?.textColor = FlatRed()
-    
-    //timeFunctions *f = [[timeFunctions alloc] init];
+
     
         var dtText = String(format:"Age: %d",lh.age)
         
-        //let items = realm.objects(Group.self).filter("groupName = 'List 2' ").first?.itemList
         
         if let grp = lh.myGroup.first {
             dtText = dtText + String(format:"   Group: %@",grp.groupName)
@@ -133,20 +139,18 @@ class MembersListViewController: UITableViewController {
         let imgFilePath = myfunc.getFullPhotoPath(memberid: lh.memberID)
     
         let imgMemberPhoto = UIImageView(image: UIImage(contentsOfFile: imgFilePath))
-        
+        cell.backgroundColor = UIColor(hexString: "BDC3C7") //hard setting ths doesnt seem to work as well
         if imgMemberPhoto.image != nil {
-        
-            if var frame = cell.accessoryView?.frame {
-                    frame.size.width = 80.0
-                    frame.size.height = 90.0
-                    imgMemberPhoto.frame = frame
-                    imgMemberPhoto.layer.masksToBounds = true
-                    imgMemberPhoto.layer.cornerRadius = 20.0
-                    cell.accessoryView = imgMemberPhoto
-                    cell.accessoryView?.isHidden = false
-            }else{
-                cell.accessoryView?.isHidden = true
-            }
+            
+            let frame = CGRect(x: 0.0, y: 0.0, width: 100.00, height: 100.00)
+            
+                imgMemberPhoto.frame = frame
+                imgMemberPhoto.layer.masksToBounds = true
+                imgMemberPhoto.layer.cornerRadius = 20.0
+                cell.accessoryView = imgMemberPhoto
+                cell.accessoryView?.tintColor = UIColor.clear
+                cell.accessoryView?.isHidden = false
+
         }else{
             cell.accessoryView?.isHidden = true
         }
@@ -168,28 +172,38 @@ class MembersListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedMember = membersList![indexPath.row]
+        selectedMember = membersList![indexPath.row + indexPath.section]
         performSegue(withIdentifier: memberseg, sender: self)
     }
-    /*
+    
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
         return true
     }
-    */
+    
 
-    /*
+    
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            let mem = membersList![indexPath.row + indexPath.section]
+            do {
+                try realm.write {
+                    realm.delete(mem)
+                }
+            } catch {
+                self.showError(errmsg: "Cant delete member")
+            }
+            
+            if loadMembers() {
+                tableView.reloadData()
+            }
             // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+            //tableView.deleteRows(at: [indexPath], with: .fade)
+        }
     }
-    */
+    
 
     /*
     // Override to support rearranging the table view.
@@ -219,6 +233,13 @@ class MembersListViewController: UITableViewController {
     }
     
     //MARK: - Errors
-    
+    func showError(errmsg:String) {
+        let alert = UIAlertController(title: "Error", message: errmsg, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+        
+        
+    }
     
 }

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import UIKit
 class appFunctions {
     
     //MARK: - Photo Functions
@@ -18,18 +18,37 @@ class appFunctions {
     
     }
     
+    func writePhoto(memberid:Int, img:UIImage) {
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            
+            
+            let photoName = makePhotoName(memberid: memberid)
+            
+            
+            let fileURL = dir.appendingPathComponent(photoName)
+            
+            
+            let data = UIImageJPEGRepresentation(img, 1.0)
+            
+           // print(fileURL.absoluteString)
+            
+            //print(getFullPhotoPath(memberid: memberid))
+            
+            do {
+                try data?.write(to: fileURL)
+            }catch{
+                print("couldnt write to fle")
+            }
+        }
+    }
     func getFullPhotoPath(memberid:Int) -> String {
+       
+        return NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] + "/" + makePhotoName(memberid: memberid)
         
-        let photoName = makePhotoName(memberid: memberid)
         
-        let stringPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-
-    
-    return stringPath + photoName
-    
-    
     
     }
+    
     //MARK: - Time Functions
     func adjustOnekSecondsForDistance(distance:Int,timeinSeconds:Int) -> Int {
         
@@ -94,5 +113,5 @@ class appFunctions {
         return isOk;
     }
 
-
+    
 }
