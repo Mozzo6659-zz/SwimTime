@@ -20,8 +20,9 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     @IBOutlet weak var txtDOBDay: UITextField!
     @IBOutlet weak var txtDOBMonth: UITextField!
     @IBOutlet weak var txtDOBYear: UITextField!
-    @IBOutlet weak var lblGroup: UILabel!
     @IBOutlet weak var txtOnekSeconds: UITextField!
+    @IBOutlet weak var lblGroup: UILabel!
+    
     
     @IBOutlet weak var btnMale: UIButton!
     
@@ -153,32 +154,22 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         self.navigationController?.popViewController(animated: true)
     }
     @IBAction func btnGenderClicked(_ sender: UIButton) {
-        //let imgclosed = getTickedImage()
-        //
-        //let imgpen = getUnTickedImage()
+        
         sender.isSelected = false
         
         if sender.tag == 1 {
-//            btnMale.imageView?.image = getTickedImage()
-//            btnFemale.imageView?.image = getUnTickedImage()
-
             btnMale.setImage(getTickedImage(), for: .normal)
 
             btnFemale.setImage(getUnTickedImage(), for: .normal)
             
         }else{
             
-//            btnMale.imageView?.image = getUnTickedImage()
-//            btnFemale.imageView?.image = getTickedImage()
-
             btnMale.setImage(getUnTickedImage(), for: .normal)
 
             btnFemale.setImage(getTickedImage(), for: .normal)
             
         }
-        //btnMale.imageView?.setNeedsDisplay()
-        //btnFemale.imageView?.setNeedsDisplay()
-        
+       
         selectedGender = sender.tag
         
     }

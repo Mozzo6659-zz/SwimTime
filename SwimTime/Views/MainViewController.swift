@@ -10,10 +10,13 @@ import UIKit
 import ChameleonFramework
 class MainViewController: UIViewController {
 
-    
+    var showFinishedEvents = false //tells the eet seque
+    let gotoEventsListSeg = "gotoEventsList"
+    let gotoMembersListSeg = "gotoMembersList"
     @IBOutlet weak var btnMembers: UIButton!
     
     
+    @IBOutlet weak var btnEvets: UIButton!
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -40,12 +43,34 @@ class MainViewController: UIViewController {
 
     //MARK: - Button functions
     
-    @IBAction func memberClicked(_ sender: Any) {
+    @IBAction func mnubtnClicked(_ sender: UIButton) {
+        var seg : String = ""
+        showFinishedEvents = (sender.tag == 3)
         
-        performSegue(withIdentifier: "gotoMembersList", sender: self)
+        switch sender.tag {
+        case 1:
+            seg = gotoMembersListSeg
+        case 2,3:
+            
+            seg = gotoEventsListSeg
+            
+        default:
+            seg = ""
+        }
         
+        if seg != "" {
+            performSegue(withIdentifier: seg, sender: self)
+            
+        }
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == gotoEventsListSeg {
+            
+            let vc = segue.destination as! EventsListViewController
+            vc.showFinished = showFinishedEvents
+        }
+    }
     
 }
 

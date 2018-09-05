@@ -18,9 +18,10 @@ class MembersListViewController: UITableViewController {
     var selectedMember = Member()
     let memberseg = "memberListToMember"
     
-    @IBOutlet weak var btnNewmember: UIBarButtonItem!
+//    @IBOutlet weak var btnNewmember: UIBarButtonItem!
+//
+//    @IBOutlet weak var btnHome: UIBarButtonItem!
     
-    @IBOutlet weak var btnHome: UIBarButtonItem!
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -121,7 +122,7 @@ class MembersListViewController: UITableViewController {
     
     cell.detailTextLabel?.font = UIFont(name:"Helvetica", size:20.0);
     
-    cell.detailTextLabel?.textColor = FlatRed()
+    cell.detailTextLabel?.textColor = UIColor.red
 
     
         var dtText = String(format:"Age: %d",lh.age)

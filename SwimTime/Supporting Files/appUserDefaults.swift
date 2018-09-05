@@ -15,6 +15,7 @@ class appUserDefaults {
     let nextMemberKey = "NextMemberID"
     let nextEventKey = "NextEventID"
     let nextRaceNoKey = "NextRaceNo"
+    let nextTeamNoKey = "NextTeamNo"
     
     func getNextId(thisKey : String) -> Int {
         var nextId : Int = 1
@@ -40,6 +41,10 @@ class appUserDefaults {
     
     func getNextRaceNo() -> Int {
         return getNextId(thisKey: nextRaceNoKey)
+        
+    }
+    func getNextTeamNo() -> Int {
+        return getNextId(thisKey: nextTeamNoKey)
         
     }
 }
