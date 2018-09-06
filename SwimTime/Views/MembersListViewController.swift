@@ -140,7 +140,7 @@ class MembersListViewController: UITableViewController {
         let imgFilePath = myfunc.getFullPhotoPath(memberid: lh.memberID)
     
         let imgMemberPhoto = UIImageView(image: UIImage(contentsOfFile: imgFilePath))
-        cell.backgroundColor = UIColor(hexString: "BDC3C7") //hard setting ths doesnt seem to work as well
+        cell.backgroundColor = UIColor(hexString: "89D8FC") //light blue.-- hard setting ths doesnt seem to work as well
         if imgMemberPhoto.image != nil {
             
             let frame = CGRect(x: 0.0, y: 0.0, width: 100.00, height: 100.00)

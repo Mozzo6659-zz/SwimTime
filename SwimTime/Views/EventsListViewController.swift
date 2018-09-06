@@ -22,7 +22,9 @@ class EventsListViewController: UITableViewController {
         super.viewDidLoad()
 
         navigationItem.setHidesBackButton(true, animated: false)
-        
+        if loadEvents() {
+            
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -52,7 +54,7 @@ class EventsListViewController: UITableViewController {
         if (eventsList?.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
             
-            noDataLabel.text             = "No Members to List"
+            noDataLabel.text             = "No Active Event to List"
             noDataLabel.textColor        = UIColor.black
             noDataLabel.backgroundColor = UIColor.gray
             //noDataLabel.layer.cornerRadius = 30;
@@ -149,19 +151,52 @@ class EventsListViewController: UITableViewController {
     
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        
+        let ev = eventsList![indexPath.row + indexPath.section]
+        
         if editingStyle == .delete {
-            // Delete the row from the data source
-            //tableView.deleteRows(at: [indexPath], with: .fade)
+            do {
+                try realm.write {
+                    if ev.eventResults.count != 0 {
+                        for er in ev.eventResults {
+                            if let mem = er.myMember.first {
+                                if let mxm = mem.eventResults.index(of: er) {
+                                    mem.eventResults.remove(at: mxm)
+                                }
+                            }
+                            realm.delete(er)
+                        }
+                    }
+                    realm.delete(ev)
+                }
+            }catch{
+                showError(errmsg: "Cant delete event")
+            }
+            if loadEvents() {
+                tableView.reloadData()
+            }
         }
     }
     
-    //MARK: - Bar Button actions
-    
     @IBAction func newEventClicked(_ sender: UIBarButtonItem) {
+        performSegue(withIdentifier: eventseg, sender: self)
     }
     
     @IBAction func homeClicked(_ sender: UIBarButtonItem) {
+        self.navigationController?.popViewController(animated: true)
     }
+    
+    //MARK: - Bar Button actions
+    /*
+    @IBAction func newEventClicked(_ sender: UIBarButtonItem) {
+        performSegue(withIdentifier: eventseg, sender: self)
+    }
+    
+    @IBAction func homeClicked(_ sender: UIBarButtonItem) {
+         self.navigationController?.popViewController(animated: true)
+    }
+    */
+    
     /*
     // Override to support rearranging the table view.
     override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
@@ -185,5 +220,13 @@ class EventsListViewController: UITableViewController {
         
     }
     
-
+    //MARK: - Errors
+    func showError(errmsg:String) {
+        let alert = UIAlertController(title: "Error", message: errmsg, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+        
+        
+    }
 }

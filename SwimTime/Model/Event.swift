@@ -13,6 +13,7 @@ class Event : Object {
     @objc dynamic var eventID : Int = 0
     @objc dynamic var webID : Int = 0
     @objc dynamic var dataChanged : Bool = false
+    @objc dynamic var useRaceNos : Bool = false
     @objc dynamic var eventDate : Date = Date()
     @objc dynamic var eventName : String = ""
     @objc dynamic var eventLocation : String = ""

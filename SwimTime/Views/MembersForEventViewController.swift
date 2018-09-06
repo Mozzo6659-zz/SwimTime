@@ -14,7 +14,7 @@ class MembersForEventViewController: UITableViewController {
     let realm = try! Realm()
     var membersList : List<Member>?
     var myfunc = appFunctions()
-    
+    var mydefs = appUserDefaults()
     var selectedEvent = Event()
     
     
@@ -37,10 +37,31 @@ class MembersForEventViewController: UITableViewController {
     //MARK: - IBActions
     
     
-    @IBAction func homeClicked(_ sender: UIBarButtonItem) {
+    
+    @IBAction func doneClicked(_ sender: UIBarButtonItem) {
+        if membersList?.count != 0 {
+        
+            do {
+                try realm.write {
+                    for mem in membersList! {
+                        mem.selectedForEvent = false
+                        let er = EventResult()
+                        if selectedEvent.useRaceNos {
+                            er.raceNo = mydefs.getNextRaceNo()
+                            
+                        }
+                        er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
+                        realm.add(er)
+                        mem.eventResults.append(er)
+                        selectedEvent.eventResults.append(er)
+                    }
+                }
+            }catch{
+                showError(errmsg: "Cant save members")
+            }
+        }
         self.navigationController?.popViewController(animated: true)
     }
-    
     
     // MARK: - my Data stuff
     func loadMembers() -> Bool{
@@ -142,6 +163,14 @@ class MembersForEventViewController: UITableViewController {
         
         cell.backgroundColor = UIColor(hexString: "BDC3C7") //hard setting ths doesnt seem to work as well
         if lh.selectedForEvent {
+            let imageView = UIImageView(image: UIImage(named: "tickbig7575"))
+            
+            //[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tickbig7575.png"]];
+            
+            imageView.sizeToFit()
+            cell.accessoryView = imageView
+            
+        }else {
             if imgMemberPhoto.image != nil {
                 
                 let frame = CGRect(x: 0.0, y: 0.0, width: 100.00, height: 100.00)
@@ -156,13 +185,6 @@ class MembersForEventViewController: UITableViewController {
             }else{
                 cell.accessoryView?.isHidden = true
             }
-        }else {
-            let imageView = UIImageView(image: UIImage(named: "tickbig7575"))
-                
-                //[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tickbig7575.png"]];
-            
-            imageView.sizeToFit()
-            cell.accessoryView = imageView;
             
         }
         
@@ -186,6 +208,7 @@ class MembersForEventViewController: UITableViewController {
         do {
             try realm.write {
                 lh.selectedForEvent = !lh.selectedForEvent
+                
             }
         }catch{
             showError(errmsg: "Couldnt update item")

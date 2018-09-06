@@ -12,6 +12,7 @@ import RealmSwift
 class EventResult : Object {
     @objc dynamic var expectedSeconds : Int = 0
     @objc dynamic var resultSeconds : Int = 0
+    @objc dynamic var pointsEarned : Int = 0
     @objc dynamic var raceNo : Int = 0
     @objc dynamic var teamNo : Int = 0
     let myMember = LinkingObjects(fromType: Member.self, property: "eventResults")

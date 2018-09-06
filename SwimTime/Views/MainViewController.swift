@@ -17,9 +17,15 @@ class MainViewController: UIViewController {
     
     
     @IBOutlet weak var btnEvets: UIButton!
+    
+    @IBOutlet weak var btnResults: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        btnMembers.layer.borderColor = UIColor.red.cgColor
+        btnEvets.layer.borderColor = UIColor.red.cgColor
         
+        btnResults.layer.borderColor = UIColor.red.cgColor
         self.navigationController?.setToolbarHidden(true, animated: false)
         //print("Flat Green " + FlatGreen().hexValue()) 2ECC70
        //self.view.backgroundColor = GradientColor(.leftToRight, frame: self.view.frame, colors: [FlatSkyBlue(),FlatSkyBlueDark()])
