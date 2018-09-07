@@ -15,13 +15,16 @@ class EventsListViewController: UITableViewController {
     var myfunc = appFunctions()
     var backFromEvent : Bool = false
     var showFinished : Bool = false //whether the lits show finished event or active events
-    var selectedMember = Member()
+    //var selectedMember = Member()
+    var selectedEvent = Event()
     let eventseg = "eventListToEvent"
+    let eventResultseg = "eventListToResults"
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         navigationItem.setHidesBackButton(true, animated: false)
+        
         if loadEvents() {
             
         }
@@ -30,10 +33,11 @@ class EventsListViewController: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         if backFromEvent {
             if loadEvents() {
-                tableView.reloadData()
+                
             }
             
-            
+            tableView.reloadData()
+            selectedEvent = Event()
             backFromEvent = false
         }
     }
@@ -42,14 +46,14 @@ class EventsListViewController: UITableViewController {
     func loadEvents() -> Bool{
         var found : Bool = false
         
-        var finishedSelect : String = "false"
+        var finishedSelect : String = "isFinished = false"
         
         if showFinished  {
-            finishedSelect = "true"
+            finishedSelect = "isFinished = true"
         }
     
         
-        eventsList = realm.objects(Event.self).filter("isFinished = " + finishedSelect)
+        eventsList = realm.objects(Event.self).filter(finishedSelect)
         
         if (eventsList?.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
@@ -57,9 +61,9 @@ class EventsListViewController: UITableViewController {
             noDataLabel.text             = "No Active Event to List"
             noDataLabel.textColor        = UIColor.black
             noDataLabel.backgroundColor = UIColor.gray
-            //noDataLabel.layer.cornerRadius = 30;
+            
             noDataLabel.textAlignment    = .center
-            noDataLabel.font = UIFont(name:"Verdana",size:40)
+            noDataLabel.font = UIFont(name:"Helvetica",size:40)
             //UIFont(fontWithName:"Verdana" size:40)
             tableView.backgroundView = noDataLabel;
             
@@ -93,6 +97,15 @@ class EventsListViewController: UITableViewController {
         return headerView
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedEvent = eventsList![indexPath.row + indexPath.section]
+        if selectedEvent.isFinished {
+              performSegue(withIdentifier: eventResultseg, sender: self)
+        }else{
+          performSegue(withIdentifier: eventseg, sender: self)
+        }
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "EventCell", for: indexPath)
 
@@ -106,17 +119,12 @@ class EventsListViewController: UITableViewController {
         
         let lh = eventsList![indexPath.row + indexPath.section]
         
-        //print(lh.memberName + " at \(indexPath.row) gender \(lh.gender) id=\(lh.memberID)")
-        
-        //cell.backgroundColor = UIColor.white
-        //cell.tintColor = UIColor.white
-        
-        
         cell.textLabel?.font = UIFont(name:"Helvetica", size:40.0)
         
         cell.textLabel?.text = lh.eventLocation + (" \(lh.eventDistance) mtrs"
         )
         cell.detailTextLabel?.textColor = UIColor.red
+        
         cell.detailTextLabel?.font = UIFont(name:"Helvetica", size:20.0)
         
 
@@ -172,13 +180,14 @@ class EventsListViewController: UITableViewController {
             }catch{
                 showError(errmsg: "Cant delete event")
             }
-            if loadEvents() {
-                tableView.reloadData()
-            }
+            
+            tableView.reloadData()
+            
         }
     }
     
     @IBAction func newEventClicked(_ sender: UIBarButtonItem) {
+        
         performSegue(withIdentifier: eventseg, sender: self)
     }
     
@@ -186,38 +195,22 @@ class EventsListViewController: UITableViewController {
         self.navigationController?.popViewController(animated: true)
     }
     
-    //MARK: - Bar Button actions
-    /*
-    @IBAction func newEventClicked(_ sender: UIBarButtonItem) {
-        performSegue(withIdentifier: eventseg, sender: self)
-    }
-    
-    @IBAction func homeClicked(_ sender: UIBarButtonItem) {
-         self.navigationController?.popViewController(animated: true)
-    }
-    */
-    
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
 
     
     // MARK: - Navigation
 
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
+        if segue.identifier == eventseg {
+            backFromEvent = true
+            if selectedEvent.eventID != 0 {
+                let vc = segue.destination as! EventViewController
+                vc.currentEvent = selectedEvent
+            }
+        }else if segue.identifier == eventResultseg {
+            let vc = segue.destination as! ResultsViewController
+            vc.currentEvent = selectedEvent
+        }
     }
     
     //MARK: - Errors

@@ -16,18 +16,26 @@ class MembersForEventViewController: UITableViewController {
     var myfunc = appFunctions()
     var mydefs = appUserDefaults()
     var selectedEvent = Event()
-    
-    
+    let quickEntrySeg = "quickEntry"
+    var backFromQuickEntry = false
     override func viewDidLoad() {
         super.viewDidLoad()
         
         navigationItem.setHidesBackButton(true, animated: false)
         if loadMembers() {
-            
+            tableView.reloadData()
         }
     }
     
-    
+    override func viewWillAppear(_ animated: Bool) {
+        if backFromQuickEntry {
+            if loadMembers() {
+                
+            }
+            tableView.reloadData()
+            backFromQuickEntry = false
+        }
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -37,6 +45,10 @@ class MembersForEventViewController: UITableViewController {
     //MARK: - IBActions
     
     
+    @IBAction func quickEntry(_ sender: UIBarButtonItem) {
+        backFromQuickEntry = true
+        performSegue(withIdentifier: quickEntrySeg, sender: self)
+    }
     
     @IBAction func doneClicked(_ sender: UIBarButtonItem) {
         if membersList?.count != 0 {
@@ -44,17 +56,20 @@ class MembersForEventViewController: UITableViewController {
             do {
                 try realm.write {
                     for mem in membersList! {
-                        mem.selectedForEvent = false
-                        let er = EventResult()
-                        if selectedEvent.useRaceNos {
-                            er.raceNo = mydefs.getNextRaceNo()
-                            
+                        if mem.selectedForEvent {
+                            mem.selectedForEvent = false
+                            let er = EventResult()
+                            if selectedEvent.useRaceNos {
+                                er.raceNo = mydefs.getNextRaceNo()
+                                
+                            }
+                            er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
+                            realm.add(er)
+                            mem.eventResults.append(er)
+                            selectedEvent.eventResults.append(er)
                         }
-                        er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
-                        realm.add(er)
-                        mem.eventResults.append(er)
-                        selectedEvent.eventResults.append(er)
                     }
+                    
                 }
             }catch{
                 showError(errmsg: "Cant save members")
@@ -145,7 +160,7 @@ class MembersForEventViewController: UITableViewController {
         cell.detailTextLabel?.textColor = UIColor.red
         
         
-        var dtText = String(format:"Age: %d",lh.age)
+        var dtText = String(format:"Age: %d",lh.age())
         
         
         if let grp = lh.myGroup.first {
@@ -161,11 +176,14 @@ class MembersForEventViewController: UITableViewController {
         let imgMemberPhoto = UIImageView(image: UIImage(contentsOfFile: imgFilePath))
         
         
-        cell.backgroundColor = UIColor(hexString: "BDC3C7") //hard setting ths doesnt seem to work as well
+        cell.backgroundColor = UIColor(hexString: "89D8FC") //hard setting ths doesnt seem to work as well
+        
+        cell.accessoryView?.tintColor = UIColor.clear
+        cell.accessoryView?.isHidden = false
+        
         if lh.selectedForEvent {
-            let imageView = UIImageView(image: UIImage(named: "tickbig7575"))
+            let imageView = UIImageView(image: UIImage(named: "ticknew"))
             
-            //[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tickbig7575.png"]];
             
             imageView.sizeToFit()
             cell.accessoryView = imageView
@@ -179,8 +197,7 @@ class MembersForEventViewController: UITableViewController {
                 imgMemberPhoto.layer.masksToBounds = true
                 imgMemberPhoto.layer.cornerRadius = 20.0
                 cell.accessoryView = imgMemberPhoto
-                cell.accessoryView?.tintColor = UIColor.clear
-                cell.accessoryView?.isHidden = false
+                
                 
             }else{
                 cell.accessoryView?.isHidden = true

@@ -55,7 +55,7 @@ class appFunctions {
         let divBy:Double = Double(distance) / 1000.00
         //var result: Double = Double(textfield) * VAT
         
-        return timeinSeconds * Int(divBy)
+        return Int(Double(timeinSeconds) * divBy)
         
     }
     

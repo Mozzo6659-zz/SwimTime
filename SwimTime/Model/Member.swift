@@ -18,6 +18,7 @@ class Member : Object {
     @objc dynamic var onekSeconds : Int = 0
     @objc dynamic var emailAddress : String = ""
     @objc dynamic var selectedForEvent : Bool = false
+   // @objc dynamic var age : Int = getAge(self)
     @objc dynamic var dataChanged : Bool = false
     
     let eventResults = List<EventResult>()
@@ -25,9 +26,8 @@ class Member : Object {
     let myGroup = LinkingObjects(fromType: Group.self, property: "members")
     let myClub = LinkingObjects(fromType: SwimClub.self, property: "members")
     
-    var age:Int {
+    func age() -> Int {
     
-        
         let components = Calendar.current.dateComponents([.year], from: dateOfBirth, to: Date())
         return components.year!
         

@@ -25,6 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         addInitSwimClub()
         //checkExplorer()
         //addMembers()
+        checkSort()
         return true
     }
 
@@ -109,6 +110,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("Error encoding Item array")
             }
 
+    }
+    
+    func checkSort() {
+       /*this wokrs for sort by age
+        let mems = realm.objects(Member.self).filter("dateOfBirth > vardate)
+        
+        let myList = mems.sorted(by: { $0.age() < $1.age()})
+        
+        for mem in myList {
+        //for mem in array.sorted(by: { $0.age() > $1.age()}) {
+            print(mem.memberName + " Age: \(mem.age())")
+        }
+         */
+        
     }
     
     func addMembers() {

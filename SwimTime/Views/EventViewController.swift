@@ -15,22 +15,25 @@ UITableViewDelegate, UITableViewDataSource {
     var timerOn = false
     var useRaceNos = false
     var returnFromMembers = false
-    var noSeconds : Int = 0
+    var noSeconds : Int = 1
     let realm = try! Realm()
     
-    let currentEvent = Event()
+    var currentEvent = Event()
     
     var eventResults : Results<EventResult>?
     
     
     let eventToMemberseg = "eventToMembers"
-    
+    let eventToResults = "eventToResults"
     let myDefs = appUserDefaults()
     let myFunc = appFunctions()
     
     @IBOutlet weak var txtLocation: UITextField!
     @IBOutlet weak var txtDistance: UITextField!
     
+    
+   
+    @IBOutlet weak var opRaceNo: UISwitch!
     
     @IBOutlet weak var btnReset: UIButton!
     
@@ -50,44 +53,63 @@ UITableViewDelegate, UITableViewDataSource {
         myTableView.delegate = self
         myTableView.dataSource = self
        
+        changeBorderColours()
+        loadEventDetails()
+        
+        loadEventResults()
+        
     }
 
     override func viewWillAppear(_ animated: Bool) {
         if returnFromMembers {
             returnFromMembers = false
-            myTableView.reloadData()
+            loadEventResults()
+            //myTableView.reloadData()
         }
     }
     
     //MARK: - Actions
 
     @IBAction func useRaceNosChanged(_ sender: UISwitch) {
+        self.resignFirstResponder()
         useRaceNos = sender.isOn
     }
     
     @IBAction func btnResetClicked(_ sender: UIButton) {
-        timer.invalidate()
-        timerOn = false
+        removeKeyBoard()
+        
+        if timerOn {
+            timer.invalidate()
+            timerOn = false
+        }
+        
+        
+      
         do {
-            if let dist = Int(txtDistance.text!) {
-                currentEvent.eventDistance = dist
-            }
-            
-            
             try realm.write {
+                if let dist = Int(txtDistance.text!) {
+                    currentEvent.eventDistance = dist
+                }
+                currentEvent.useRaceNos = opRaceNo.isOn
+            
                 for er in currentEvent.eventResults {
                     let mem = er.myMember.first!
                     er.resultSeconds = 0
                     er.expectedSeconds = myFunc.adjustOnekSecondsForDistance(distance: currentEvent.eventDistance , timeinSeconds: mem.onekSeconds)
+                    if useRaceNos && er.raceNo == 0 {
+                        er.raceNo = myDefs.getNextRaceNo()
+                    }
+                    //print("\(er.expectedSeconds)")
                 }
                 
             }
-            
+            loadEventResults()
             myTableView.reloadData()
         }catch{
             showError(errmsg: "Cant Reset")
         }
-       
+       changeBorderColours()
+        
         lblTimeDisplay.text = "00:00:00"
         noSeconds=1;
         btnStart.setTitle("Start", for: .normal)
@@ -98,7 +120,7 @@ UITableViewDelegate, UITableViewDataSource {
     
     @IBAction func btnDone(_ sender: UIBarButtonItem) {
         //delete event if no members in event
-        self.navigationController?.popViewController(animated: true)
+        
         if currentEvent.eventID != 0 {
             //0 means even has never been saved
             if currentEvent.eventResults.count == 0 {
@@ -114,10 +136,13 @@ UITableViewDelegate, UITableViewDataSource {
                 
             }
         }
+        self.navigationController?.popViewController(animated: true)
     }
     
     @IBAction func startStopTimer(_ sender: UIButton) {
+         removeKeyBoard()
         var bContinue = true
+        var finishTheEvent = false
         if !timerOn {
             /*we are startng so check we have people in the race*/
             if currentEvent.eventResults.count == 0 {
@@ -128,9 +153,8 @@ UITableViewDelegate, UITableViewDataSource {
         if (bContinue) {
             if timerOn {
                 timer.invalidate()
-                //timer = nil;
-                
-                //[self displayResults] goes to the results view controller
+                //finish the event
+                finishTheEvent = true
                 
             }else {
                 
@@ -139,22 +163,95 @@ UITableViewDelegate, UITableViewDataSource {
             }
             
             timerOn = !timerOn
-            //[tblResults reloadData];
+            if finishTheEvent {
+                finishEvent()
+            }else{
+                 myTableView.reloadData()
+            }
+           
+            
         }
+        changeBorderColours()
     }
     
     @IBAction func btnAddMembers(_ sender: UIBarButtonItem) {
         //lets save the event here
+        removeKeyBoard()
+        
         if saveEvent() {
             performSegue(withIdentifier: eventToMemberseg, sender: self)
         }
     }
     
+    func changeBorderColours() {
+        var myCol : CGColor
+        if timerOn {
+            myCol = UIColor.red.cgColor
+        }else{
+            myCol = UIColor.black.cgColor
+        }
+        
+        myTableView.layer.borderColor = myCol
+        lblTimeDisplay.layer.borderColor = myCol
+    }
     //MARK: - TableView stuff
     
+    func finishEvent() {
+        do {
+            try realm.write {
+                currentEvent.isFinished = true
+                if self.eventResults?.count != 0 {
+                    for er in self.eventResults! {
+                        if er.resultSeconds == 0 {
+                            //didnt finish so remove them from the event
+                            let mem = er.myMember.first
+                            if let mxm = mem?.eventResults.index(of: er) {
+                                mem?.eventResults.remove(at: mxm)
+                            }
+                           
+                            realm.delete(er)
+                        }
+                    }
+                }
+                
+            }
+        }catch{
+            showError(errmsg: "Cant finish Event")
+        }
+        //MARK: - COME BACK 3
+        //Change to go to results controller
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    func removeKeyBoard() {
+         self.view.endEditing(true)
+    }
+    func loadEventDetails() {
+        if currentEvent.eventDistance != 0 {
+            txtDistance.text = "\(currentEvent.eventDistance)"
+        }else{
+            txtDistance.text = ""
+        }
+        
+        txtLocation.text = currentEvent.eventLocation
+        opRaceNo.isOn = currentEvent.useRaceNos
+    }
+    
+    func loadEventResults() {
+       
+        if currentEvent.eventResults.count != 0 {
+            eventResults = currentEvent.eventResults.filter("resultSeconds=0").sorted(byKeyPath: "expectedSeconds", ascending: true)
+//            for er in eventResults! {
+//                print("\(er.expectedSeconds)")
+//            }
+        }
+        
+            myTableView.reloadData()
+        
+    }
     func numberOfSections(in tableView: UITableView) -> Int {
         
-        return currentEvent.eventResults.count
+        return eventResults?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -183,7 +280,7 @@ UITableViewDelegate, UITableViewDataSource {
     func configureCell(cell:UITableViewCell, atIndexPath indexPath:IndexPath) {
         
         
-        let er = currentEvent.eventResults[indexPath.row + indexPath.section]
+        let er = eventResults![indexPath.row + indexPath.section]
         let mem = er.myMember.first!
         let grp = mem.myGroup.first!
         
@@ -191,16 +288,21 @@ UITableViewDelegate, UITableViewDataSource {
         cell.detailTextLabel?.font = UIFont(name: "Helvetica", size: 20.0)
         
         //NSLog(@"memberid=%d name=%@",lh.member.memberid,lh.member.membername);
-        let textlabel = mem.memberName
+        var txtLabel : String = ""
         
-        var dtText = String(format:" Age: %d",mem.age)
+        if currentEvent.useRaceNos {
+            txtLabel = ("\(er.raceNo) - ")
+        }
+        txtLabel += mem.memberName
+        
+        var dtText = String(format:"   Age: %d",mem.age())
         dtText = dtText + String(format:"  Group: %@",grp.groupName)
             
         
        let dtlLabel = "Est Time: " + myFunc.convertSecondsToTime(timeinseconds: er.expectedSeconds) + dtText
         
        
-        cell.textLabel?.text = textlabel
+        cell.textLabel?.text = txtLabel
         cell.detailTextLabel?.textColor = UIColor.red
         cell.detailTextLabel?.text = dtlLabel
         
@@ -222,23 +324,31 @@ UITableViewDelegate, UITableViewDataSource {
         }else{
             cell.accessoryView?.isHidden = true
         }
-        
-        
-        
-        //cell.accessoryView=nil;
-        
-        //NSLog(@"%@",dtlLabel);
-        
-        
-        
+       
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let er = eventResults![indexPath.row + indexPath.section]
         if timerOn {
-            //finish him off
+            do {
+                try realm.write {
+                    er.resultSeconds = myFunc.convertTimeToSeconds(thetimeClock: lblTimeDisplay.text!)
+                    er.diffSeconds = er.expectedSeconds - er.resultSeconds
+                }
+                
+                
+            }catch{
+                showError(errmsg: "Cannot find this result")
+            }
             
+            loadEventResults()
+            if eventResults?.count == 0 {
+                
+                finishEvent()
+            }
         }else{
-            //go to window to adjust estimate and take a photo
+            //MARK: -COME BACK 1
+            //go to member update estimate and maybe a photo
         }
     }
     
@@ -253,8 +363,21 @@ UITableViewDelegate, UITableViewDataSource {
     // Override to support editing the table view.
    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            // Delete the row from the data source
-            //tableView.deleteRows(at: [indexPath], with: .fade)
+            let er = eventResults![indexPath.row + indexPath.section]
+            do {
+                try realm.write {
+                    let mem = er.myMember.first
+                    //remove the event result from the member
+                    if let mxm = mem?.eventResults.index(of: er) {
+                        mem?.eventResults.remove(at: mxm)
+                    }
+                    realm.delete(er)
+                    
+                }
+            }catch{
+                showError(errmsg: "Cant remove result")
+            }
+            loadEventResults()
         }
     }
     
@@ -331,7 +454,8 @@ func doEventStart() {
     }
     
     @objc func updateTimer() {
-        noSeconds += 1;
+       
+            noSeconds += 1
     
         lblTimeDisplay.text = myFunc.convertSecondsToTime(timeinseconds: noSeconds)
     

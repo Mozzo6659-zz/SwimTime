@@ -125,7 +125,7 @@ class MembersListViewController: UITableViewController {
     cell.detailTextLabel?.textColor = UIColor.red
 
     
-        var dtText = String(format:"Age: %d",lh.age)
+        var dtText = String(format:"Age: %d",lh.age())
         
         
         if let grp = lh.myGroup.first {

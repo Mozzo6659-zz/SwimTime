@@ -17,8 +17,8 @@ class appUserDefaults {
     let nextRaceNoKey = "NextRaceNo"
     let nextTeamNoKey = "NextTeamNo"
     
-    func getNextId(thisKey : String) -> Int {
-        var nextId : Int = 1
+    func getNextId(thisKey : String, defaulStart:Int = 1) -> Int {
+        var nextId : Int = defaulStart
         if let defId  = defaults.object(forKey: thisKey) as? Int {
             nextId = defId + 1
         }
@@ -40,7 +40,7 @@ class appUserDefaults {
     }
     
     func getNextRaceNo() -> Int {
-        return getNextId(thisKey: nextRaceNoKey)
+        return getNextId(thisKey: nextRaceNoKey, defaulStart: 100)
         
     }
     func getNextTeamNo() -> Int {
