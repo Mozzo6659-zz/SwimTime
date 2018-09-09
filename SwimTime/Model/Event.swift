@@ -14,6 +14,7 @@ class Event : Object {
     @objc dynamic var webID : Int = 0
     @objc dynamic var dataChanged : Bool = false
     @objc dynamic var useRaceNos : Bool = false
+    @objc dynamic var usePoints : Bool = false
     @objc dynamic var eventDate : Date = Date()
     @objc dynamic var eventName : String = ""
     @objc dynamic var eventLocation : String = ""
@@ -22,6 +23,7 @@ class Event : Object {
     @objc dynamic var ageFilterMin : Int = 0
     @objc dynamic var ageFilterMax : Int = 0
     @objc dynamic var genderFilter : String = ""
+    
     let eventResults = List<EventResult>()
     
     func getAgeFilter() -> String {

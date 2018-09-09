@@ -63,6 +63,7 @@ class MembersForEventViewController: UITableViewController {
                                 er.raceNo = mydefs.getNextRaceNo()
                                 
                             }
+                            er.ageAtEvent = mem.age()
                             er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                             realm.add(er)
                             mem.eventResults.append(er)

@@ -24,35 +24,31 @@ UITableViewDelegate, UITableViewDataSource {
     
     
     let eventToMemberseg = "eventToMembers"
-    let eventToResults = "eventToResults"
+    let eventToResultsseg = "eventToResults"
     let myDefs = appUserDefaults()
     let myFunc = appFunctions()
-    
+    var origStartFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
+    var origTableFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     @IBOutlet weak var txtLocation: UITextField!
     @IBOutlet weak var txtDistance: UITextField!
     
-    
-   
     @IBOutlet weak var opRaceNo: UISwitch!
-    
     @IBOutlet weak var btnReset: UIButton!
-    
     @IBOutlet weak var btnStart: UIButton!
-    @IBOutlet weak var btnFilter: UIButton!
-    
-    
-    @IBOutlet weak var lblFilter: UILabel!
     @IBOutlet weak var lblTimeDisplay: UILabel!
-    
     @IBOutlet weak var myTableView: UITableView!
+    @IBOutlet weak var startView: UIView!
     
-    
+    @IBOutlet weak var detailView: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         myTableView.delegate = self
         myTableView.dataSource = self
-       
+        btnReset.layer.borderColor = UIColor.white.cgColor
+        btnStart.layer.borderColor = UIColor.white.cgColor
+        origStartFrame = startView.frame
+        origTableFrame = myTableView.frame
         changeBorderColours()
         loadEventDetails()
         
@@ -83,7 +79,6 @@ UITableViewDelegate, UITableViewDataSource {
             timerOn = false
         }
         
-        
       
         do {
             try realm.write {
@@ -104,10 +99,12 @@ UITableViewDelegate, UITableViewDataSource {
                 
             }
             loadEventResults()
+            moveStartViewDown()
             myTableView.reloadData()
         }catch{
             showError(errmsg: "Cant Reset")
         }
+        
        changeBorderColours()
         
         lblTimeDisplay.text = "00:00:00"
@@ -116,7 +113,12 @@ UITableViewDelegate, UITableViewDataSource {
         myTableView.reloadData()
     }
     
-    
+    /*
+ UIView.animate(withDuration: 1, animations: {
+ self.heightConstraint.constant = newHeight
+ self.view.layoutIfNeeded()
+ })
+*/
     
     @IBAction func btnDone(_ sender: UIBarButtonItem) {
         //delete event if no members in event
@@ -186,13 +188,14 @@ UITableViewDelegate, UITableViewDataSource {
     func changeBorderColours() {
         var myCol : CGColor
         if timerOn {
-            myCol = UIColor.red.cgColor
+            myCol = UIColor(hexString: "8EFF25")!.cgColor //same colour as start buttion
         }else{
-            myCol = UIColor.black.cgColor
+            myCol = UIColor.red.cgColor
         }
         
         myTableView.layer.borderColor = myCol
         lblTimeDisplay.layer.borderColor = myCol
+        
     }
     //MARK: - TableView stuff
     
@@ -218,9 +221,8 @@ UITableViewDelegate, UITableViewDataSource {
         }catch{
             showError(errmsg: "Cant finish Event")
         }
-        //MARK: - COME BACK 3
-        //Change to go to results controller
-        self.navigationController?.popViewController(animated: true)
+        
+        performSegue(withIdentifier: eventToResultsseg, sender: self)
     }
     
     func removeKeyBoard() {
@@ -392,6 +394,11 @@ UITableViewDelegate, UITableViewDataSource {
             returnFromMembers = true
             let vc = segue.destination as! MembersForEventViewController
             vc.selectedEvent = currentEvent
+        }else {
+            if segue.identifier == eventToResultsseg {
+                let vc = segue.destination as! ResultsViewController
+                vc.currentEvent = currentEvent
+            }
         }
     }
     
@@ -447,12 +454,53 @@ func doEventStart() {
     btnStart.setTitle("Finish",for: .normal)
     
     timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
-//
-//    timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
-//
-//    [self maketablecontents:YES];
+
+    moveStartViewUp()
+    
+   
+   
+    
+}
+    
+    func moveStartViewUp() {
+        let xPosition = detailView.frame.origin.x
+        //View will slide 20px up
+        let yPosition = detailView.frame.origin.y
+        
+        let myTableNewHeight = origTableFrame.size.height + (self.detailView.frame.size.height - self.startView.frame.size.height)
+        let myTableYPosition = origTableFrame.origin.y + startView.frame.size.height
+        
+        UIView.animate(withDuration: 1, animations: {
+            self.detailView.isHidden = true
+            
+            self.startView.frame = CGRect(x: xPosition, y: yPosition, width: self.startView.frame.size.width, height: self.startView.frame.size.height)
+            
+            self.myTableView.frame = CGRect(x: xPosition, y: myTableYPosition, width: self.myTableView.frame.size.width, height: myTableNewHeight)
+            self.myTableView.frame.size.height = myTableNewHeight
+            self.view.layoutIfNeeded()
+        })
+
     }
     
+    func moveStartViewDown() {
+//        let xPosition = detailView.frame.origin.x
+//
+//
+//        let yPosition = detailView.frame.origin.y + detailView.frame.size.height + 8.0
+//
+//        let myTableNewHeight = myTableView.frame.size.height - (self.detailView.frame.size.height - self.startView.frame.size.height)
+//        let myTableYPosition = yPosition - startView.frame.size.height
+        
+        UIView.animate(withDuration: 1, animations: {
+            
+            
+            self.startView.frame = self.origStartFrame
+             self.myTableView.frame = self.origTableFrame
+
+            self.detailView.isHidden = false
+            self.view.layoutIfNeeded()
+        })
+    }
     @objc func updateTimer() {
        
             noSeconds += 1
