@@ -221,34 +221,14 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
 
                             if selectedGroup.groupName != memberGroup.groupName {
                                 if  memberGroup.members.count != 0 {
-                                    let mxm = memberGroup.members.index(of: selectedMember)
+                                    let mxm = memberGroup.members.index(where: {$0.memberID == selectedMember.memberID})
                                     memberGroup.members.remove(at: mxm!)
                                 }
                             }
                         }
                     
                     
-        /*old delete method
-                                if  memberGroup.members.count != 0 {
-                                    let mxm = memberGroup.members.index(of: selectedMember)
-                                    memberGroup.members.remove(at: mxm!)
-                                    for mem in memberGroup.members {
-                                        if mem.memberID == selectedMember.memberID {
-
-                                            memberGroup.members.remove(at: index)
-
-                                            continue
-                                        }else{
-                                            index += 1
-                                        }
-
-                                  }
-                                }
- 
-                            }
-                        
-                    }
- */
+       
                     selectedGroup.members.append(selectedMember)
                     
                     if selectedMember.memberID == 0 {

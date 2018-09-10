@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 class EventViewController: UIViewController,
-UITableViewDelegate, UITableViewDataSource {
+ UITableViewDataSource,UITableViewDelegate {
 
     var timer : Timer!
     var timerOn = false
@@ -29,6 +29,8 @@ UITableViewDelegate, UITableViewDataSource {
     let myFunc = appFunctions()
     var origStartFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     var origTableFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
+    var origDetailsFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
+    
     @IBOutlet weak var txtLocation: UITextField!
     @IBOutlet weak var txtDistance: UITextField!
     
@@ -49,6 +51,7 @@ UITableViewDelegate, UITableViewDataSource {
         btnStart.layer.borderColor = UIColor.white.cgColor
         origStartFrame = startView.frame
         origTableFrame = myTableView.frame
+        origDetailsFrame = detailView.frame
         changeBorderColours()
         loadEventDetails()
         
@@ -208,7 +211,7 @@ UITableViewDelegate, UITableViewDataSource {
                         if er.resultSeconds == 0 {
                             //didnt finish so remove them from the event
                             let mem = er.myMember.first
-                            if let mxm = mem?.eventResults.index(of: er) {
+                            if let mxm = mem?.eventResults.index(where: {$0.eventResultId == er.eventResultId}) {
                                 mem?.eventResults.remove(at: mxm)
                             }
                            
@@ -334,8 +337,13 @@ UITableViewDelegate, UITableViewDataSource {
         if timerOn {
             do {
                 try realm.write {
-                    er.resultSeconds = myFunc.convertTimeToSeconds(thetimeClock: lblTimeDisplay.text!)
-                    er.diffSeconds = er.expectedSeconds - er.resultSeconds
+                    let resultseconds = myFunc.convertTimeToSeconds(thetimeClock: lblTimeDisplay.text!)
+                    er.rawresultSeconds = resultseconds
+                    er.resultSeconds = resultseconds - er.staggerStartBy
+                    er.diffSeconds = er.resultSeconds - er.expectedSeconds
+                    if let mem = er.myMember.first {
+                        er.ageAtEvent = mem.age() //this is how old they are when the event was started
+                    }
                 }
                 
                 
@@ -370,7 +378,7 @@ UITableViewDelegate, UITableViewDataSource {
                 try realm.write {
                     let mem = er.myMember.first
                     //remove the event result from the member
-                    if let mxm = mem?.eventResults.index(of: er) {
+                    if let mxm = mem?.eventResults.index(where: {$0.eventResultId == er.eventResultId}) {
                         mem?.eventResults.remove(at: mxm)
                     }
                     realm.delete(er)
@@ -412,7 +420,7 @@ UITableViewDelegate, UITableViewDataSource {
                         currentEvent.eventLocation = txtLocation.text!
                         currentEvent.eventDistance = Int(txtDistance.text!)!
                         currentEvent.useRaceNos = useRaceNos
-                        
+                        currentEvent.eventDate = Date()
                         if currentEvent.eventID == 0 {
                             currentEvent.eventDate = Date()
                             currentEvent.eventID = myDefs.getNextEventId()
@@ -454,8 +462,12 @@ func doEventStart() {
     btnStart.setTitle("Finish",for: .normal)
     
     timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
-
-    moveStartViewUp()
+    
+    if saveEvent() {
+        moveStartViewUp()
+    }
+    
+    
     
    
    
@@ -463,20 +475,25 @@ func doEventStart() {
 }
     
     func moveStartViewUp() {
-        let xPosition = detailView.frame.origin.x
+        let xPosition = origDetailsFrame.origin.x + 3.0
         //View will slide 20px up
-        let yPosition = detailView.frame.origin.y
+        let yPosition = origDetailsFrame.origin.y
         
         let myTableNewHeight = origTableFrame.size.height + (self.detailView.frame.size.height - self.startView.frame.size.height)
-        let myTableYPosition = origTableFrame.origin.y + startView.frame.size.height
+        
+        let myTableYPosition = origTableFrame.origin.y - startView.frame.size.height
         
         UIView.animate(withDuration: 1, animations: {
-            self.detailView.isHidden = true
+            
             
             self.startView.frame = CGRect(x: xPosition, y: yPosition, width: self.startView.frame.size.width, height: self.startView.frame.size.height)
             
-            self.myTableView.frame = CGRect(x: xPosition, y: myTableYPosition, width: self.myTableView.frame.size.width, height: myTableNewHeight)
-            self.myTableView.frame.size.height = myTableNewHeight
+            self.myTableView.frame = CGRect(x: self.origTableFrame.origin.x, y: myTableYPosition, width: self.origTableFrame.size.width, height: myTableNewHeight)
+            
+           
+            self.detailView.frame = CGRect(x: xPosition + self.view.frame.size.width, y: yPosition, width: self.origDetailsFrame.size.width, height: self.origDetailsFrame.size.height)
+            
+            self.detailView.isHidden = true
             self.view.layoutIfNeeded()
         })
 
@@ -496,11 +513,13 @@ func doEventStart() {
             
             self.startView.frame = self.origStartFrame
              self.myTableView.frame = self.origTableFrame
-
+            self.detailView.frame = self.origDetailsFrame
             self.detailView.isHidden = false
             self.view.layoutIfNeeded()
         })
     }
+    
+    
     @objc func updateTimer() {
        
             noSeconds += 1
@@ -520,3 +539,5 @@ func doEventStart() {
         
     }
 }
+
+

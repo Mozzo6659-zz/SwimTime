@@ -60,10 +60,13 @@ class appFunctions {
     }
     
     func convertSecondsToTime(timeinseconds:Int) -> String{
-        let hours = Int(timeinseconds / 3600)
+        
+       
+        
+        let hours = Int(abs(timeinseconds) / 3600)
     
-        let seconds = Int(timeinseconds  % 60)
-        let  minutes = Int((timeinseconds / 60) % 60)
+        let seconds = Int(abs(timeinseconds)  % 60)
+        let  minutes = Int((abs(timeinseconds) / 60) % 60)
    
         return String(format: "%02d:%02d:%02d",hours, minutes, seconds)
         

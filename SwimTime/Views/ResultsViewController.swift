@@ -20,16 +20,23 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var lblDistance: UILabel!
     @IBOutlet weak var lblDate: UILabel!
     
+    @IBOutlet weak var myToolbar: UIToolbar!
+    @IBOutlet weak var myTableView: UITableView!
     @IBOutlet weak var btnSortByImprovement: UIButton!
     @IBOutlet weak var btnSortByTime: UIButton!
     
-   
+    @IBOutlet weak var tbTime: UIBarButtonItem!
+    
+    @IBOutlet weak var tbGroup: UIBarButtonItem!
     var resultList : [EventResult] = [] //use if not in group Mode
     var groupDict : [String : [EventResult]] = [:]
     var sectionGroups : [Group] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+       // myTableView.register(ResultCell.self, forCellReuseIdentifier: "ResultCell")
+        myTableView.register(UINib(nibName: "ResultCell", bundle: nil), forCellReuseIdentifier: "ResultCell")
+        tbTime.tintColor = UIColor.orange
         getData()
         changeBtnColour()
         showEventDetails()
@@ -47,10 +54,25 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     @IBAction func sortBtnClicked(_ sender: UIButton) {
         sortByTime = sender.tag == 1
+        //isGrouped = sender.tag == 2
         changeBtnColour()
+        sortListData()
+        
+        
     }
     
     
+    @IBAction func groupBy(_ sender: UIBarButtonItem) {
+        
+        tbTime.tintColor = myToolbar.tintColor
+        tbGroup.tintColor = myToolbar.tintColor
+        
+        isGrouped = sender.tag == 2
+        
+        sender.tintColor = UIColor.orange
+       sortListData()
+    
+    }
     
     func changeBtnColour() {
         //FFC1DF - pale pink
@@ -106,6 +128,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
             }
             groupDict[grp.groupName] = erForGroup
+            //print(groupDict.count)
         }
     }
     
@@ -114,10 +137,11 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         for er in currentEvent.eventResults {
             let mem = er.myMember.first
             if let grp = mem?.myGroup.first {
+                //print(grp.groupName)
                 if tempGroups.count == 0 {
                     tempGroups.append(grp)
                 }else{
-                    if tempGroups.index(of: grp) == nil {
+                    if tempGroups.index(where: { $0.groupName == grp.groupName }) == nil {
                         tempGroups.append(grp)
                     }
                     
@@ -127,6 +151,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         //yes sections sort by group id not name
         sectionGroups = tempGroups.sorted(by: { $0.groupID < $1.groupID})
+        //print(sectionGroups.count)
     }
     
     func sortListData() {
@@ -152,6 +177,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         
         resultList = sortedArray
+        myTableView.reloadData()
     }
     
     //MARK: - Tableview stuff
@@ -160,10 +186,44 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         var intSections = 1
         if isGrouped {
             intSections = sectionGroups.count
+            //print("\(intSections)")
         }
         
         return intSections
     }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 30.0
+    }
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let offset : CGFloat = 5.0
+//        if isGrouped {
+//            print("\(section)")
+//        }
+        //var headerView = UIView(frame: CGRect(x: 0, y: 0, width: myTableView.frame.size.width - (offset * 2), height: 100))
+        
+        let headerView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: myTableView.frame.size.width - (offset * 2.0), height: 100.0))
+        
+        if isGrouped {
+            headerView.backgroundColor = UIColor.black
+            let label = UILabel(frame: CGRect(x: 0, y: -5, width: myTableView.frame.size.width, height: 30.0))
+            label.clipsToBounds = true
+            label.layer.cornerRadius = 5.0
+            label.backgroundColor = UIColor.black
+            label.textColor = UIColor.white
+            label.textAlignment = .center
+            label.font = UIFont(name: "Helvetica", size: 25.0)
+            label.text = sectionGroups[section].groupName
+            //print(sectionGroups[section].groupName)
+            headerView.addSubview(label)
+            
+        }else{
+            headerView.backgroundColor = UIColor.clear
+        }
+        
+        return headerView
+}
+    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         var noRows : Int = 1
@@ -189,7 +249,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
 //
      func configureCell(cell:ResultCell, atIndexPath indexPath:IndexPath) {
         var er = EventResult()
-        
+        var hdrText = ""
         if isGrouped {
             if let myArray = groupDict[sectionGroups[indexPath.section].groupName] {
                 er = myArray[indexPath.row]
@@ -200,12 +260,18 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         
         if let mem = er.myMember.first {
-            cell.lblHeader.text = mem.memberName
+            //print(mem.memberName)
+            hdrText = mem.memberName
         }
         
-        cell.lblEstimate.text = myfunc.convertSecondsToTime(timeinseconds: er.expectedSeconds)
-        cell.lblImprovement.text = myfunc.convertSecondsToTime(timeinseconds: er.diffSeconds)
-        cell.lblResult.text = myfunc.convertSecondsToTime(timeinseconds: er.resultSeconds)
+        if currentEvent.usePoints {
+            hdrText += (" \(er.pointsEarned) points")
+        }
+        
+        cell.lblHeader.text = hdrText
+        cell.lblEstimate.text = "Est: " + myfunc.convertSecondsToTime(timeinseconds: er.expectedSeconds)
+        cell.lblImprovement.text = "Diff: " + myfunc.convertSecondsToTime(timeinseconds: er.diffSeconds)
+        cell.lblResult.text = "Result: " + myfunc.convertSecondsToTime(timeinseconds: er.resultSeconds)
         
         cell.lblImprovement.backgroundColor = er.diffSeconds < 0 ? UIColor.green : UIColor.red
         
@@ -227,17 +293,9 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                     break
             }
             
-        if currentEvent.usePoints {
-            cell.lblPoints.text = String(format:"Points: %d", er.pointsEarned)
-        }else{
-            cell.lblPoints.text = ""
-        }
+    
         
      }
-
     
-
-    
-
     
 }

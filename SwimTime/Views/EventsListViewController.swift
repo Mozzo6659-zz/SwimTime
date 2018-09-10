@@ -168,7 +168,7 @@ class EventsListViewController: UITableViewController {
                     if ev.eventResults.count != 0 {
                         for er in ev.eventResults {
                             if let mem = er.myMember.first {
-                                if let mxm = mem.eventResults.index(of: er) {
+                                if let mxm = mem.eventResults.index(where: {$0.eventResultId == er.eventResultId}) {
                                     mem.eventResults.remove(at: mxm)
                                 }
                             }

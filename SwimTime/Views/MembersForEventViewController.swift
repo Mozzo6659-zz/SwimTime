@@ -59,6 +59,7 @@ class MembersForEventViewController: UITableViewController {
                         if mem.selectedForEvent {
                             mem.selectedForEvent = false
                             let er = EventResult()
+                            er.eventResultId = mydefs.getNextEventResultId()
                             if selectedEvent.useRaceNos {
                                 er.raceNo = mydefs.getNextRaceNo()
                                 
@@ -97,7 +98,7 @@ class MembersForEventViewController: UITableViewController {
         
         for rs in resultsInEvent {
             if let memberInEvent = rs.myMember.first {
-                let mxm = memNotInEventArray.index(of: memberInEvent)
+                let mxm = memNotInEventArray.index(where: {$0.memberID ==  memberInEvent.memberID})
                 memNotInEventArray.remove(at: mxm!)
             }
             

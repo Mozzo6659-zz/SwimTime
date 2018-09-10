@@ -199,7 +199,7 @@ class MembersListViewController: UITableViewController {
                 try realm.write {
                     
                     //remove from the club
-                    if let mxm = memClub?.members.index(of: mem) {
+                    if let mxm = memClub?.members.index(where: {$0.memberID == mem.memberID}) {
                          memClub?.members.remove(at: mxm)
                     }
                     
