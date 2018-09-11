@@ -14,6 +14,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     var sortByTime = true
     var isGrouped = false
     
+    
     var currentEvent = Event()
     let myfunc = appFunctions()
     
@@ -28,14 +29,18 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var tbTime: UIBarButtonItem!
     
     @IBOutlet weak var tbGroup: UIBarButtonItem!
+    
+    
     var resultList : [EventResult] = [] //use if not in group Mode
     var groupDict : [String : [EventResult]] = [:]
     var sectionGroups : [Group] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       // myTableView.register(ResultCell.self, forCellReuseIdentifier: "ResultCell")
+       navigationItem.setHidesBackButton(true, animated: false)
+        //register the custom cell
         myTableView.register(UINib(nibName: "ResultCell", bundle: nil), forCellReuseIdentifier: "ResultCell")
+        
         tbTime.tintColor = UIColor.orange
         getData()
         changeBtnColour()
@@ -61,6 +66,11 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
     }
     
+    @IBAction func goHome(_ sender: UIBarButtonItem) {
+        
+        self.navigationController?.popToRootViewController(animated: true)
+        
+    }
     
     @IBAction func groupBy(_ sender: UIBarButtonItem) {
         

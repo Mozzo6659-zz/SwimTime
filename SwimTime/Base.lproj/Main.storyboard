@@ -90,11 +90,12 @@
                         <outlet property="btnResults" destination="SXq-rx-IzW" id="NzG-6v-5gV"/>
                         <segue destination="xGU-YQ-fe8" kind="show" identifier="gotoMembersList" id="Ktk-df-PzF"/>
                         <segue destination="xHj-7U-741" kind="show" identifier="gotoEventsList" id="FlI-ir-4Xr"/>
+                        <segue destination="Uh1-n7-IKA" kind="show" identifier="MainToEvent" id="2O2-b1-Zhe"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="511" y="-365"/>
+            <point key="canvasLocation" x="691" y="-162"/>
         </scene>
         <!--Members-->
         <scene sceneID="08u-sl-8zb">
@@ -225,7 +226,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MU3-Cy-NAp" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1345" y="88"/>
+            <point key="canvasLocation" x="1030" y="506"/>
         </scene>
         <!--Event-->
         <scene sceneID="R6E-Ii-Bhb">
@@ -442,9 +443,9 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wIn-YQ-cXT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2118" y="125"/>
+            <point key="canvasLocation" x="2071" y="107"/>
         </scene>
-        <!--Results View Controller-->
+        <!--Results-->
         <scene sceneID="YRr-Hm-rsx">
             <objects>
                 <viewController id="P1y-Ig-7Vg" customClass="ResultsViewController" customModule="SwimTime" customModuleProvider="target" sceneMemberID="viewController">
@@ -566,6 +567,11 @@
                         <color key="backgroundColor" white="0.56000000000000005" alpha="0.70999999999999996" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="5hm-Ro-udi"/>
                     </view>
+                    <navigationItem key="navigationItem" title="Results" id="euO-a1-lr4">
+                        <barButtonItem key="leftBarButtonItem" title="&lt; Home" id="ovM-Ru-7li">
+                            <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="btnSortByImprovement" destination="YJU-eU-KI8" id="CVt-t1-g0e"/>
                         <outlet property="btnSortByTime" destination="tOg-wp-vyc" id="5XK-Qd-qzi"/>
@@ -993,5 +999,6 @@
     <inferredMetricsTieBreakers>
         <segue reference="ZPU-VH-1mb"/>
         <segue reference="JwM-Nv-E9M"/>
+        <segue reference="2O2-b1-Zhe"/>
     </inferredMetricsTieBreakers>
 </document>

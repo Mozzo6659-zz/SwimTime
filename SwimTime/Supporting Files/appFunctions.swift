@@ -109,6 +109,7 @@ class appFunctions {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
         if let date = dateFormatter.date(from:dttocheck) {
+            
             isOk = true
         }
         
@@ -116,5 +117,29 @@ class appFunctions {
         return isOk;
     }
 
+    func getDateDiffSeconds(fromDate:Date) -> Int {
+        let calendar = NSCalendar.current
+        
+        let components = Set<Calendar.Component>([.second, .minute, .hour])
+        
+        //let datecomp = calendar.component(components, from: fromDate)
+        //let comp = calendar.c
+        //let components = calendar.dateComponents([.second], from: fromDate, to: toDate)
+        let datecomp = calendar.dateComponents(components, from: fromDate, to: Date())
+        
+        return (datecomp.hour! * 3600) + (datecomp.minute! * 60) + (datecomp.second)!
+        
+    }
+    
+    func getDateDiffHours(fromDate:Date) -> Int {
+        let calendar = NSCalendar.current
+       
+        let hour = calendar.component(.hour, from: fromDate)
+        //let comp = calendar.c
+        //let components = calendar.dateComponents([.hour], from: fromDate, to: toDate)
+        
+        //return components.hour!
+        return hour
+    }
     
 }

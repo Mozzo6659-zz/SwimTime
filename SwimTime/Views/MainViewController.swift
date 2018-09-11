@@ -8,11 +8,21 @@
 
 import UIKit
 import ChameleonFramework
+import RealmSwift
+
 class MainViewController: UIViewController {
 
     var showFinishedEvents = false //tells the eet seque
     let gotoEventsListSeg = "gotoEventsList"
     let gotoMembersListSeg = "gotoMembersList"
+    
+    let myDefs = appUserDefaults()
+    let myFunc = appFunctions()
+    let runningEventSeg = "MainToEvent"
+    //var runningEventID = 0
+    
+    let realm = try! Realm()
+    
     @IBOutlet weak var btnMembers: UIButton!
     
     
@@ -27,8 +37,26 @@ class MainViewController: UIViewController {
         
         btnResults.layer.borderColor = UIColor.red.cgColor
         self.navigationController?.setToolbarHidden(true, animated: false)
-        //print("Flat Green " + FlatGreen().hexValue()) 2ECC70
-       //self.view.backgroundColor = GradientColor(.leftToRight, frame: self.view.frame, colors: [FlatSkyBlue(),FlatSkyBlueDark()])
+        
+        
+//        runningEventID = myDefs.getRunningEventID()
+//
+//        if runningEventID != 0 {
+//
+//            //check the date isnt more than 20 hours ago
+//
+//
+//            let runDate = myDefs.getRunningEventStopDate()
+//            let hrsDiff = myFunc.getDateDiffHours(fromDate: runDate)
+//
+//            if hrsDiff < 20 {
+//                performSegue(withIdentifier: runningEventSeg, sender: self)
+//            }else{
+//                myDefs.setRunningEventID(eventID: 0)
+//                myDefs.setRunningEventSecondsStopped(clockseconds: 0)
+//            }
+//
+//        }
         
     }
 
@@ -36,6 +64,7 @@ class MainViewController: UIViewController {
         
         navigationController?.setNavigationBarHidden(true, animated: true)
 
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -75,8 +104,19 @@ class MainViewController: UIViewController {
             
             let vc = segue.destination as! EventsListViewController
             vc.showFinished = showFinishedEvents
+        }else if segue.identifier == runningEventSeg {
+            
+            //this segue is called in by the appdelgate if a running event is found
+            let vc = segue.destination as! EventViewController
+            vc.eventIsRunning = true
+            vc.currentEvent = getRunningEvent()
         }
     }
     
+    func getRunningEvent()->Event {
+        let runningEventID = myDefs.getRunningEventID()
+        let runningEvent = realm.objects(Event.self).filter("eventID=%d",runningEventID).first
+        return runningEvent!
+    }
 }
 

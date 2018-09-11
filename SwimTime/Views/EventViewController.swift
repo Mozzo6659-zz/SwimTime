@@ -15,7 +15,10 @@ class EventViewController: UIViewController,
     var timerOn = false
     var useRaceNos = false
     var returnFromMembers = false
+    var eventIsRunning = false //if true then the current even is running so we start it back off
     var noSeconds : Int = 1
+    
+    
     let realm = try! Realm()
     
     var currentEvent = Event()
@@ -54,7 +57,6 @@ class EventViewController: UIViewController,
         origDetailsFrame = detailView.frame
         changeBorderColours()
         loadEventDetails()
-        
         loadEventResults()
         
     }
@@ -78,8 +80,7 @@ class EventViewController: UIViewController,
         removeKeyBoard()
         
         if timerOn {
-            timer.invalidate()
-            timerOn = false
+            stopTimer()
         }
         
       
@@ -116,32 +117,32 @@ class EventViewController: UIViewController,
         myTableView.reloadData()
     }
     
-    /*
- UIView.animate(withDuration: 1, animations: {
- self.heightConstraint.constant = newHeight
- self.view.layoutIfNeeded()
- })
-*/
     
     @IBAction func btnDone(_ sender: UIBarButtonItem) {
         //delete event if no members in event
         
-        if currentEvent.eventID != 0 {
-            //0 means even has never been saved
-            if currentEvent.eventResults.count == 0 {
-                //remove any with no event results
-                do {
-                    try realm.write {
-                        realm.delete(currentEvent)
-                        
+        if !timerOn {
+            if currentEvent.eventID != 0 {
+                //0 means even has never been saved
+                if currentEvent.eventResults.count == 0 {
+                    //remove any with no event results
+                    do {
+                        try realm.write {
+                            realm.delete(currentEvent)
+                            
+                        }
+                    }catch{
+                        showError(errmsg: "Cant delete empty event")
                     }
-                }catch{
-                    showError(errmsg: "Cant delete empty event")
+                    
                 }
-                
             }
+           
+            
+            self.navigationController?.popViewController(animated: true)
+        }else{
+            showError(errmsg: "Finish or Reset the event or press home to exit")
         }
-        self.navigationController?.popViewController(animated: true)
     }
     
     @IBAction func startStopTimer(_ sender: UIButton) {
@@ -167,7 +168,8 @@ class EventViewController: UIViewController,
                doEventStart()
             }
             
-            timerOn = !timerOn
+            //timerOn = !timerOn
+            
             if finishTheEvent {
                 finishEvent()
             }else{
@@ -181,10 +183,14 @@ class EventViewController: UIViewController,
     
     @IBAction func btnAddMembers(_ sender: UIBarButtonItem) {
         //lets save the event here
-        removeKeyBoard()
-        
-        if saveEvent() {
-            performSegue(withIdentifier: eventToMemberseg, sender: self)
+        if !timerOn {
+            removeKeyBoard()
+            
+            if saveEvent() {
+                performSegue(withIdentifier: eventToMemberseg, sender: self)
+            }
+        }else{
+            showError(errmsg: "Cant add members while the event is running")
         }
     }
     
@@ -224,13 +230,23 @@ class EventViewController: UIViewController,
         }catch{
             showError(errmsg: "Cant finish Event")
         }
+        stopTimer()
+        timerOn = false
         
         performSegue(withIdentifier: eventToResultsseg, sender: self)
+    }
+    
+    
+    func stopTimer() {
+        timer.invalidate()
+        timerOn = false
     }
     
     func removeKeyBoard() {
          self.view.endEditing(true)
     }
+    
+    
     func loadEventDetails() {
         if currentEvent.eventDistance != 0 {
             txtDistance.text = "\(currentEvent.eventDistance)"
@@ -246,14 +262,31 @@ class EventViewController: UIViewController,
        
         if currentEvent.eventResults.count != 0 {
             eventResults = currentEvent.eventResults.filter("resultSeconds=0").sorted(byKeyPath: "expectedSeconds", ascending: true)
-//            for er in eventResults! {
-//                print("\(er.expectedSeconds)")
-//            }
+            
+            if eventIsRunning && eventResults?.count != 0 {
+                let secondsElapsed = myDefs.getRunningEventSecondsStopped()
+                let addseconds = myFunc.getDateDiffSeconds(fromDate: myDefs.getRunningEventStopDate())
+                
+                let dateFormatter = DateFormatter()
+                
+                dateFormatter.dateFormat = "dd/MM/yyyy hh:mm:ss"
+//                print(dateFormatter.string(from: myDefs.getRunningEventStopDate()))
+//                print(dateFormatter.string(from: Date()))
+//                print("eventelapsed: \(secondsElapsed) secindstoadd:\(addseconds)")
+//                
+                noSeconds = secondsElapsed + addseconds + 1
+                myDefs.setRunningEventID(eventID: 0) //turn this off
+                myDefs.setRunningEventSecondsStopped(clockseconds: 0)
+                eventIsRunning = false
+                doEventStart()
+            }
+
         }
         
             myTableView.reloadData()
         
     }
+    
     func numberOfSections(in tableView: UITableView) -> Int {
         
         return eventResults?.count ?? 0
@@ -460,6 +493,7 @@ class EventViewController: UIViewController,
     //MARK: Timer
 func doEventStart() {
     btnStart.setTitle("Finish",for: .normal)
+    timerOn = true
     
     timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimer), userInfo: nil, repeats: true)
     
@@ -477,16 +511,15 @@ func doEventStart() {
     func moveStartViewUp() {
         let xPosition = origDetailsFrame.origin.x + 3.0
         //View will slide 20px up
-        let yPosition = origDetailsFrame.origin.y
+        let yPosition = origDetailsFrame.origin.y + 5.0 //off set from the top
         
-        let myTableNewHeight = origTableFrame.size.height + (self.detailView.frame.size.height - self.startView.frame.size.height)
-        
-        let myTableYPosition = origTableFrame.origin.y - startView.frame.size.height
+        let myTableNewHeight = origTableFrame.size.height + (origDetailsFrame.size.height - 5.0)
+        let myTableYPosition = origDetailsFrame.origin.y + origStartFrame.size.height
         
         UIView.animate(withDuration: 1, animations: {
             
             
-            self.startView.frame = CGRect(x: xPosition, y: yPosition, width: self.startView.frame.size.width, height: self.startView.frame.size.height)
+            self.startView.frame = CGRect(x: xPosition, y: yPosition, width: self.origStartFrame.size.width, height: self.origStartFrame.size.height)
             
             self.myTableView.frame = CGRect(x: self.origTableFrame.origin.x, y: myTableYPosition, width: self.origTableFrame.size.width, height: myTableNewHeight)
             
@@ -494,20 +527,14 @@ func doEventStart() {
             self.detailView.frame = CGRect(x: xPosition + self.view.frame.size.width, y: yPosition, width: self.origDetailsFrame.size.width, height: self.origDetailsFrame.size.height)
             
             self.detailView.isHidden = true
+            
             self.view.layoutIfNeeded()
         })
 
     }
     
     func moveStartViewDown() {
-//        let xPosition = detailView.frame.origin.x
-//
-//
-//        let yPosition = detailView.frame.origin.y + detailView.frame.size.height + 8.0
-//
-//        let myTableNewHeight = myTableView.frame.size.height - (self.detailView.frame.size.height - self.startView.frame.size.height)
-//        let myTableYPosition = yPosition - startView.frame.size.height
-        
+
         UIView.animate(withDuration: 1, animations: {
             
             

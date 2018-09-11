@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -26,12 +27,56 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //checkExplorer()
         //addMembers()
         checkSort()
+        
+        UIApplication.shared.applicationIconBadgeNumber = 0 //incase there was a badge
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        
+        
+        
+        
+        if let topController = UIApplication.shared.keyWindow?.rootViewController {
+            
+                if topController.childViewControllers.count != 0 {
+                
+                    let vcArray = topController.childViewControllers
+                    
+                    let lastVC = vcArray[vcArray.count-1]
+                    
+                    if lastVC.isMember(of: EventViewController.self) {
+                        let vc  = lastVC as! EventViewController
+                        if vc.timerOn {
+                            let myDefs = appUserDefaults()
+                            myDefs.setRunningEventID(eventID: vc.currentEvent.eventID)
+                            myDefs.setRunningEevntStopDate(stopDate: Date())
+                            myDefs.setRunningEventSecondsStopped(clockseconds: vc.noSeconds)
+                          
+                            UNUserNotificationCenter.current().requestAuthorization(options: [.badge]) { (granted, error) in
+                                if error == nil {
+                                    DispatchQueue.main.async(execute: {
+                                        UIApplication.shared.applicationIconBadgeNumber = 1
+                                    })
+                                    
+                                }
+                            }
+                            
+                        }else{
+                           UIApplication.shared.applicationIconBadgeNumber = 0
+                        }
+                        vc.navigationController?.popToRootViewController(animated: false)
+                        
+                        
+                    }
+                }
+
+         }
+        
+        
+
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
@@ -43,8 +88,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
     }
 
+    
     func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        
+        //need to pt this here. The main viewcontrollers viewwillappear and stuff doesnt fire correctly for what I want
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        let myDefs = appUserDefaults()
+        
+        let runningEventID = myDefs.getRunningEventID()
+        if runningEventID != 0 {
+            
+            if let topController = UIApplication.shared.keyWindow?.rootViewController {
+                if topController.childViewControllers.count == 1 {
+                    let vc = topController.childViewControllers[0] as! MainViewController
+                        vc.performSegue(withIdentifier: "MainToEvent", sender: self)
+                }
+            }
+            
+        }
+        
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

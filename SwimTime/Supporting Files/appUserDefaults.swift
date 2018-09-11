@@ -18,6 +18,51 @@ class appUserDefaults {
     let nextRaceNoKey = "NextRaceNo"
     let nextTeamNoKey = "NextTeamNo"
     
+    let runningEventIDKey = "runningEventID"
+    let runningEventStopDate = "runningEventStopDate"
+    let runningEventSecondsStopped = "runningEventSeconds"
+    
+    func setRunningEventID(eventID : Int) {
+        
+        defaults.set(eventID, forKey: runningEventIDKey)
+    }
+    
+    func getRunningEventID() -> Int {
+        var eventID : Int = 0
+         if let defId  = defaults.object(forKey: runningEventIDKey) as? Int {
+            eventID = defId
+        }
+        
+        return eventID
+            
+    }
+    func setRunningEevntStopDate(stopDate:Date) {
+        defaults.set(stopDate, forKey: runningEventStopDate)
+    }
+    
+    func getRunningEventStopDate() -> Date {
+        var retDate : Date = Date()
+        if let defId  = defaults.object(forKey: runningEventStopDate) as? Date {
+            retDate = defId
+        }
+        return retDate
+    }
+    
+    func setRunningEventSecondsStopped(clockseconds : Int) {
+        
+        defaults.set(clockseconds, forKey: runningEventSecondsStopped)
+    }
+    
+    func getRunningEventSecondsStopped() -> Int {
+        var seconds : Int = 0
+        if let defId  = defaults.object(forKey: runningEventSecondsStopped) as? Int {
+            seconds = defId
+        }
+        
+        return seconds
+        
+    }
+    
     func getNextId(thisKey : String, defaulStart:Int = 1) -> Int {
         var nextId : Int = defaulStart
         if let defId  = defaults.object(forKey: thisKey) as? Int {
