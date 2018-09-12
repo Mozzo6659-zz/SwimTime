@@ -37,10 +37,11 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     var myfunc = appFunctions()
     var myDefs = appUserDefaults()
     var selectedGender = 1
-    var pickerItems : Results<Group>?
+    var pickerItems : Results<SwimClub>?
     var photoUpdated = false
     var selectedMember = Member()
-    var selectedGroup = Group()
+    //var selectedGroup = Group()
+    var selectedClub = SwimClub()
     var defSwimClub = SwimClub()
     
     let imagePicker = UIImagePickerController()
@@ -50,7 +51,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         
         //flat colours look shit
         //self.view.backgroundColor = GradientColor(.leftToRight, frame: self.view.frame, colors: [FlatSkyBlue(),FlatSkyBlueDark()])
-        
+        getDefSwimClub()
         navigationItem.setHidesBackButton(true, animated: false)
         //pickerView.isHidden = true
         configureView()
@@ -80,8 +81,6 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         imagePicker.sourceType = .camera
         imagePicker.allowsEditing = true
 
-    //[vwExtraDetails setHidden:quickEntry];
-    
         loadPickerData()
         pickerView.delegate = self
         pickerView.dataSource = self
@@ -93,13 +92,14 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     }
 
     func getDefSwimClub() {
-        let scArray : Results<SwimClub> = realm.objects(SwimClub.self).filter("clubID = 1")
+        let scArray : Results<SwimClub> = realm.objects(SwimClub.self).filter("isDefault = true")
         defSwimClub = scArray.first!
     }
+    
     //MARK: - Picker data stuff
     
     func loadPickerData() {
-        pickerItems = realm.objects(Group.self)
+        pickerItems = realm.objects(SwimClub.self)
         
         
     }
@@ -113,32 +113,79 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         
-        return pickerItems![row].groupName
+        return pickerItems![row].clubName
         
     
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        lblGroup.text = pickerItems![row].groupName
-        selectedGroup = pickerItems![row]
+        lblGroup.text = pickerItems![row].clubName
+        selectedClub = pickerItems![row]
+        defSwimClub = selectedClub
         pickerView.isHidden = true
-        
         //Im gonna remove the member from the list
-        
-        
         
     }
     
     //MARK: - Button functions
     @IBAction func groupBtnClicked(_ sender: UIButton) {
         removeKeyBoard()
-        var pnt : CGPoint = lblGroup.center
-        pnt.x = pnt.x - 60.0
-        pnt.y = pnt.y + 60.0
-        pickerView.center = pnt
-        pickerView.isHidden = false
+        
+        if sender.tag == 1 {
+            if pickerItems?.count != 0 {
+                var pnt : CGPoint = lblGroup.center
+                pnt.x = pnt.x - 60.0
+                pnt.y = pnt.y + 60.0
+                
+                pickerView.center = pnt
+                pickerView.isHidden = false
+            }
+        }else{
+            addNewTeam()
+        }
     }
     
+    func addNewTeam() {
+        var userTextField = UITextField() //module lel textfile used in the closure
+        
+        let alert = UIAlertController(title: "Add New Team", message: "", preferredStyle: .alert)
+        
+        let alertAction = UIAlertAction(title: "Add Team", style: .default) {
+            (action) in
+            
+            //var item = Item(thetitle: userTextField.text!)
+                let newName = userTextField.text!
+            
+            if !newName.isEmpty {
+                do {
+                    try self.realm.write {
+                        let newClub = SwimClub()
+                        newClub.clubID = self.myDefs.getNextClubId()
+                        newClub.clubName = newName
+                        newClub.isDefault = false
+                        self.realm.add(newClub)
+                        self.loadPickerData()
+                        self.defSwimClub = newClub
+                        self.selectedClub = newClub
+                        self.lblGroup.text = newClub.clubName
+                    }
+                } catch {
+                    print("Error saving items: \(error)")
+                }
+            }
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create New Team"
+            userTextField = alertTextField
+        }
+        
+        alert.addAction(alertAction)
+        present(alert, animated: true, completion: nil)
+                //self.saveData(item: item)
+        
+
+    }
     @IBAction func takePhoto(_ sender: UIButton) {
         
         present(imagePicker, animated: true, completion: nil)
@@ -215,25 +262,24 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
                     
                     selectedMember.dateOfBirth = dateFormatter.date(from: DOB)!
                     
-                    
-                        if selectedMember.myGroup.count != 0 {
-                            let memberGroup = selectedMember.myGroup.first!
+                    //we dont use Groups any ore but im leavin it
+                        if selectedMember.myClub.count != 0 {
+                            let memberClub = selectedMember.myClub.first!
 
-                            if selectedGroup.groupName != memberGroup.groupName {
-                                if  memberGroup.members.count != 0 {
-                                    let mxm = memberGroup.members.index(where: {$0.memberID == selectedMember.memberID})
-                                    memberGroup.members.remove(at: mxm!)
+                            if selectedClub.clubName != memberClub.clubName {
+                                if  memberClub.members.count != 0 {
+                                    let mxm = memberClub.members.index(where: {$0.memberID == selectedMember.memberID})
+                                    memberClub.members.remove(at: mxm!)
                                 }
                             }
                         }
-                    
-                    
-       
-                    selectedGroup.members.append(selectedMember)
+
+
+
+                    selectedClub.members.append(selectedMember)
                     
                     if selectedMember.memberID == 0 {
                         selectedMember.memberID = myDefs.getNextMemberId()
-                        defSwimClub.members.append(selectedMember)
                         realm.add(selectedMember)
                     }
                 }
@@ -308,10 +354,10 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         txtDOBDay.text = thedatesplit[2]
     
         
-        lblGroup.text = selectedMember.myGroup.first?.groupName
+        lblGroup.text = selectedMember.myClub.first?.clubName
     
         if selectedMember.myGroup.count != 0 {
-            selectedGroup = selectedMember.myGroup.first!
+            selectedClub = selectedMember.myClub.first!
         }
         //NSString *photoname = [mysettings makePhotoName:selectedMember.memberid];
         if selectedMember.memberID != 0 {
@@ -343,10 +389,9 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         btnMale.setImage(getTickedImage(), for: .normal)
         btnFemale.setImage(getUnTickedImage(), for: .normal)
         
-        selectedGroup = realm.objects(Group.self).first!
-        lblGroup.text = selectedGroup.groupName
+        selectedClub = defSwimClub
+        lblGroup.text = selectedClub.clubName
         selectedMember = Member()
-        
     }
 
     //MARK: Erors

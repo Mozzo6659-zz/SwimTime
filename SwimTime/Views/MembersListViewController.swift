@@ -62,7 +62,7 @@ class MembersListViewController: UITableViewController {
     // MARK: - my Data stuff
     func loadMembers() -> Bool{
         var found : Bool = false
-        membersList = realm.objects(Member.self)
+        membersList = realm.objects(Member.self).sorted(byKeyPath: "memberName")
 
         if (membersList?.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
@@ -128,8 +128,8 @@ class MembersListViewController: UITableViewController {
         var dtText = String(format:"Age: %d",lh.age())
         
         
-        if let grp = lh.myGroup.first {
-            dtText = dtText + String(format:"   Group: %@",grp.groupName)
+        if let grp = lh.myClub.first {
+            dtText = dtText + String(format:"   Club: %@",grp.clubName)
         }
        
         dtText = dtText + String(format:"   One K: %@",myfunc.convertSecondsToTime(timeinseconds: lh.onekSeconds))

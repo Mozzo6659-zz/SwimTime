@@ -23,6 +23,7 @@ class Event : Object {
     @objc dynamic var ageFilterMin : Int = 0
     @objc dynamic var ageFilterMax : Int = 0
     @objc dynamic var genderFilter : String = ""
+    @objc dynamic var presetEvent = PresetEvent()
     
     let eventResults = List<EventResult>()
     

@@ -19,7 +19,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     let myfunc = appFunctions()
     
     @IBOutlet weak var lblDistance: UILabel!
-    @IBOutlet weak var lblDate: UILabel!
+    
     
     @IBOutlet weak var myToolbar: UIToolbar!
     @IBOutlet weak var myTableView: UITableView!
@@ -49,11 +49,12 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func showEventDetails() {
-        lblDistance.text = ("\(currentEvent.eventDistance) meters")
         let dateFormatter = DateFormatter()
         
         dateFormatter.dateFormat = "dd/MM/yyyy"
-        lblDate.text = dateFormatter.string(from: currentEvent.eventDate)
+        lblDistance.text = ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters") + dateFormatter.string(from: currentEvent.eventDate)
+        
+        
         
     }
     

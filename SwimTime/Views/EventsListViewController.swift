@@ -53,7 +53,7 @@ class EventsListViewController: UITableViewController {
         }
     
         
-        eventsList = realm.objects(Event.self).filter(finishedSelect)
+        eventsList = realm.objects(Event.self).filter(finishedSelect).sorted(byKeyPath: "eventDate", ascending: false)
         
         if (eventsList?.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))

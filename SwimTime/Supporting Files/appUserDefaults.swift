@@ -17,7 +17,7 @@ class appUserDefaults {
     let nextEventResultKey = "NextEventResultID"
     let nextRaceNoKey = "NextRaceNo"
     let nextTeamNoKey = "NextTeamNo"
-    
+    let nextClubIDKey = "NextClubID"
     let runningEventIDKey = "runningEventID"
     let runningEventStopDate = "runningEventStopDate"
     let runningEventSecondsStopped = "runningEventSeconds"
@@ -75,11 +75,18 @@ class appUserDefaults {
         return nextId
         
     }
+    func setNextMemberID(memid:Int) {
+        defaults.set(memid, forKey: nextMemberKey)
+    }
     func getNextMemberId() -> Int {
         
         return getNextId(thisKey: nextMemberKey)
     }
     
+    func getNextClubId() -> Int {
+        
+        return getNextId(thisKey: nextClubIDKey)
+    }
     func getNextEventId() -> Int {
          return getNextId(thisKey: nextEventKey)
        

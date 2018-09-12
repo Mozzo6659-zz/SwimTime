@@ -87,7 +87,7 @@ class MembersForEventViewController: UITableViewController {
         
         var found : Bool = false
         
-        let membersNotInEvent : Results<Member> = realm.objects(Member.self)
+        let membersNotInEvent : Results<Member> = realm.objects(Member.self).sorted(byKeyPath: "memberName")
         let memNotInEventArray = List<Member>()
         
         for m in membersNotInEvent {
@@ -104,10 +104,10 @@ class MembersForEventViewController: UITableViewController {
             
         }
         
-        membersList = memNotInEventArray
+        //
         
         
-        if (membersList?.count == 0) {
+        if (memNotInEventArray.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
             
             noDataLabel.text             = "No Members to List"
@@ -121,7 +121,8 @@ class MembersForEventViewController: UITableViewController {
             
             //tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         }else{
-            tableView.backgroundView=nil;
+            tableView.backgroundView=nil
+            membersList = memNotInEventArray
             found = true
         }
         return found

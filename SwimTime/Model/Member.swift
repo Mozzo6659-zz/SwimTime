@@ -23,7 +23,7 @@ class Member : Object {
     
     let eventResults = List<EventResult>()
     
-    let myGroup = LinkingObjects(fromType: Group.self, property: "members")
+    let myGroup = LinkingObjects(fromType: Group.self, property: "members") //no longer used inc ase they want to resurrect it
     let myClub = LinkingObjects(fromType: SwimClub.self, property: "members")
     
     func age() -> Int {

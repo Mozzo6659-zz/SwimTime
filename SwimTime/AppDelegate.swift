@@ -22,8 +22,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //
 //        let nextmem = myDEF.getNextMemberId()
 //        print("\(nextmem)")
-        addGroups()
-        addInitSwimClub()
+        let seedDB = seedDatabase()
+        seedDB.addGroups()
+        seedDB.addInitSwimClub()
+        seedDB.addtheseMembers()
+        seedDB.addThesePresetEvents()
         //checkExplorer()
         //addMembers()
         checkSort()
@@ -50,11 +53,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     if lastVC.isMember(of: EventViewController.self) {
                         let vc  = lastVC as! EventViewController
                         if vc.timerOn {
+                            
                             let myDefs = appUserDefaults()
                             myDefs.setRunningEventID(eventID: vc.currentEvent.eventID)
                             myDefs.setRunningEevntStopDate(stopDate: Date())
                             myDefs.setRunningEventSecondsStopped(clockseconds: vc.noSeconds)
-                          
+                            vc.stopTimer()
                             UNUserNotificationCenter.current().requestAuthorization(options: [.badge]) { (granted, error) in
                                 if error == nil {
                                     DispatchQueue.main.async(execute: {
@@ -124,55 +128,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     
-    func addInitSwimClub() {
-        let clubArray : Results<SwimClub> = realm.objects(SwimClub.self)
-        
-        if clubArray.count != 0 {
-            let defsc = SwimClub()
-            defsc.clubName = "Seas the Limit"
-            defsc.clubID = 1
-            do {
-                
-                try realm.write {
-                    realm.add(defsc)
-                }
-            }catch {
-                print("Error encoding Item array")
-            }
-
-        }
-        
-        
-        
-    }
-    func addGroups() {
-        var groupArray : Results<Group>
-        
-        groupArray = realm.objects(Group.self)
-        
-        if groupArray.count == 0 {
-            addGroup(id: 0, groupname: "None")
-            addGroup(id: 1, groupname: "Beginner")
-            addGroup(id: 2, groupname: "Explorer")
-            addGroup(id: 3, groupname: "Performer")
-        }
-   
-    }
     
-    func addGroup(id : Int,groupname : String) {
-        let grp = Group()
-        grp.groupID = id
-        grp.groupName = groupname
-        do {
-                
-                try realm.write {
-                    realm.add(grp)
-                }
-            }catch {
-                print("Error encoding Item array")
-            }
-
-    }
     
     func checkSort() {
        /*this wokrs for sort by age

@@ -25,6 +25,7 @@ class MainViewController: UIViewController {
     
     @IBOutlet weak var btnMembers: UIButton!
     
+    @IBOutlet weak var btnDev: UIButton!
     
     @IBOutlet weak var btnEvets: UIButton!
     
@@ -78,6 +79,7 @@ class MainViewController: UIViewController {
 
     //MARK: - Button functions
     
+    
     @IBAction func mnubtnClicked(_ sender: UIButton) {
         var seg : String = ""
         showFinishedEvents = (sender.tag == 3)
@@ -117,6 +119,14 @@ class MainViewController: UIViewController {
         let runningEventID = myDefs.getRunningEventID()
         let runningEvent = realm.objects(Event.self).filter("eventID=%d",runningEventID).first
         return runningEvent!
+    }
+    
+    //MARK: - Dev Stuff
+    @IBAction func btnDevClicked(_ sender: UIButton) {
+        let myseed = seedDatabase()
+        
+        myseed.addtheseMembers()
+        
     }
 }
 
