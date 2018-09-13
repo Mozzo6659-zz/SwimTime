@@ -39,11 +39,11 @@
                                 </connections>
                             </button>
                             <button opaque="NO" tag="2" contentMode="scaleToFill" fixedFrame="YES" insetsLayoutMarginsFromSafeArea="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iub-OG-V2Y">
-                                <rect key="frame" x="43" y="206" width="682" height="93"/>
+                                <rect key="frame" x="43" y="194" width="682" height="93"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.55626061739999999" green="1" blue="0.1463440862" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="50"/>
-                                <state key="normal" title="Events">
+                                <state key="normal" title="Exhibition">
                                     <color key="titleColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
                                 <userDefinedRuntimeAttributes>
@@ -59,7 +59,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" tag="3" contentMode="scaleToFill" fixedFrame="YES" insetsLayoutMarginsFromSafeArea="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SXq-rx-IzW">
-                                <rect key="frame" x="43" y="324" width="682" height="93"/>
+                                <rect key="frame" x="43" y="420" width="682" height="93"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.55626061739999999" green="1" blue="0.1463440862" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="50"/>
@@ -78,8 +78,28 @@
                                     <action selector="mnubtnClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hli-FU-3hq"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" tag="4" contentMode="scaleToFill" fixedFrame="YES" insetsLayoutMarginsFromSafeArea="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="814-Ws-SDS">
+                                <rect key="frame" x="43" y="307" width="682" height="93"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.55626061739999999" green="1" blue="0.1463440862" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="50"/>
+                                <state key="normal" title="Dual Meet">
+                                    <color key="titleColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="50"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
+                                        <integer key="value" value="2"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="mnubtnClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="6Qs-KJ-el9"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" tag="3" contentMode="scaleToFill" fixedFrame="YES" insetsLayoutMarginsFromSafeArea="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9HI-O4-kVU">
-                                <rect key="frame" x="43" y="538" width="682" height="93"/>
+                                <rect key="frame" x="43" y="612" width="682" height="93"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.55626061739999999" green="1" blue="0.1463440862" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" name="Helvetica-Bold" family="Helvetica" pointSize="50"/>
@@ -108,6 +128,7 @@
                         <outlet property="btnDev" destination="9HI-O4-kVU" id="oIE-wb-HxJ"/>
                         <outlet property="btnEvets" destination="iub-OG-V2Y" id="NUm-s5-FDN"/>
                         <outlet property="btnMembers" destination="Dio-Ey-szX" id="Rep-cG-HdQ"/>
+                        <outlet property="btnPresetEvent" destination="814-Ws-SDS" id="MYm-39-tBJ"/>
                         <outlet property="btnResults" destination="SXq-rx-IzW" id="NzG-6v-5gV"/>
                         <segue destination="xGU-YQ-fe8" kind="show" identifier="gotoMembersList" id="Ktk-df-PzF"/>
                         <segue destination="xHj-7U-741" kind="show" identifier="gotoEventsList" id="FlI-ir-4Xr"/>
@@ -192,7 +213,7 @@
             </objects>
             <point key="canvasLocation" x="1345" y="-550"/>
         </scene>
-        <!--Events-->
+        <!--Races-->
         <scene sceneID="s8w-zr-6uo">
             <objects>
                 <tableViewController id="xHj-7U-741" customClass="EventsListViewController" customModule="SwimTime" customModuleProvider="target" sceneMemberID="viewController">
@@ -235,7 +256,7 @@
                             <outlet property="delegate" destination="xHj-7U-741" id="mjq-nu-bR5"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Events" id="sGf-Iv-sEw">
+                    <navigationItem key="navigationItem" title="Races" id="sGf-Iv-sEw">
                         <barButtonItem key="leftBarButtonItem" title="&lt; Home" id="t4J-F0-gBn">
                             <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                             <connections>
@@ -258,7 +279,7 @@
             </objects>
             <point key="canvasLocation" x="1030" y="506"/>
         </scene>
-        <!--Event-->
+        <!--Race-->
         <scene sceneID="R6E-Ii-Bhb">
             <objects>
                 <viewController id="Uh1-n7-IKA" customClass="EventViewController" customModule="SwimTime" customModuleProvider="target" sceneMemberID="viewController">
@@ -443,7 +464,7 @@
                         <color key="backgroundColor" white="0.56000000000000005" alpha="0.71157962328767121" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <viewLayoutGuide key="safeArea" id="kOe-Pt-dOD"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Event" id="gO1-pQ-Jus">
+                    <navigationItem key="navigationItem" title="Race" id="gO1-pQ-Jus">
                         <barButtonItem key="leftBarButtonItem" title="&lt; Done" id="ahv-pG-vgo">
                             <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                             <connections>
@@ -967,7 +988,7 @@
             </objects>
             <point key="canvasLocation" x="-417" y="-38"/>
         </scene>
-        <!--Members For Event-->
+        <!--Members For Race-->
         <scene sceneID="OWT-a4-B23">
             <objects>
                 <tableViewController id="H6o-ff-qIs" customClass="MembersForEventViewController" customModule="SwimTime" customModuleProvider="target" sceneMemberID="viewController">
@@ -1010,7 +1031,7 @@
                             <outlet property="delegate" destination="H6o-ff-qIs" id="FhU-xO-cbd"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Members For Event" largeTitleDisplayMode="always" id="cma-cu-MET">
+                    <navigationItem key="navigationItem" title="Members For Race" largeTitleDisplayMode="always" id="cma-cu-MET">
                         <barButtonItem key="leftBarButtonItem" title="&lt; Done" id="LPg-6c-7dq">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
@@ -1041,8 +1062,8 @@
         <image name="timeglyphwithtext" width="30" height="33"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="K3t-Vx-ffJ"/>
-        <segue reference="JwM-Nv-E9M"/>
-        <segue reference="2O2-b1-Zhe"/>
+        <segue reference="ZPU-VH-1mb"/>
+        <segue reference="XMo-B0-09e"/>
+        <segue reference="5tc-y9-oXI"/>
     </inferredMetricsTieBreakers>
 </document>

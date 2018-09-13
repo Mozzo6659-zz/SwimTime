@@ -19,6 +19,7 @@ class PresetEvent : Object {
     @objc dynamic var maxPerClub : Int = 0
     @objc dynamic var maxPerRelay : Int = 0
     @objc dynamic var maxRelays : Int = 0
+    @objc dynamic var useScoring : Bool = false
     
     let eventAgeGroups = List<PresetEventAgeGroups>()
     

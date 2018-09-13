@@ -22,6 +22,8 @@ class EventResult : Object {
      @objc dynamic var ageAtEvent : Int = 0
     @objc dynamic var diffSeconds : Int = 0
     
+    var selectedAgeCatgeory = PresetEventAgeGroups() //for reporting Im gonna need this. Chad can put you in any category regardless of how old you are
+    
     let myMember = LinkingObjects(fromType: Member.self, property: "eventResults")
     
     let myEvent = LinkingObjects(fromType: Event.self, property: "eventResults")

@@ -15,6 +15,8 @@ class EventsListViewController: UITableViewController {
     var myfunc = appFunctions()
     var backFromEvent : Bool = false
     var showFinished : Bool = false //whether the lits show finished event or active events
+    var showPreset : Bool = false
+    
     //var selectedMember = Member()
     var selectedEvent = Event()
     let eventseg = "eventListToEvent"
@@ -46,14 +48,17 @@ class EventsListViewController: UITableViewController {
     func loadEvents() -> Bool{
         var found : Bool = false
         
-        var finishedSelect : String = "isFinished = false"
+        var filterstring : String = showFinished ? "isFinished=true" : "isFinished=false"
         
-        if showFinished  {
-            finishedSelect = "isFinished = true"
+        
+        if showPreset {
+            filterstring += " AND hasPresetEvent=true"
+            //eventsList = eventsList?.filter("hasPresetEvent=true")
         }
-    
         
-        eventsList = realm.objects(Event.self).filter(finishedSelect).sorted(byKeyPath: "eventDate", ascending: false)
+        eventsList = realm.objects(Event.self).filter(filterstring).sorted(byKeyPath: "eventDate", ascending: false)
+        
+        
         
         if (eventsList?.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))

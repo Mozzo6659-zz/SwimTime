@@ -48,9 +48,6 @@ class seedDatabase {
         case 3:
             add1000AgeGroups(eventID: eventId)
             break
-        case 4:
-            add500RelayAgeGroups(eventID: eventId)
-            break
           default:
             break
         }
@@ -87,6 +84,7 @@ class seedDatabase {
         event.maxPerClub = 20
         event.maxPerGenderAndAgeGroup = 2
         event.maxClubs = 2
+        event.useScoring = true
         addEventToRealm(event: event)
     }
     
@@ -99,6 +97,7 @@ class seedDatabase {
         event.maxPerClub = 20
         event.maxPerGenderAndAgeGroup = 2
         event.maxClubs = 2
+        event.useScoring = true
         addEventToRealm(event: event)
     }
     
@@ -113,6 +112,7 @@ class seedDatabase {
         event.maxRelays = 4
         event.maxPerClub = 16
         event.maxClubs = 2
+        event.useScoring = true
         addEventToRealm(event: event)
         
     }
@@ -139,19 +139,19 @@ class seedDatabase {
         //500m - 25's and 95's off GO  --  10&U's 12's and 15's off 2 minutes behind.
         let myageGrps = List<PresetEventAgeGroups>()
         
-        let ageGrp1 = makeAgeGroup(presetEventId: eventID, minage: 0, maxage: 10, staggerseconds: 120,agegrpName:"10 and under") //10 an under
+        let ageGrp1 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(), presetEventId: eventID, minage: 0, maxage: 10, staggerseconds: 120,agegrpName:"10 and under") //10 an under
         myageGrps.append(ageGrp1)
         
-        let ageGrp2 = makeAgeGroup(presetEventId: eventID, minage: 11, maxage: 12, staggerseconds: 120,agegrpName:"12 and under") //12 an under
+        let ageGrp2 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 11, maxage: 12, staggerseconds: 120,agegrpName:"12 and under") //12 an under
         myageGrps.append(ageGrp2)
         
-        let ageGrp3 = makeAgeGroup(presetEventId: eventID, minage: 13, maxage: 15, staggerseconds: 120,agegrpName:"15 and under") //15 an under
+        let ageGrp3 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 13, maxage: 15, staggerseconds: 120,agegrpName:"15 and under") //15 an under
         myageGrps.append(ageGrp3)
         
-        let ageGrp4 = makeAgeGroup(presetEventId: eventID, minage: 16, maxage: 25, staggerseconds: 0,agegrpName:"25 and under") //25 an under
+        let ageGrp4 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 16, maxage: 25, staggerseconds: 0,agegrpName:"25 and under") //25 an under
         myageGrps.append(ageGrp4)
         
-        let ageGrp5 = makeAgeGroup(presetEventId: eventID, minage: 26, maxage: 95, staggerseconds: 0,agegrpName:"95 and under") //95 an under
+        let ageGrp5 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 26, maxage: 95, staggerseconds: 0,agegrpName:"95 and under") //95 an under
         myageGrps.append(ageGrp5)
         
         addAgeGroupToRealm(agegrps: myageGrps)
@@ -162,48 +162,48 @@ class seedDatabase {
         //age groups are :  5&over ; 10&over ; 12&over ; 15& over ; 25&over
 
         let myageGrps = List<PresetEventAgeGroups>()
-        let ageGrp1 = makeAgeGroup(presetEventId: eventID, minage: 5, maxage: 9, staggerseconds: 120,agegrpName:"5 and over") //10 an under
+        let ageGrp1 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 5, maxage: 9, staggerseconds: 120,agegrpName:"5 and over") //10 an under
         myageGrps.append(ageGrp1)
         
-        let ageGrp2 = makeAgeGroup(presetEventId: eventID, minage: 10, maxage: 11, staggerseconds: 120,agegrpName:"10 and over")
+        let ageGrp2 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 10, maxage: 11, staggerseconds: 120,agegrpName:"10 and over")
         myageGrps.append(ageGrp2)
         
-        let ageGrp3 = makeAgeGroup(presetEventId: eventID, minage: 12, maxage: 14, staggerseconds: 120,agegrpName:"12 and over")
+        let ageGrp3 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 12, maxage: 14, staggerseconds: 120,agegrpName:"12 and over")
         myageGrps.append(ageGrp3)
         
-        let ageGrp4 = makeAgeGroup(presetEventId: eventID, minage: 15, maxage: 24, staggerseconds: 0,agegrpName:"12 and over")
+        let ageGrp4 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 15, maxage: 24, staggerseconds: 0,agegrpName:"12 and over")
         myageGrps.append(ageGrp4)
         
-        let ageGrp5 = makeAgeGroup(presetEventId: eventID, minage: 25, maxage: 100, staggerseconds: 0,agegrpName:"25 and over")
+        let ageGrp5 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 25, maxage: 100, staggerseconds: 0,agegrpName:"25 and over")
         myageGrps.append(ageGrp5)
         
         addAgeGroupToRealm(agegrps: myageGrps)
         
     }
+    //not having age groups on the relay
+//    func add500RelayAgeGroups(eventID:Int) {
+//        //age groups are :  10&under ; 12&un ; 15& over ; 25&over
+//        let myageGrps = List<PresetEventAgeGroups>()
+//        let ageGrp1 = makeAgeGroup(presetEventId: eventID, minage: 0, maxage: 10, staggerseconds: 0,agegrpName:"10 and under") //10 an under
+//        myageGrps.append(ageGrp1)
+//
+//        let ageGrp2 = makeAgeGroup(presetEventId: eventID, minage: 11, maxage: 12, staggerseconds: 0,agegrpName:"12 and under")
+//        myageGrps.append(ageGrp2)
+//
+//        let ageGrp3 = makeAgeGroup(presetEventId: eventID, minage: 13, maxage: 15, staggerseconds: 0,agegrpName:"15 and under") //15 an under
+//        myageGrps.append(ageGrp3)
+//
+//        let ageGrp4 = makeAgeGroup(presetEventId: eventID, minage: 16, maxage: 25, staggerseconds: 0,agegrpName:"25 and under")
+//        myageGrps.append(ageGrp4)
+//
+////        var ageGrp5 = PresetEventAgeGroups(presetEventId: eventID, minage: 25, maxage: 100, staggerseconds: 0,agegrpName:"25 and over")
+////        myageGrps.append(ageGrp5)
+//
+//        addAgeGroupToRealm(agegrps: myageGrps)
+//
+//    }
     
-    func add500RelayAgeGroups(eventID:Int) {
-        //age groups are :  10&under ; 12&un ; 15& over ; 25&over
-        let myageGrps = List<PresetEventAgeGroups>()
-        let ageGrp1 = makeAgeGroup(presetEventId: eventID, minage: 0, maxage: 10, staggerseconds: 0,agegrpName:"10 and under") //10 an under
-        myageGrps.append(ageGrp1)
-        
-        let ageGrp2 = makeAgeGroup(presetEventId: eventID, minage: 11, maxage: 12, staggerseconds: 0,agegrpName:"12 and under")
-        myageGrps.append(ageGrp2)
-        
-        let ageGrp3 = makeAgeGroup(presetEventId: eventID, minage: 13, maxage: 15, staggerseconds: 0,agegrpName:"15 and under") //15 an under
-        myageGrps.append(ageGrp3)
-        
-        let ageGrp4 = makeAgeGroup(presetEventId: eventID, minage: 16, maxage: 25, staggerseconds: 0,agegrpName:"25 and under")
-        myageGrps.append(ageGrp4)
-        
-//        var ageGrp5 = PresetEventAgeGroups(presetEventId: eventID, minage: 25, maxage: 100, staggerseconds: 0,agegrpName:"25 and over")
-//        myageGrps.append(ageGrp5)
-        
-        addAgeGroupToRealm(agegrps: myageGrps)
-
-    }
-    
-    func makeAgeGroup(presetEventId: Int, minage: Int, maxage: Int, staggerseconds: Int ,agegrpName:String) -> PresetEventAgeGroups {
+    func makeAgeGroup(id:Int,presetEventId: Int, minage: Int, maxage: Int, staggerseconds: Int ,agegrpName:String) -> PresetEventAgeGroups {
         let agegrp = PresetEventAgeGroups()
         
         agegrp.presetEventID = presetEventId

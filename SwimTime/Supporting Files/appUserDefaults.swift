@@ -21,7 +21,7 @@ class appUserDefaults {
     let runningEventIDKey = "runningEventID"
     let runningEventStopDate = "runningEventStopDate"
     let runningEventSecondsStopped = "runningEventSeconds"
-    
+    let nextPresetAgeGroupID = "NextPesetAgeGroupId"
     func setRunningEventID(eventID : Int) {
         
         defaults.set(eventID, forKey: runningEventIDKey)
@@ -104,4 +104,10 @@ class appUserDefaults {
         return getNextId(thisKey: nextTeamNoKey)
         
     }
+    
+    func getNextPresetAgeGroupID() -> Int {
+        return getNextId(thisKey: nextPresetAgeGroupID)
+        
+    }
+    
 }

@@ -16,6 +16,8 @@ class EventViewController: UIViewController,
     var useRaceNos = false
     var returnFromMembers = false
     var eventIsRunning = false //if true then the current even is running so we start it back off
+    
+    var usePresetEvents = false
     var noSeconds : Int = 1
     
     

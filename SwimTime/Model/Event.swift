@@ -20,7 +20,11 @@ class Event : Object {
     @objc dynamic var eventLocation : String = ""
     @objc dynamic var isFinished : Bool = false
     @objc dynamic var eventDistance : Int = 0
+    @objc dynamic var hasPresetEvent : Bool = false
     
+    @objc dynamic var presetEvent : PresetEvent?
+    
+    let eventResults = List<EventResult>()
     
      //currnetly not using this. the idea was to set up filters tfor selecting members that would be persisted
     //leave it for now. Preset event has its won filters
@@ -29,9 +33,8 @@ class Event : Object {
     @objc dynamic var genderFilter : String = ""
     
     
-    @objc dynamic var presetEvent : PresetEvent?
     
-    let eventResults = List<EventResult>()
+    
     //currnetly not using this. the idea was to set up filters tfor selecting members that would be persisted//leave ot for now
     func getAgeFilter() -> String {
         var sFilter = ""

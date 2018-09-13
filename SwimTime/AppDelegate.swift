@@ -117,18 +117,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-    //MARK: - my Data manipulation
-    func checkExplorer() {
-        let groupArray : Results<Group> = realm.objects(Group.self).filter("groupID = 2")
-        
-        print(groupArray[0].members.count)
-        
-        for mem in groupArray[0].members {
-            print(mem.memberName)
-        }
-    }
-    
-    
     
     func checkSort() {
        /*this wokrs for sort by age
@@ -144,33 +132,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
     }
     
-    func addMembers() {
-        //temp process
-        let appDef = appUserDefaults()
-        let mem = Member()
-        let grp = realm.objects(Group.self).first!
-        print(grp.groupName)
-        mem.memberID = appDef.getNextMemberId()
-        mem.memberName = "Joe Blow"
-        mem.gender = "Male"
-        mem.onekSeconds = 1800
-        
-        let calendar = Calendar.current
-        
-        mem.dateOfBirth = calendar.date(byAdding: .year, value: -30, to: Date())!
-        
-        
-        do {
-            
-            try self.realm.write {
-                
-                self.realm.add(mem)
-                grp.members.append(mem)
-            }
-        }catch {
-            print("Error encoding Item array")
-        }
-        //mem.dateOfBirth =
-    }
+    
 }
 

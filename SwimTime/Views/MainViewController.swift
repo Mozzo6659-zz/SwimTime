@@ -13,6 +13,7 @@ import RealmSwift
 class MainViewController: UIViewController {
 
     var showFinishedEvents = false //tells the eet seque
+    var showPresetEvents = false
     let gotoEventsListSeg = "gotoEventsList"
     let gotoMembersListSeg = "gotoMembersList"
     
@@ -27,6 +28,7 @@ class MainViewController: UIViewController {
     
     @IBOutlet weak var btnDev: UIButton!
     
+    @IBOutlet weak var btnPresetEvent: UIButton!
     @IBOutlet weak var btnEvets: UIButton!
     
     @IBOutlet weak var btnResults: UIButton!
@@ -37,6 +39,8 @@ class MainViewController: UIViewController {
         btnEvets.layer.borderColor = UIColor.red.cgColor
         
         btnResults.layer.borderColor = UIColor.red.cgColor
+       btnPresetEvent.layer.borderColor = UIColor.red.cgColor
+        
         self.navigationController?.setToolbarHidden(true, animated: false)
         
         
@@ -83,11 +87,11 @@ class MainViewController: UIViewController {
     @IBAction func mnubtnClicked(_ sender: UIButton) {
         var seg : String = ""
         showFinishedEvents = (sender.tag == 3)
-        
+        showPresetEvents = (sender.tag == 4)
         switch sender.tag {
         case 1:
             seg = gotoMembersListSeg
-        case 2,3:
+        case 2,3,4:
             
             seg = gotoEventsListSeg
             
@@ -106,6 +110,7 @@ class MainViewController: UIViewController {
             
             let vc = segue.destination as! EventsListViewController
             vc.showFinished = showFinishedEvents
+            vc.showPreset = showPresetEvents
         }else if segue.identifier == runningEventSeg {
             
             //this segue is called in by the appdelgate if a running event is found

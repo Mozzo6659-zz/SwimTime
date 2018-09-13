@@ -165,6 +165,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
                         newClub.isDefault = false
                         self.realm.add(newClub)
                         self.loadPickerData()
+                        self.pickerView.reloadAllComponents()
                         self.defSwimClub = newClub
                         self.selectedClub = newClub
                         self.lblGroup.text = newClub.clubName
