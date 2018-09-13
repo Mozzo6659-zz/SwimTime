@@ -21,6 +21,7 @@ class EventResult : Object {
      @objc dynamic var teamOrder : Int = 0
      @objc dynamic var ageAtEvent : Int = 0
     @objc dynamic var diffSeconds : Int = 0
+    
     let myMember = LinkingObjects(fromType: Member.self, property: "eventResults")
     
     let myEvent = LinkingObjects(fromType: Event.self, property: "eventResults")

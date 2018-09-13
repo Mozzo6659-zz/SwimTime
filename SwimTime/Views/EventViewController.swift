@@ -320,7 +320,7 @@ class EventViewController: UIViewController,
         
         let er = eventResults![indexPath.row + indexPath.section]
         let mem = er.myMember.first!
-        let grp = mem.myGroup.first!
+        let grp = mem.myClub.first!
         
         cell.textLabel?.font = UIFont(name: "Helvetica", size: 35.0)
         cell.detailTextLabel?.font = UIFont(name: "Helvetica", size: 20.0)
@@ -334,7 +334,7 @@ class EventViewController: UIViewController,
         txtLabel += mem.memberName
         
         var dtText = String(format:"   Age: %d",mem.age())
-        dtText = dtText + String(format:"  Group: %@",grp.groupName)
+        dtText = dtText + String(format:"  Team: %@",grp.clubName)
             
         
        let dtlLabel = "Est Time: " + myFunc.convertSecondsToTime(timeinseconds: er.expectedSeconds) + dtText
@@ -391,7 +391,7 @@ class EventViewController: UIViewController,
             }
         }else{
             //MARK: -COME BACK 1
-            //go to member update estimate and maybe a photo
+            //go to member update estimate and maybe a photo change club
         }
     }
     

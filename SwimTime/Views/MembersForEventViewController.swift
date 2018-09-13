@@ -12,7 +12,7 @@ import RealmSwift
 class MembersForEventViewController: UITableViewController {
 
     let realm = try! Realm()
-    var membersList : List<Member>?
+    var membersList : Results<Member>?
     var myfunc = appFunctions()
     var mydefs = appUserDefaults()
     var selectedEvent = Event()
@@ -36,11 +36,7 @@ class MembersForEventViewController: UITableViewController {
             backFromQuickEntry = false
         }
     }
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
+   
     
     //MARK: - IBActions
     
@@ -87,27 +83,56 @@ class MembersForEventViewController: UITableViewController {
         
         var found : Bool = false
         
-        let membersNotInEvent : Results<Member> = realm.objects(Member.self).sorted(byKeyPath: "memberName")
-        let memNotInEventArray = List<Member>()
         
-        for m in membersNotInEvent {
-            memNotInEventArray.append(m)
-        }
+        var membersNotInEvent : Results<Member> = realm.objects(Member.self).sorted(byKeyPath: "memberName") //start wiht them all then filter if applicable
         
-        let resultsInEvent = selectedEvent.eventResults
+        var memIdInEvent = [Int]()
+        
+         let resultsInEvent = selectedEvent.eventResults
         
         for rs in resultsInEvent {
             if let memberInEvent = rs.myMember.first {
-                let mxm = memNotInEventArray.index(where: {$0.memberID ==  memberInEvent.memberID})
-                memNotInEventArray.remove(at: mxm!)
+                memIdInEvent.append(memberInEvent.memberID)
             }
             
         }
         
+        if memIdInEvent.count != 0 {
+            membersNotInEvent = membersNotInEvent.filter("NOT (memberID IN %@)",memIdInEvent)
+        }
+        
+        
+        
+        
+        //"NOT (memberID IN %@",memsInevent)
+//        var memsToRemove = []
+//
+//        for mem in mem
+        //let filterarray = memNotInEventArray.filter(<#T##predicate: NSPredicate##NSPredicate#>)
+        
+        //let noinev = membersNotInEvent.filter("ANY Member.memberID IN %@",)
+        //[NSPredicate predicateWithFormat:@"ANY tags IN %@", theTags]
+        
+//        let memNotInEventArray = List<Member>()
+//
+//        for m in membersNotInEvent {
+//            memNotInEventArray.append(m)
+//        }
+//
+//        let resultsInEvent = selectedEvent.eventResults
+//
+//        for rs in resultsInEvent {
+//            if let memberInEvent = rs.myMember.first {
+//                let mxm = memNotInEventArray.index(where: {$0.memberID ==  memberInEvent.memberID})
+//                memNotInEventArray.remove(at: mxm!)
+//            }
+//
+//        }
+        
         //
         
         
-        if (memNotInEventArray.count == 0) {
+        if (membersNotInEvent.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
             
             noDataLabel.text             = "No Members to List"
@@ -122,7 +147,7 @@ class MembersForEventViewController: UITableViewController {
             //tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         }else{
             tableView.backgroundView=nil
-            membersList = memNotInEventArray
+            membersList = membersNotInEvent
             found = true
         }
         return found
@@ -166,8 +191,8 @@ class MembersForEventViewController: UITableViewController {
         var dtText = String(format:"Age: %d",lh.age())
         
         
-        if let grp = lh.myGroup.first {
-            dtText = dtText + String(format:"   Group: %@",grp.groupName)
+        if let grp = lh.myClub.first {
+            dtText = dtText + String(format:"   Team: %@",grp.clubName)
         }
         
         dtText = dtText + String(format:"   One K: %@",myfunc.convertSecondsToTime(timeinseconds: lh.onekSeconds))

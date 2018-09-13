@@ -116,7 +116,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="691" y="-162"/>
+            <point key="canvasLocation" x="408" y="-128"/>
         </scene>
         <!--Members-->
         <scene sceneID="08u-sl-8zb">
@@ -127,9 +127,18 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="0.56177083333333344" alpha="0.71264982876712324" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <color key="tintColor" red="0.53725490196078429" green="0.84705882352941175" blue="0.9882352941176471" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <searchBar key="tableHeaderView" contentMode="redraw" id="l1E-iG-IUn">
+                            <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            <color key="barTintColor" white="0.70999999999999996" alpha="0.56220569349315064" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <outlet property="delegate" destination="xGU-YQ-fe8" id="s85-Fk-LHf"/>
+                            </connections>
+                        </searchBar>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="MemberCell" textLabel="dcs-39-wQM" detailTextLabel="M2j-tA-Jdh" rowHeight="95" style="IBUITableViewCellStyleSubtitle" id="KGm-bt-jgE">
-                                <rect key="frame" x="0.0" y="55.5" width="768" height="95"/>
+                                <rect key="frame" x="0.0" y="99.5" width="768" height="95"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" clipsSubviews="YES" clearsContextBeforeDrawing="NO" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="KGm-bt-jgE" id="J3u-Pc-8Sd">
                                     <rect key="frame" x="0.0" y="0.0" width="768" height="94.5"/>
@@ -464,7 +473,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wIn-YQ-cXT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2071" y="107"/>
+            <point key="canvasLocation" x="1748" y="128"/>
         </scene>
         <!--Results-->
         <scene sceneID="YRr-Hm-rsx">
@@ -578,6 +587,9 @@
                     <navigationItem key="navigationItem" title="Results" id="euO-a1-lr4">
                         <barButtonItem key="leftBarButtonItem" title="&lt; Home" id="ovM-Ru-7li">
                             <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <action selector="goHome:" destination="P1y-Ig-7Vg" id="OG7-7C-XiZ"/>
+                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
@@ -953,7 +965,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d9I-c5-uzL" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-232" y="-12"/>
+            <point key="canvasLocation" x="-417" y="-38"/>
         </scene>
         <!--Members For Event-->
         <scene sceneID="OWT-a4-B23">
@@ -1029,7 +1041,7 @@
         <image name="timeglyphwithtext" width="30" height="33"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="ZPU-VH-1mb"/>
+        <segue reference="K3t-Vx-ffJ"/>
         <segue reference="JwM-Nv-E9M"/>
         <segue reference="2O2-b1-Zhe"/>
     </inferredMetricsTieBreakers>

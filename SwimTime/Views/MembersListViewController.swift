@@ -60,22 +60,30 @@ class MembersListViewController: UITableViewController {
     
     
     // MARK: - my Data stuff
-    func loadMembers() -> Bool{
+    func loadMembers(with filterName:String="") -> Bool{
         var found : Bool = false
-        membersList = realm.objects(Member.self).sorted(byKeyPath: "memberName")
+        
 
-        if (membersList?.count == 0) {
-            let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
-            
-            noDataLabel.text             = "No Members to List"
-            noDataLabel.textColor        = UIColor.black
-            noDataLabel.backgroundColor = UIColor.gray
-            //noDataLabel.layer.cornerRadius = 30;
-            noDataLabel.textAlignment    = .center
-            noDataLabel.font = UIFont(name:"Verdana",size:40)
-            //UIFont(fontWithName:"Verdana" size:40)
-            tableView.backgroundView = noDataLabel;
-            
+        if filterName != "" {
+            membersList = realm.objects(Member.self).sorted(byKeyPath: "memberName").filter("memberName BEGINSWITH[cd] %@",filterName)
+        }else{
+            membersList = realm.objects(Member.self).sorted(byKeyPath: "memberName")
+        }
+        if (membersList?.count == 0)  {
+            if  filterName == "" {
+                let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
+                
+                noDataLabel.text             = "No Members to List"
+                noDataLabel.textColor        = UIColor.black
+                noDataLabel.backgroundColor = UIColor.gray
+                //noDataLabel.layer.cornerRadius = 30;
+                noDataLabel.textAlignment    = .center
+                noDataLabel.font = UIFont(name:"Verdana",size:40)
+                //UIFont(fontWithName:"Verdana" size:40)
+                tableView.backgroundView = noDataLabel;
+            }else{
+                showError(errmsg: "No members matching search criteria")
+            }
             //tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         }else{
             tableView.backgroundView=nil;
@@ -260,4 +268,34 @@ class MembersListViewController: UITableViewController {
         
     }
     
+    
+}
+
+//MARK: - Search bar Methods
+extension MembersListViewController : UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        if searchBar.text?.count != 0 {
+            if loadMembers(with: searchBar.text!) {
+                tableView.reloadData()
+            }
+        }
+        
+        
+        
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            
+            if loadMembers() {
+                
+            }
+            tableView.reloadData()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+            
+        }
+    }
 }

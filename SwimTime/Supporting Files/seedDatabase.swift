@@ -231,7 +231,6 @@ class seedDatabase {
         
         if currentmembers.count == 0 {
         
-            addmember(memid: 186,memName: "Joe Blow",memDOB: "2008-09-14",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male")
             addmember(memid: 187,memName: "Illya Vashinsky",memDOB: "2001-11-08",memGroupID: 0,email: "",oneKSeconds: 780,gender: "Male")
             addmember(memid: 188,memName: "Daisy Message",memDOB: "2001-06-26",memGroupID: 0,email: "",oneKSeconds: 795,gender: "Female")
             addmember(memid: 189,memName: "Chad Schneider",memDOB: "1973-10-31",memGroupID: 0,email: "",oneKSeconds: 870,gender: "Male")

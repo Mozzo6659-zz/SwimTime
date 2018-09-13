@@ -67,10 +67,9 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
     }
     
+    
     @IBAction func goHome(_ sender: UIBarButtonItem) {
-        
         self.navigationController?.popToRootViewController(animated: true)
-        
     }
     
     @IBAction func groupBy(_ sender: UIBarButtonItem) {
@@ -125,6 +124,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func buildLists() {
+        
         resultList = Array(currentEvent.eventResults)
         
         for grp in sectionGroups {

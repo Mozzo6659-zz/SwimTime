@@ -356,7 +356,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         
         lblGroup.text = selectedMember.myClub.first?.clubName
     
-        if selectedMember.myGroup.count != 0 {
+        if selectedMember.myClub.count != 0 {
             selectedClub = selectedMember.myClub.first!
         }
         //NSString *photoname = [mysettings makePhotoName:selectedMember.memberid];
