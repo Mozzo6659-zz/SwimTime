@@ -23,4 +23,11 @@ class PresetEvent : Object {
     
     let eventAgeGroups = List<PresetEventAgeGroups>()
     
+    func getPresetName() -> String {
+        var retVal : String = ("\(distance) mtrs")
+        if isRelay {
+            retVal = retVal + " Relay"
+        }
+        return retVal
+    }
 }

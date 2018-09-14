@@ -16,10 +16,35 @@ class MembersForEventViewController: UITableViewController {
     var myfunc = appFunctions()
     var mydefs = appUserDefaults()
     var selectedEvent = Event()
+    var filterShowing : Bool = true
+    var usePreset : Bool = false
+    var origtableframe  : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
+    
     let quickEntrySeg = "quickEntry"
+    var origFilterViewHeight : CGFloat = 0
     var backFromQuickEntry = false
+    
+    var presetEventExtension : PresetEventExtension?
+    
+    @IBOutlet weak var filterView: UIView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        //adjuts the height
+        origtableframe = tableView.frame
+        origFilterViewHeight = filterView.frame.size.height
+        //print("orig height \(origFilterViewHeight)")
+        
+        self.navigationController?.setToolbarHidden(false, animated: false)
+        
+        //filterView.frame.size.height = 1.0
+        //filterView.isHidden = true
+        
+        //hideShowFilter(self)
+        
+        if let _  = presetEventExtension {
+            usePreset = true
+        }
         
         navigationItem.setHidesBackButton(true, animated: false)
         if loadMembers() {
@@ -38,9 +63,32 @@ class MembersForEventViewController: UITableViewController {
     }
    
     
+    
     //MARK: - IBActions
     
     
+    @IBAction func hideShowFilter(_ sender: Any) {
+        filterShowing = !filterShowing
+        if filterShowing {
+            print("Im gonna show it")
+        }else{
+            print("Im swithcin it off")
+        }
+        //let tbheight = tableView.frame.size.height
+        //print("tb height: \(tbheight)")
+        let newtbFrame = CGRect(x: origtableframe.origin.x, y: origtableframe.origin.y - origFilterViewHeight, width: origtableframe.width, height: origtableframe.size.height + origFilterViewHeight)
+        UIView.animate(withDuration: 1
+            , animations: {
+                self.filterView.frame.size.height = self.filterShowing ? self.origFilterViewHeight : 1.0
+                if self.filterShowing {
+                    self.tableView.frame = self.origtableframe
+                }else{
+                    self.tableView.frame = newtbFrame
+                }
+                self.filterView.isHidden = !self.filterShowing
+        })
+
+    }
     @IBAction func quickEntry(_ sender: UIBarButtonItem) {
         backFromQuickEntry = true
         performSegue(withIdentifier: quickEntrySeg, sender: self)
@@ -60,7 +108,7 @@ class MembersForEventViewController: UITableViewController {
                                 er.raceNo = mydefs.getNextRaceNo()
                                 
                             }
-                            er.ageAtEvent = mem.age()
+                            er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
                             er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                             realm.add(er)
                             mem.eventResults.append(er)
@@ -104,32 +152,6 @@ class MembersForEventViewController: UITableViewController {
         
         
         
-        //"NOT (memberID IN %@",memsInevent)
-//        var memsToRemove = []
-//
-//        for mem in mem
-        //let filterarray = memNotInEventArray.filter(<#T##predicate: NSPredicate##NSPredicate#>)
-        
-        //let noinev = membersNotInEvent.filter("ANY Member.memberID IN %@",)
-        //[NSPredicate predicateWithFormat:@"ANY tags IN %@", theTags]
-        
-//        let memNotInEventArray = List<Member>()
-//
-//        for m in membersNotInEvent {
-//            memNotInEventArray.append(m)
-//        }
-//
-//        let resultsInEvent = selectedEvent.eventResults
-//
-//        for rs in resultsInEvent {
-//            if let memberInEvent = rs.myMember.first {
-//                let mxm = memNotInEventArray.index(where: {$0.memberID ==  memberInEvent.memberID})
-//                memNotInEventArray.remove(at: mxm!)
-//            }
-//
-//        }
-        
-        //
         
         
         if (membersNotInEvent.count == 0) {
@@ -188,7 +210,7 @@ class MembersForEventViewController: UITableViewController {
         cell.detailTextLabel?.textColor = UIColor.red
         
         
-        var dtText = String(format:"Age: %d",lh.age())
+        var dtText = String(format:"Age: %d",myfunc.getAgeFromDate(fromDate:lh.dateOfBirth, toDate: selectedEvent.eventDate))
         
         
         if let grp = lh.myClub.first {

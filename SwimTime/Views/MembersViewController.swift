@@ -49,11 +49,9 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //flat colours look shit
-        //self.view.backgroundColor = GradientColor(.leftToRight, frame: self.view.frame, colors: [FlatSkyBlue(),FlatSkyBlueDark()])
-        getDefSwimClub()
+        defSwimClub = myDefs.getDefSwimClub()
         navigationItem.setHidesBackButton(true, animated: false)
-        //pickerView.isHidden = true
+
         configureView()
         
         if (selectedMember.memberID == 0 ) {
@@ -84,17 +82,13 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         loadPickerData()
         pickerView.delegate = self
         pickerView.dataSource = self
-    
         pickerView.isHidden = true        
         
         self.view.bringSubview(toFront: pickerView)
         
     }
 
-    func getDefSwimClub() {
-        let scArray : Results<SwimClub> = realm.objects(SwimClub.self).filter("isDefault = true")
-        defSwimClub = scArray.first!
-    }
+    
     
     //MARK: - Picker data stuff
     

@@ -49,6 +49,9 @@ class appFunctions {
     
     }
     
+    func getGlobalDateFormat() -> String {
+        return "dd/MM/yyyy"
+    }
     //MARK: - Time Functions
     func adjustOnekSecondsForDistance(distance:Int,timeinSeconds:Int) -> Int {
         
@@ -108,7 +111,7 @@ class appFunctions {
         
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
-        if let date = dateFormatter.date(from:dttocheck) {
+        if let _ = dateFormatter.date(from:dttocheck) {
             
             isOk = true
         }
@@ -117,6 +120,16 @@ class appFunctions {
         return isOk;
     }
 
+    func getAgeFromDate(fromDate:Date,toDate:Date) -> Int {
+        let calendar = NSCalendar.current
+        
+        let components = Set<Calendar.Component>([.year])
+         let datecomp = calendar.dateComponents(components, from: fromDate, to: toDate)
+        
+        return datecomp.year ?? 0
+        
+        
+    }
     func getDateDiffSeconds(fromDate:Date) -> Int {
         let calendar = NSCalendar.current
         

@@ -208,10 +208,15 @@ class EventsListViewController: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == eventseg {
             backFromEvent = true
+            let vc = segue.destination as! EventViewController
             if selectedEvent.eventID != 0 {
-                let vc = segue.destination as! EventViewController
+                
                 vc.currentEvent = selectedEvent
+                
             }
+            vc.usePresetEvents = showPreset
+            
+            
         }else if segue.identifier == eventResultseg {
             let vc = segue.destination as! ResultsViewController
             vc.currentEvent = selectedEvent

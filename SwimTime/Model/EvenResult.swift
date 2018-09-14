@@ -22,7 +22,8 @@ class EventResult : Object {
      @objc dynamic var ageAtEvent : Int = 0
     @objc dynamic var diffSeconds : Int = 0
     
-    var selectedAgeCatgeory = PresetEventAgeGroups() //for reporting Im gonna need this. Chad can put you in any category regardless of how old you are
+    //for reporting Im gonna need this. Chad can put you in any category regardless of how old you are. Im using a lits raher than a blank object. A lst can be empty whihc is fine for this purpose
+    var selectedAgeCatgeory = List<PresetEventAgeGroups>()
     
     let myMember = LinkingObjects(fromType: Member.self, property: "eventResults")
     

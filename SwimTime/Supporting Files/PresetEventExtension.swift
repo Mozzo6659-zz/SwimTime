@@ -5,9 +5,10 @@
 //  Created by Mick Mossman on 13/9/18.
 //  Copyright © 2018 Mick Mossman. All rights reserved.
 //
+//This cass helps the event controller control members entry and give the points
+//back to the event controller
 
 import Foundation
-
 
 class PresetEventExtension {
     var presetEvent = PresetEvent()
@@ -59,7 +60,7 @@ class PresetEventExtension {
             if errmsg == "" {
                 if presetEvent.maxPerGenderAndAgeGroup != 0 {
                     if getHowmanyFromGenderAgeGroup(categoryid: category!.presetAgeGroupID, thisgender: member.gender,clubid:swmclb.clubID) == presetEvent.maxPerGenderAndAgeGroup {
-                        errmsg = "Race has reached capacity for your team, geder and category of \(presetEvent.maxPerGenderAndAgeGroup)"
+                        errmsg = "Race has reached capacity for your team, gender and category of \(presetEvent.maxPerGenderAndAgeGroup)"
                     }
                 }
             }

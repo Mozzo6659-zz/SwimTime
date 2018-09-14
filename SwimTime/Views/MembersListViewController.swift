@@ -26,6 +26,8 @@ class MembersListViewController: UITableViewController {
         super.viewDidLoad()
         
         navigationItem.setHidesBackButton(true, animated: false)
+        navigationController?.setToolbarHidden(false, animated: true)
+
         if loadMembers() {
             //tableView.rowHeight = 80.0
             //tableView.separatorStyle = .none

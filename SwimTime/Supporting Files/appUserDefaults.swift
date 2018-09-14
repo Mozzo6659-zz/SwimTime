@@ -7,9 +7,10 @@
 //
 
 import Foundation
-
+import RealmSwift
 class appUserDefaults {
     //var nextMemberId = 0
+    let realm = try! Realm()
     
     var defaults = UserDefaults.standard
     let nextMemberKey = "NextMemberID"
@@ -22,6 +23,8 @@ class appUserDefaults {
     let runningEventStopDate = "runningEventStopDate"
     let runningEventSecondsStopped = "runningEventSeconds"
     let nextPresetAgeGroupID = "NextPesetAgeGroupId"
+    
+    
     func setRunningEventID(eventID : Int) {
         
         defaults.set(eventID, forKey: runningEventIDKey)
@@ -109,5 +112,8 @@ class appUserDefaults {
         return getNextId(thisKey: nextPresetAgeGroupID)
         
     }
-    
+    func getDefSwimClub() -> SwimClub {
+        let scArray : Results<SwimClub> = realm.objects(SwimClub.self).filter("isDefault = true")
+        return scArray.first!
+    }
 }
