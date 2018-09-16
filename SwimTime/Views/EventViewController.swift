@@ -42,7 +42,7 @@ class EventViewController: UIViewController,
     var origTableFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     var origDetailsFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     
-    var origInternalDetailsFrame = CGRect(x: 19.0, y: 60.0, width: 730.0, height: 143.0)
+    var origInternalDetailsFrame = CGRect(x: 19.0, y: 60.0, width: 718.0, height: 170.0)
     
     var pickerViewFrame = CGRect(x: 120.0, y: 100.0, width: 600.00, height: 143.0)
     
@@ -152,10 +152,14 @@ class EventViewController: UIViewController,
             //set team 1 to be the default swim club
             lblIPTeam1.text = defSwimClub.clubName
             if presetEventExtension.addClub(swimClub: defSwimClub) {
-                
+                do {
+                    try realm.write {
+                        self.currentEvent.selectedTeams.append(defSwimClub)
+                    }
+                }catch{
+                    self.showError(errmsg: "Could not initailise")
+                }
             }
-        }else{
-            
         }
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -182,8 +186,10 @@ class EventViewController: UIViewController,
         let datefmt =  DateFormatter()
         datefmt.dateFormat = myFunc.getGlobalDateFormat()
         
-    lblEventDate.text = datefmt.string(from: datepicker.date)
-        view.endEditing(true)
+        lblEventDate.text = datefmt.string(from: datepicker.date)
+        
+        //COME BACK - need to updare ages ??
+        removeKeyBoard()
         
     }
     //MARK: - Actions
@@ -192,13 +198,14 @@ class EventViewController: UIViewController,
     
     
     @IBAction func btnPickPresetEvent(_ sender: UIButton) {
+        removeKeyBoard()
         pickerPresetEvent.isHidden = false
          pickerPresetEvent.bringSubview(toFront: self.view)
     }
     
     
     @IBAction func btnPickTeams(_ sender: UIButton) {
-    
+            removeKeyBoard()
             pickerTeams.isHidden = false
             pickingTeam1 = sender.tag == 1
        pickerTeams.bringSubview(toFront: self.view)
@@ -206,7 +213,7 @@ class EventViewController: UIViewController,
     
     
     @IBAction func useRaceNosChanged(_ sender: UISwitch) {
-        self.resignFirstResponder()
+        removeKeyBoard()
         useRaceNos = sender.isOn
     }
     
@@ -378,7 +385,7 @@ class EventViewController: UIViewController,
     }
     
     func removeKeyBoard() {
-         self.view.endEditing(true)
+         view.endEditing(true)
     }
     
     
@@ -582,6 +589,72 @@ class EventViewController: UIViewController,
     }
     
     //MARK: - Data stuff
+    func canChangeDetails() -> Bool {
+        return currentEvent.eventID == 0 && currentEvent.eventResults.count == 0
+            
+        
+    }
+    @IBAction func addNewTeam(_ sender: UIButton) {
+        let useTeam1 = (sender.tag==1)
+        
+        var userTextField = UITextField() //textfile used in the closure
+        userTextField.autocapitalizationType = .words
+        
+        let alert = UIAlertController(title: "Add New Team", message: "", preferredStyle: .alert)
+        
+        let alertAction = UIAlertAction(title: "Add Team", style: .default) {
+            (action) in
+            
+            //var item = Item(thetitle: userTextField.text!)
+            let newName = userTextField.text!
+            
+            if !newName.isEmpty {
+                do {
+                    try self.realm.write {
+                        let newClub = SwimClub()
+                        newClub.clubID = self.myDefs.getNextClubId()
+                        newClub.clubName = newName
+                        newClub.isDefault = false
+                        self.realm.add(newClub)
+                        self.loadPickerViews()
+                        if useTeam1 {
+                            self.lblIPTeam1.text = newName
+                            self.currentEvent.selectedTeams[0] = newClub
+                            self.presetEventExtension.raceClubs[0] = newClub
+                        }else{
+                            self.lblIPTeam2.text = newName
+                            if self.currentEvent.selectedTeams.count == 1 {
+                                self.currentEvent.selectedTeams.append(newClub)
+                                self.presetEventExtension.raceClubs.append(newClub)
+                            }else{
+                                self.currentEvent.selectedTeams[1] = newClub
+                                self.presetEventExtension.raceClubs[1] = newClub
+                            }
+                        }
+                    }
+                } catch {
+                    print("Error saving items: \(error)")
+                }
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) {
+            (action) in
+            self.removeKeyBoard()
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create New Team"
+            userTextField = alertTextField
+        }
+        
+        alert.addAction(cancelAction)
+        alert.addAction(alertAction)
+        
+        present(alert, animated: true, completion: nil)
+        //self.saveData(item: item)
+        
+    }
     
     func saveEvent() -> Bool {
         var ok = false
@@ -640,7 +713,7 @@ class EventViewController: UIViewController,
             if let _ = currentEvent.presetEvent {
                 
             }else{
-                sErrmsg = "Please select a Preset Meet"
+                sErrmsg = "Please select a Preset Distance"
             }
         }
         
@@ -785,18 +858,17 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-//        lblGroup.text = pickerItems![row].clubName
-//        selectedClub = pickerItems![row]
-//        defSwimClub = selectedClub
-//
+
         var bOK = true
         if pickerView.tag == 1 {
             let thisteam = pickerTeamItems![row]
             if presetEventExtension.addClub(swimClub: thisteam) {
                 if pickingTeam1 {
                     lblIPTeam1.text = thisteam.clubName
+                    currentEvent.selectedTeams[0] = thisteam
                 }else{
                     lblIPTeam2.text = thisteam.clubName
+                    currentEvent.selectedTeams[1] = thisteam
                 }
             }else{
                 showError(errmsg: "Only 2 Teams allowed")
@@ -807,9 +879,10 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
             if let pse = currentEvent.presetEvent {
                 if currentEvent.eventResults.count != 0 && pse.presetEventID != thispse.presetEventID {
                    bOK = false
+                    showError(errmsg: "Once members are selected you cant change the event rules")
                 }
                 
-                showError(errmsg: "Once members are selected you cant change the event rules")
+                
             }
             
             if bOK {

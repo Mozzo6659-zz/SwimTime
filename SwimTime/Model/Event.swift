@@ -25,7 +25,7 @@ class Event : Object {
     @objc dynamic var presetEvent : PresetEvent?
     
     let eventResults = List<EventResult>()
-    
+    let selectedTeams = List<SwimClub>() //preset event clubs selected
      //currnetly not using this. the idea was to set up filters tfor selecting members that would be persisted
     //leave it for now. Preset event has its won filters
     @objc dynamic var ageFilterMin : Int = 0

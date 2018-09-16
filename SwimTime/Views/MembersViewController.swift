@@ -141,6 +141,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     
     func addNewTeam() {
         var userTextField = UITextField() //module lel textfile used in the closure
+        userTextField.autocapitalizationType = .words
         
         let alert = UIAlertController(title: "Add New Team", message: "", preferredStyle: .alert)
         
@@ -175,7 +176,12 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
             userTextField = alertTextField
         }
         
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) {
+            (action) in
+            self.removeKeyBoard()
+        }
         alert.addAction(alertAction)
+        alert.addAction(cancelAction)
         present(alert, animated: true, completion: nil)
                 //self.saveData(item: item)
         
