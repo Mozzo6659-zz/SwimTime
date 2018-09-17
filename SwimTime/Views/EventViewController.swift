@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 class EventViewController: UIViewController,
- UITableViewDataSource,UITableViewDelegate {
+ UITableViewDataSource,UITableViewDelegate,StoreFiltersDelegate {
 
     var timer : Timer!
     var timerOn = false
@@ -20,6 +20,9 @@ class EventViewController: UIViewController,
     var usePresetEvents = false
     var noSeconds : Int = 1
     
+    var lastSelectedAgeGroup : PresetEventAgeGroups?
+    var lastSelectedTeam : SwimClub?
+    
     var pickingTeam1 : Bool = false //when the team picker view cmes up i need to know which label to retrun the result
     
     let realm = try! Realm()
@@ -29,7 +32,7 @@ class EventViewController: UIViewController,
     var eventResults : Results<EventResult>?
     var pickerTeamItems : Results<SwimClub>?
     var pickerPresetEventItems : Results<PresetEvent>?
-    var presetEventExtension = PresetEventExtension()
+    //var presetEventExtension = PresetEventExtension()
     
     private var datepicker : UIDatePicker?
     
@@ -151,7 +154,7 @@ class EventViewController: UIViewController,
         if currentEvent.eventID == 0 {
             //set team 1 to be the default swim club
             lblIPTeam1.text = defSwimClub.clubName
-            if presetEventExtension.addClub(swimClub: defSwimClub) {
+            
                 do {
                     try realm.write {
                         self.currentEvent.selectedTeams.append(defSwimClub)
@@ -159,7 +162,7 @@ class EventViewController: UIViewController,
                 }catch{
                     self.showError(errmsg: "Could not initailise")
                 }
-            }
+            
         }
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -577,8 +580,14 @@ class EventViewController: UIViewController,
             returnFromMembers = true
             let vc = segue.destination as! MembersForEventViewController
             vc.selectedEvent = currentEvent
-            if usePresetEvents {
-                vc.presetEventExtension = presetEventExtension
+            vc.usePreset = usePresetEvents
+            if let sc = lastSelectedTeam {
+                vc.lastTeamFilter = sc
+            }else{
+                vc.lastTeamFilter = currentEvent.selectedTeams[0]
+            }
+            if let agp = lastSelectedAgeGroup {
+                vc.lastAgeGroupFilter = agp
             }
         }else {
             if segue.identifier == eventToResultsseg {
@@ -620,15 +629,15 @@ class EventViewController: UIViewController,
                         if useTeam1 {
                             self.lblIPTeam1.text = newName
                             self.currentEvent.selectedTeams[0] = newClub
-                            self.presetEventExtension.raceClubs[0] = newClub
+                            
                         }else{
                             self.lblIPTeam2.text = newName
                             if self.currentEvent.selectedTeams.count == 1 {
                                 self.currentEvent.selectedTeams.append(newClub)
-                                self.presetEventExtension.raceClubs.append(newClub)
+                                
                             }else{
                                 self.currentEvent.selectedTeams[1] = newClub
-                                self.presetEventExtension.raceClubs[1] = newClub
+                               
                             }
                         }
                     }
@@ -664,11 +673,15 @@ class EventViewController: UIViewController,
                 do {
                     try realm.write {
                         currentEvent.eventLocation = txtLocation.text!
-                        currentEvent.eventDistance = Int(txtDistance.text!)!
-                        currentEvent.useRaceNos = useRaceNos
+                        if usePresetEvents {
+                            currentEvent.eventDistance = currentEvent.presetEvent!.distance
+                        }else{
+                            currentEvent.eventDistance = Int(txtDistance.text!)!
+                            currentEvent.useRaceNos = useRaceNos
+                        }
+                        
                         currentEvent.eventDate = df.date(from: lblEventDate.text!)!
                         if currentEvent.eventID == 0 {
-                            currentEvent.eventDate = Date()
                             currentEvent.eventID = myDefs.getNextEventId()
                             realm.add(currentEvent)
                         }
@@ -692,13 +705,7 @@ class EventViewController: UIViewController,
         }else{
             sErrmsg = "Please enter a location"
         }
-        if let sDistance = txtDistance.text {
-            if sDistance.isEmpty {
-                sErrmsg = "Please enter a distance"
-            }
-        }else{
-            sErrmsg = "Please enter a distance"
-        }
+        
         
         if let sEvent = lblEventDate.text {
             if sEvent.isEmpty {
@@ -714,6 +721,14 @@ class EventViewController: UIViewController,
                 
             }else{
                 sErrmsg = "Please select a Preset Distance"
+            }
+        }else {
+            if let sDistance = txtDistance.text {
+                if sDistance.isEmpty {
+                    sErrmsg = "Please enter a distance"
+                }
+            }else{
+                sErrmsg = "Please enter a distance"
             }
         }
         
@@ -784,7 +799,14 @@ func doEventStart() {
     
     
     }
-    
+    //MARK: - Delegate Store Filters
+    func updateDefaultFilters(team : SwimClub,ageGroup: PresetEventAgeGroups?) {
+        lastSelectedTeam = team
+        if let ag = ageGroup {
+            lastSelectedAgeGroup = ag
+        }
+        
+    }
     //MARK: - Errors
     func showError(errmsg:String) {
         let alert = UIAlertController(title: "Error", message: errmsg, preferredStyle: .alert)
@@ -862,17 +884,21 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
         var bOK = true
         if pickerView.tag == 1 {
             let thisteam = pickerTeamItems![row]
-            if presetEventExtension.addClub(swimClub: thisteam) {
+            
                 if pickingTeam1 {
                     lblIPTeam1.text = thisteam.clubName
-                    currentEvent.selectedTeams[0] = thisteam
+                    currentEvent.selectedTeams[0] = thisteam //0 will always exist
                 }else{
                     lblIPTeam2.text = thisteam.clubName
-                    currentEvent.selectedTeams[1] = thisteam
+                    if currentEvent.selectedTeams.count == 1 {
+                        currentEvent.selectedTeams.append(thisteam)
+                    }else{
+                        currentEvent.selectedTeams[1] = thisteam
+                    }
+                    
+                    
                 }
-            }else{
-                showError(errmsg: "Only 2 Teams allowed")
-            }
+            
         }else{
             
             let thispse = pickerPresetEventItems![row]
@@ -888,7 +914,6 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
             if bOK {
                 lblIPMeet.text = pickerPresetEventItems![row].getPresetName()
                 
-                presetEventExtension.presetEvent = thispse
                 currentEvent.presetEvent = thispse
             }
            
