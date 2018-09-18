@@ -52,6 +52,16 @@ class appFunctions {
     func getGlobalDateFormat() -> String {
         return "dd/MM/yyyy"
     }
+    
+    func formatDate(thedate:Date, theformat:String = "") -> String {
+        var myFormat = getGlobalDateFormat()
+        if !theformat.isEmpty {
+            myFormat = theformat
+        }
+        let dtf = DateFormatter()
+        dtf.dateFormat = myFormat
+        return dtf.string(from: thedate)
+    }
     //MARK: - Time Functions
     func adjustOnekSecondsForDistance(distance:Int,timeinSeconds:Int) -> Int {
         

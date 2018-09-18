@@ -14,7 +14,7 @@ protocol StoreFiltersDelegate {
     func updateDefaultFilters(team : SwimClub,ageGroup: PresetEventAgeGroups?)
 }
 
-class MembersForEventViewController: UITableViewController {
+class MembersForEventViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
 
     let realm = try! Realm()
     var membersList : Results<Member>?
@@ -25,18 +25,18 @@ class MembersForEventViewController: UITableViewController {
     var pickerAgeGroups : UIPickerView!
     
     var pickerTeamItems = [SwimClub]()
-    
     var pickerAgeGroupItems = [PresetEventAgeGroups]()
     
-    var lastAgeGroupFilter : PresetEventAgeGroups?
+    var lastAgeGroupFilter : PresetEventAgeGroups?//this has a dua purpose for preset events wiht preset age groups. This will be thw age group the ember is in for validation purposes
     var lastTeamFilter : SwimClub?
     
     var selectedEvent = Event()
-    var filterShowing : Bool = false
+    
     var usePreset : Bool = false
     var origtableframe  : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     var origFilterFrame : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
-    var pickerViewFrame = CGRect(x: 120.0, y: 100.0, width: 600.00, height: 143.0)
+    var pickerViewFrame = CGRect(x: 1.0, y: 1.0 , width: 1.0, height: 1.0)
+    
     let quickEntrySeg = "quickEntry"
   
     var origFilterViewHeight : CGFloat = 1.0
@@ -48,27 +48,36 @@ class MembersForEventViewController: UITableViewController {
     //one array for all members not in the event and their age at event time
     var memAges = [(memberid: 0, ageAtEvent: 0)]
     
-    
+    var filterShowing : Bool = false
     //one arrya for all existing event result members used to validate the numbers
     var memForEvent = [PresetEventMember]()
     
     
-    @IBOutlet weak var lblAgeGroup: UILabel!
     @IBOutlet weak var lblTeam: UILabel!
+    
+    @IBOutlet weak var lblAgeGroup: UILabel!
     @IBOutlet weak var filterView: UIView!
     
-    @IBOutlet weak var btnAgeGroup: UIButton!
     @IBOutlet weak var btnTeam: UIButton!
+    
+    @IBOutlet weak var btnAgeGroup: UIButton!
+    
+    
+    @IBOutlet weak var myTableView: UITableView!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        pickerViewFrame = CGRect(x: 120.0, y: view.frame.size.height / 2 , width: 600.00, height: 143.0)
         navigationItem.setHidesBackButton(true, animated: false)
         //adjuts the height
-        origtableframe = tableView.frame
+        origtableframe = myTableView.frame
         
         origFilterViewHeight = filterView.frame.size.height
-        //origFilterFrame = CGRect(x: filterView.frame.origin.x, y: (view.frame.size.height - filterView.frame.size.height)/2, width: filterView.frame.size.width, height: filterView.frame.size.height)
+        
+        
+        origFilterFrame = CGRect(x: filterView.frame.origin.x, y: (view.frame.size.height - filterView.frame.size.height)/2, width: filterView.frame.size.width, height: filterView.frame.size.height)
         
         filterView.isHidden = true
         
@@ -84,7 +93,7 @@ class MembersForEventViewController: UITableViewController {
         loadPresetEventMembers()
         
         if loadMembers() {
-            tableView.reloadData()
+            myTableView.reloadData()
         }
     }
     
@@ -93,7 +102,7 @@ class MembersForEventViewController: UITableViewController {
             if loadMembers() {
                 
             }
-            tableView.reloadData()
+            myTableView.reloadData()
             backFromQuickEntry = false
         }
     }
@@ -105,58 +114,61 @@ class MembersForEventViewController: UITableViewController {
     
     @IBAction func filterClicked(_ sender: UIButton) {
         if sender.tag == 1 {
-            pickerTeams.isHidden = false
+                        pickerTeams.isHidden = false
             
-        }else{
-            pickerAgeGroups.isHidden = false
-        }
+                    }else{
+                        pickerAgeGroups.isHidden = false
+                    }
     }
+    
+
     
     
     @IBAction func hideShowFilter(_ sender: Any) {
         filterShowing = !filterShowing
-//        if filterShowing {
-//            print("Im gonna show it")
-//        }else{
-//            print("Im swithcin it off")
-//        }
+
         
-        //tried floatomg waste of time on a table view
-//        let hidingFilterFrame = CGRect(x: 200.0, y: origFilterFrame.origin.y, width: origFilterFrame.size.width, height: origFilterFrame.size.height)
-//        UIView.animate(withDuration: 1, animations: {
-//            if self.filterShowing {
-//                self.filterView.frame = hidingFilterFrame
-//                self.filterView.frame = self.origFilterFrame
-//                self.view.bringSubview(toFront: self.filterView)
-//            }else{
-//                self.filterView.frame = self.origFilterFrame
-//                self.filterView.frame = hidingFilterFrame
-//
-//            }
-//        })
-       // filterView.isHidden = !filterShowing
-        
-        
-        let newtbFrame = CGRect(x: origtableframe.origin.x, y: origtableframe.origin.y - origFilterViewHeight, width: origtableframe.width, height: origtableframe.size.height + origFilterViewHeight)
-        UIView.animate(withDuration: 1
-            , animations: {
-                if self.filterShowing {
-                    self.tableView.setContentOffset(.zero, animated: true)
-                }
-                self.filterView.frame.size.height = self.filterShowing ? self.origFilterViewHeight : 1.0
-                if self.filterShowing {
-                    self.tableView.frame = self.origtableframe
-                }else{
-                    self.tableView.frame = newtbFrame
-                }
-                self.filterView.isHidden = !self.filterShowing
+        let hidingFilterFrame = CGRect(x: 200.0, y: origFilterFrame.origin.y, width: origFilterFrame.size.width, height: origFilterFrame.size.height)
+        UIView.animate(withDuration: 1, animations: {
+            if self.filterShowing {
+                self.filterView.frame = hidingFilterFrame
+                self.filterView.frame = self.origFilterFrame
+                self.view.bringSubview(toFront: self.filterView)
+                self.filterView.isHidden = false
+            }else{
+                self.filterView.frame = self.origFilterFrame
+                self.filterView.frame = hidingFilterFrame
+                self.filterView.isHidden = true
+            }
         })
+        //filterView.isHidden = filterShowing
+        
+        
+//        let newtbFrame = CGRect(x: origtableframe.origin.x, y: origtableframe.origin.y - origFilterViewHeight, width: origtableframe.width, height: origtableframe.size.height + origFilterViewHeight)
+//        UIView.animate(withDuration: 1
+//            , animations: {
+//                if self.filterShowing {
+//                    self.myTableView.setContentOffset(.zero, animated: true)
+//                }
+//                self.filterView.frame.size.height = self.filterShowing ? self.origFilterViewHeight : 1.0
+//                if self.filterShowing {
+//                    self.myTableView.frame = self.origtableframe
+//                }else{
+//                    self.myTableView.frame = newtbFrame
+//                }
+//                self.filterView.isHidden = !self.filterShowing
+//        })
 
     }
+    
     @IBAction func quickEntry(_ sender: UIBarButtonItem) {
-        backFromQuickEntry = true
-        performSegue(withIdentifier: quickEntrySeg, sender: self)
+                backFromQuickEntry = true
+                performSegue(withIdentifier: quickEntrySeg, sender: self)
     }
+    
+    
+    
+    
     
     @IBAction func doneClicked(_ sender: UIBarButtonItem) {
         //2 If we have a delegate set, call the method userEnteredANewCityName
@@ -183,6 +195,16 @@ class MembersForEventViewController: UITableViewController {
                             }
                             er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
                             er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
+                            
+                            
+                            let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
+                            
+                            if let psage = pse?.PresetAgeGroup {
+                                 er.selectedAgeCatgeory.removeAll()
+                                er.selectedAgeCatgeory.append(psage)
+                            }
+                           
+                            
                             realm.add(er)
                             mem.eventResults.append(er)
                             selectedEvent.eventResults.append(er)
@@ -205,23 +227,86 @@ class MembersForEventViewController: UITableViewController {
         if usePreset {
             
                 for er in selectedEvent.eventResults {
- 
-                    let pse = PresetEventMember()
                     let mem = er.myMember.first!
-                    pse.memberid = mem.memberID
-                    pse.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)
-                    pse.gender = mem.gender
-                    pse.clubID = (mem.myClub.first?.clubID)!
-                    pse.relayLetter = ""
-                    if selectedEvent.presetEvent?.eventAgeGroups.count != 0 {
-                        pse.PresetAgeGroup = er.selectedAgeCatgeory.first!
+                    if let agrp = er.selectedAgeCatgeory.first {
+                        addMemberToPreset(mem: mem,agegrp: agrp)
+                    }else{
+                       addMemberToPreset(mem: mem,agegrp: nil)
                     }
-                    memForEvent.append(pse)
+                    
+                    
                 }
             
         }
         
     }
+    
+    func addMemberToPreset(mem:Member,agegrp:PresetEventAgeGroups?) {
+        let pse = PresetEventMember()
+        
+        pse.memberid = mem.memberID
+        pse.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)
+        pse.gender = mem.gender
+        pse.clubID = (mem.myClub.first?.clubID)!
+        pse.relayLetter = ""
+        if let ag =  agegrp  {
+            pse.PresetAgeGroup = ag
+        }
+        memForEvent.append(pse)
+    }
+    func checkMemIsvalid(mem:Member) -> Bool {
+        var errMsg = ""
+        if usePreset {
+            if let pse = selectedEvent.presetEvent {
+                if pse.eventAgeGroups.count != 0 && memForEvent.count != 0 {
+                    if pse.maxPerEvent != 0 {
+                        if pse.maxPerEvent == memForEvent.count {
+                            errMsg = "Maximum number for the Race exceeded. Max entrants is \(pse.maxPerEvent)"
+                        }
+                    }
+                    if pse.maxPerClub != 0 {
+                        if let myclub = mem.myClub.first {
+                            
+                            let clubs  = memForEvent.filter({$0.clubID == myclub.clubID})
+                            if clubs.count == pse.maxPerClub {
+                                errMsg = "Maximum number exceeded. Max entrants for each club is \(pse.maxPerClub)"
+                            }
+                        }
+                        
+                    }
+                    
+                    //0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID}
+                    if pse.maxPerGenderAndAgeGroup != 0 {
+                        if let myclub = mem.myClub.first {
+                            //print("\(mem.gender) count=\(memForEvent.count)")
+                            let matchingmems  = memForEvent.filter({$0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID})
+                                if matchingmems.count == pse.maxPerGenderAndAgeGroup {
+                                    errMsg = "Maximum number per club, gender and age group exceeded. Max entrants for \(mem.gender) for \(lastAgeGroupFilter!.presetAgeGroupName) each club is \(pse.maxPerGenderAndAgeGroup)"
+                                }
+                            
+                            
+                           
+                        }
+                    }
+                }
+            }
+            
+        }
+        
+        if !errMsg.isEmpty {
+            showError(errmsg: errMsg)
+        }else{
+            if selectedEvent.presetEvent?.eventAgeGroups.count != 0 {
+                addMemberToPreset(mem: mem, agegrp: lastAgeGroupFilter)
+            }else{
+                addMemberToPreset(mem: mem, agegrp: nil)
+            }
+           
+            
+        }
+        return errMsg.isEmpty
+    }
+    
     
     func loadMembers() -> Bool{
         //Im trying to list Members that are NOT in this event
@@ -282,7 +367,7 @@ class MembersForEventViewController: UITableViewController {
         
         
         if (membersNotInEvent.count == 0) {
-            let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
+            let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: myTableView.bounds.size.width, height: myTableView.bounds.size.height))
             
             noDataLabel.text             = "No Members to List"
             noDataLabel.textColor        = UIColor.black
@@ -291,11 +376,11 @@ class MembersForEventViewController: UITableViewController {
             noDataLabel.textAlignment    = .center
             noDataLabel.font = UIFont(name:"Verdana",size:40)
             //UIFont(fontWithName:"Verdana" size:40)
-            tableView.backgroundView = noDataLabel;
+            myTableView.backgroundView = noDataLabel;
             
             //tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         }else{
-            tableView.backgroundView=nil
+            myTableView.backgroundView=nil
             //get all members not in event and create the age at event array to help the filter get people of the right ages
             //memAges.removeAll()
             
@@ -308,18 +393,18 @@ class MembersForEventViewController: UITableViewController {
     
     // MARK: - Table view data source
     
-    override func numberOfSections(in tableView: UITableView) -> Int {
+   func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return membersList?.count ?? 0
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return 1
     }
     
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "EventMemberCell", for: indexPath)
         
         configureCell(cell: cell, atIndexPath: indexPath)
@@ -391,27 +476,47 @@ class MembersForEventViewController: UITableViewController {
         
     }
     
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 3.0
     }
     
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView()
         headerView.backgroundColor = UIColor.clear
         return headerView
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mem = membersList![indexPath.row + indexPath.section]
-        do {
-            try realm.write {
-                mem.selectedForEvent = !mem.selectedForEvent
-                
+        
+        var bok = false
+        
+        if mem.selectedForEvent  {
+            bok = true
+            if let mxm = memForEvent.index(where: {$0.memberid == mem.memberID}) {
+                memForEvent.remove(at: mxm)
             }
-        }catch{
-            showError(errmsg: "Couldnt update item")
+            
+            
+        }else{
+            if checkMemIsvalid(mem: mem) {
+                bok = true
+            }
         }
-        tableView.reloadData()
+        
+        if bok {
+            do {
+                try realm.write {
+                    mem.selectedForEvent = !mem.selectedForEvent
+                    
+                }
+            }catch{
+                showError(errmsg: "Couldnt update item")
+            }
+            tableView.reloadData()
+        }
+        
+        
     }
     
   
@@ -459,8 +564,18 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
     
     func loadPickerViewAgeGroups() {
         if usePreset  {
-            if !(selectedEvent.presetEvent?.isRelay)! {
+            if selectedEvent.presetEvent?.eventAgeGroups.count != 0 {
                 pickerAgeGroupItems = Array(selectedEvent.presetEvent!.eventAgeGroups)
+                //set lastAgegroup filter
+                var selagegrp = PresetEventAgeGroups()
+                for ag in selectedEvent.presetEvent!.eventAgeGroups {
+                    selagegrp = ag
+                    if ag.useOverMinForSelect {
+                        break
+                    }
+                }
+                lastAgeGroupFilter = selagegrp
+                lblAgeGroup.text = selagegrp.presetAgeGroupName
             }else{
                 loadAllAgeGroups()
             }
@@ -476,7 +591,8 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
     func configurePickerView(pckview:UIPickerView) {
         
         pckview.frame = pickerViewFrame
-        pckview.backgroundColor = UIColor(hexString: "89D8FC")
+        pckview.backgroundColor = UIColor(hexString: "FFC991")
+        pckview.clipsToBounds = true
         pckview.layer.cornerRadius = 10.0
         pckview.delegate = self
         pckview.dataSource = self
@@ -517,7 +633,7 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
         }
         
         if loadMembers() {
-            tableView.reloadData()
+            myTableView.reloadData()
         }
         pickerView.isHidden = true
         //Im gonna remove the member from the list

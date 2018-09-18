@@ -32,7 +32,12 @@ class EventViewController: UIViewController,
     var eventResults : Results<EventResult>?
     var pickerTeamItems : Results<SwimClub>?
     var pickerPresetEventItems : Results<PresetEvent>?
+    var eventHasAgeGroups = false
     //var presetEventExtension = PresetEventExtension()
+    
+    
+    var groupDict : [String : [EventResult]] = [:]
+    var sectionGroups : [PresetEventAgeGroups] = []
     
     private var datepicker : UIDatePicker?
     
@@ -45,7 +50,7 @@ class EventViewController: UIViewController,
     var origTableFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     var origDetailsFrame = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     
-    var origInternalDetailsFrame = CGRect(x: 19.0, y: 60.0, width: 718.0, height: 170.0)
+    var origInternalDetailsFrame = CGRect(x: 8.0, y: 60.0, width: 750.0, height: 170.0)
     
     var pickerViewFrame = CGRect(x: 120.0, y: 100.0, width: 600.00, height: 143.0)
     
@@ -114,14 +119,9 @@ class EventViewController: UIViewController,
         exhibitionView.backgroundColor = UIColor.clear
         dualmeetView.backgroundColor = UIColor.clear
   
-        //make em pick one and make sure there is a location and a date before saving
-        
-//        if currentEvent.eventID == 0 {
-//            //new event
-//            let datefmt =  DateFormatter()
-//            datefmt.dateFormat = myFunc.getGlobalDateFormat()
-//            lblEventDate.text = datefmt.string(from: Date())
-//        }
+        if let ev = currentEvent.presetEvent {
+            eventHasAgeGroups = ev.eventAgeGroups.count != 0
+        }
         
         changeBorderColours()
         
@@ -130,10 +130,10 @@ class EventViewController: UIViewController,
         loadEventResults()
         
         if usePresetEvents {
-           dualmeetView.frame = origDetailsFrame
+           dualmeetView.frame = origInternalDetailsFrame
             
         }else{
-            exhibitionView.frame = origDetailsFrame
+            exhibitionView.frame = origInternalDetailsFrame
         }
         
         exhibitionView.isHidden = usePresetEvents
@@ -144,7 +144,8 @@ class EventViewController: UIViewController,
             if currentEvent.eventID != 0 && currentEvent.eventResults.count != 0 {
                 dualmeetView.isUserInteractionEnabled = false //cant chnage if its been saved
             }
-             
+            
+            
         }
         
        
@@ -186,11 +187,8 @@ class EventViewController: UIViewController,
     }
     
     @objc func dateChanged(datepicker:UIDatePicker) {
-        let datefmt =  DateFormatter()
-        datefmt.dateFormat = myFunc.getGlobalDateFormat()
         
-        lblEventDate.text = datefmt.string(from: datepicker.date)
-        
+        lblEventDate.text = myFunc.formatDate(thedate: datepicker.date)
         //COME BACK - need to updare ages ??
         removeKeyBoard()
         
@@ -393,14 +391,27 @@ class EventViewController: UIViewController,
     
     
     func loadEventDetails() {
+        var sDateText = ""
         if currentEvent.eventDistance != 0 {
             txtDistance.text = "\(currentEvent.eventDistance)"
+            sDateText = myFunc.formatDate(thedate: currentEvent.eventDate)
+            if currentEvent.hasPresetEvent {
+                lblIPMeet.text = currentEvent.presetEvent?.getPresetName()
+                lblIPTeam1.text = currentEvent.selectedTeams[0].clubName
+                if currentEvent.selectedTeams.count > 1 {
+                    lblIPTeam2.text = currentEvent.selectedTeams[0].clubName
+                }
+            }
         }else{
             txtDistance.text = ""
         }
         
+        
+        lblEventDate.text = sDateText
         txtLocation.text = currentEvent.eventLocation
         opRaceNo.isOn = currentEvent.useRaceNos
+        
+        
     }
     
     func loadEventResults() {
@@ -408,22 +419,24 @@ class EventViewController: UIViewController,
         if currentEvent.eventResults.count != 0 {
             eventResults = currentEvent.eventResults.filter("resultSeconds=0").sorted(byKeyPath: "expectedSeconds", ascending: true)
             
-            if eventIsRunning && eventResults?.count != 0 {
-                let secondsElapsed = myDefs.getRunningEventSecondsStopped()
-                let addseconds = myFunc.getDateDiffSeconds(fromDate: myDefs.getRunningEventStopDate())
-                
-                let dateFormatter = DateFormatter()
-                
-                dateFormatter.dateFormat = "dd/MM/yyyy hh:mm:ss"
-//                print(dateFormatter.string(from: myDefs.getRunningEventStopDate()))
-//                print(dateFormatter.string(from: Date()))
-//                print("eventelapsed: \(secondsElapsed) secindstoadd:\(addseconds)")
-//                
-                noSeconds = secondsElapsed + addseconds + 1
-                myDefs.setRunningEventID(eventID: 0) //turn this off
-                myDefs.setRunningEventSecondsStopped(clockseconds: 0)
-                eventIsRunning = false
-                doEventStart()
+            if eventResults?.count != 0 {
+                if eventIsRunning  {
+                    let secondsElapsed = myDefs.getRunningEventSecondsStopped()
+                    let addseconds = myFunc.getDateDiffSeconds(fromDate: myDefs.getRunningEventStopDate())
+                    
+                    let dateFormatter = DateFormatter()
+                    
+                    dateFormatter.dateFormat = "dd/MM/yyyy hh:mm:ss"
+                    noSeconds = secondsElapsed + addseconds + 1
+                    myDefs.setRunningEventID(eventID: 0) //turn this off
+                    myDefs.setRunningEventSecondsStopped(clockseconds: 0)
+                    eventIsRunning = false
+                    doEventStart()
+                }else{
+                    if eventHasAgeGroups  {
+                        loadGroupTableData()
+                    }
+                }
             }
 
         }
@@ -432,23 +445,95 @@ class EventViewController: UIViewController,
         
     }
     
+    func loadGroupTableData() {
+        if groupDict.count != 0 {
+            groupDict.removeAll()
+        }
+        if sectionGroups.count != 0 {
+            sectionGroups.removeAll()
+        }
+        
+        
+        for er in eventResults! {
+            /*var groupDict : [String : [EventResult]] = [:]
+            var sectionGroups : [PresetEventAgeGroups] = []
+             */
+            if let grp = er.selectedAgeCatgeory.first {
+            
+                if sectionGroups.count == 0 {
+                    sectionGroups.append(grp)
+                }else{
+                    if let _ = sectionGroups.index(where: {$0.presetAgeGroupName == grp.presetAgeGroupName}) {
+                        
+                    }else{
+                        sectionGroups.append(grp)
+                    }
+                }
+               
+                //groupDict[grp.presetAgeGroupName]?.append(er)
+                //print("\(groupDict[grp.presetAgeGroupName]?.count ?? "Help")")
+            }
+            
+        }
+        
+        for sd in sectionGroups {
+            let mArr = Array(eventResults!.filter("ANY selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName))
+            groupDict[sd.presetAgeGroupName] = mArr
+        }
+        
+    }
     func numberOfSections(in tableView: UITableView) -> Int {
         
-        return eventResults?.count ?? 0
+        if useSectionsinTableView() {
+            return sectionGroups.count
+        }else{
+            return eventResults?.count ?? 0
+        }
+        
+        
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return 1
+        if useSectionsinTableView() {
+            print("\(sectionGroups[section].presetAgeGroupName)")
+            return (groupDict[sectionGroups[section].presetAgeGroupName]?.count)!
+        }else{
+            return 1
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 3.0
+        if useSectionsinTableView() {
+            return 30.0
+        }else{
+            return 3.0
+        }
+        
     }
     
    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = UIView()
-        headerView.backgroundColor = UIColor.clear
+        let offset : CGFloat = 5.0
+
+    
+        let headerView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: myTableView.frame.size.width - (offset * 2.0), height: 100.0))
+    
+        if useSectionsinTableView() {
+            headerView.backgroundColor = UIColor.black
+            let label = UILabel(frame: CGRect(x: 0, y: -5, width: myTableView.frame.size.width, height: 30.0))
+            label.clipsToBounds = true
+            label.layer.cornerRadius = 5.0
+            label.backgroundColor = UIColor.black
+            label.textColor = UIColor.white
+            label.textAlignment = .center
+            label.font = UIFont(name: "Helvetica", size: 25.0)
+            label.text = sectionGroups[section].presetAgeGroupName
+            //print(sectionGroups[section].groupName)
+            headerView.addSubview(label)
+            
+        }else{
+            headerView.backgroundColor = UIColor.clear
+        }
         return headerView
     }
     
@@ -461,9 +546,16 @@ class EventViewController: UIViewController,
     }
     
     func configureCell(cell:UITableViewCell, atIndexPath indexPath:IndexPath) {
+        var er = EventResult()
+        if useSectionsinTableView() {
+            if let myArray = groupDict[sectionGroups[indexPath.section].presetAgeGroupName] {
+                er = myArray[indexPath.row]
+            }
+           
+        }else{
+           er = eventResults![indexPath.row + indexPath.section]
+        }
         
-        
-        let er = eventResults![indexPath.row + indexPath.section]
         let mem = er.myMember.first!
         let grp = mem.myClub.first!
         
@@ -674,7 +766,9 @@ class EventViewController: UIViewController,
                     try realm.write {
                         currentEvent.eventLocation = txtLocation.text!
                         if usePresetEvents {
+                            currentEvent.hasPresetEvent=true
                             currentEvent.eventDistance = currentEvent.presetEvent!.distance
+                            
                         }else{
                             currentEvent.eventDistance = Int(txtDistance.text!)!
                             currentEvent.useRaceNos = useRaceNos
@@ -752,6 +846,9 @@ func doEventStart() {
     
 }
     
+    func useSectionsinTableView() -> Bool {
+        return (!eventIsRunning) && eventHasAgeGroups
+    }
     func moveStartViewUp() {
         let xPosition = origDetailsFrame.origin.x + 3.0
         //View will slide 20px up
@@ -915,6 +1012,8 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
                 lblIPMeet.text = pickerPresetEventItems![row].getPresetName()
                 
                 currentEvent.presetEvent = thispse
+                
+                eventHasAgeGroups = thispse.eventAgeGroups.count != 0
             }
            
         }
