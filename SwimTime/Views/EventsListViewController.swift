@@ -54,6 +54,10 @@ class EventsListViewController: UITableViewController {
         if showPreset {
             filterstring += " AND hasPresetEvent=true"
             //eventsList = eventsList?.filter("hasPresetEvent=true")
+        }else{
+            if !showFinished {
+                filterstring += " AND hasPresetEvent=false"
+            }
         }
         
         eventsList = realm.objects(Event.self).filter(filterstring).sorted(byKeyPath: "eventDate", ascending: false)
@@ -163,7 +167,7 @@ class EventsListViewController: UITableViewController {
 
     
     // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
         let ev = eventsList![indexPath.row + indexPath.section]
         

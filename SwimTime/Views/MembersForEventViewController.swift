@@ -69,7 +69,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        pickerViewFrame = CGRect(x: 120.0, y: view.frame.size.height / 2 , width: 600.00, height: 143.0)
+        
         navigationItem.setHidesBackButton(true, animated: false)
         //adjuts the height
         origtableframe = myTableView.frame
@@ -80,6 +80,8 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         origFilterFrame = CGRect(x: filterView.frame.origin.x, y: (view.frame.size.height - filterView.frame.size.height)/2, width: filterView.frame.size.width, height: filterView.frame.size.height)
         
         filterView.isHidden = true
+        
+        pickerViewFrame = CGRect(x: 120.0, y: (view.frame.size.height/2) + origFilterFrame.size.height , width: 600.00, height: 143.0)
         
         self.navigationController?.setToolbarHidden(false, animated: false)
         
@@ -133,7 +135,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
             if self.filterShowing {
                 self.filterView.frame = hidingFilterFrame
                 self.filterView.frame = self.origFilterFrame
-                self.view.bringSubview(toFront: self.filterView)
+                self.view.bringSubviewToFront(self.filterView)
                 self.filterView.isHidden = false
             }else{
                 self.filterView.frame = self.origFilterFrame
@@ -194,14 +196,17 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                 
                             }
                             er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
+                            
                             er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                             
                             
                             let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
                             
                             if let psage = pse?.PresetAgeGroup {
-                                 er.selectedAgeCatgeory.removeAll()
-                                er.selectedAgeCatgeory.append(psage)
+                                er.selectedAgeCategory.removeAll()
+                                er.selectedAgeCategory.append(psage)
+                                er.staggerStartBy = psage.staggerSeconds
+                                er.expectedSeconds += psage.staggerSeconds
                             }
                            
                             
@@ -228,7 +233,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
             
                 for er in selectedEvent.eventResults {
                     let mem = er.myMember.first!
-                    if let agrp = er.selectedAgeCatgeory.first {
+                    if let agrp = er.selectedAgeCategory.first {
                         addMemberToPreset(mem: mem,agegrp: agrp)
                     }else{
                        addMemberToPreset(mem: mem,agegrp: nil)
@@ -243,15 +248,17 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     func addMemberToPreset(mem:Member,agegrp:PresetEventAgeGroups?) {
         let pse = PresetEventMember()
-        
         pse.memberid = mem.memberID
         pse.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)
         pse.gender = mem.gender
         pse.clubID = (mem.myClub.first?.clubID)!
         pse.relayLetter = ""
         if let ag =  agegrp  {
+            print("agegrpid=\(ag.presetAgeGroupID) name=\(ag.presetAgeGroupName)")
             pse.PresetAgeGroup = ag
+            
         }
+
         memForEvent.append(pse)
     }
     func checkMemIsvalid(mem:Member) -> Bool {
@@ -278,7 +285,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                     //0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID}
                     if pse.maxPerGenderAndAgeGroup != 0 {
                         if let myclub = mem.myClub.first {
-                            //print("\(mem.gender) count=\(memForEvent.count)")
+                            //print("\(mem.gender) agegrpid=\(lastAgeGroupFilter!.presetAgeGroupID)")
                             let matchingmems  = memForEvent.filter({$0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID})
                                 if matchingmems.count == pse.maxPerGenderAndAgeGroup {
                                     errMsg = "Maximum number per club, gender and age group exceeded. Max entrants for \(mem.gender) for \(lastAgeGroupFilter!.presetAgeGroupName) each club is \(pse.maxPerGenderAndAgeGroup)"
@@ -426,7 +433,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         cell.detailTextLabel?.textColor = UIColor.red
         
         
-        var dtText = String(format:"Age: %d",myfunc.getAgeFromDate(fromDate:lh.dateOfBirth, toDate: selectedEvent.eventDate))
+        var dtText = String(format:"(%@)   Age: %d",lh.gender,myfunc.getAgeFromDate(fromDate:lh.dateOfBirth, toDate: selectedEvent.eventDate))
         
         
         if let grp = lh.myClub.first {

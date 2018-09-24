@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     let realm = try! Realm()
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
 //        let myDEF = appUserDefaults()
 //
@@ -44,9 +44,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if let topController = UIApplication.shared.keyWindow?.rootViewController {
             
-                if topController.childViewControllers.count != 0 {
+                if topController.children.count != 0 {
                 
-                    let vcArray = topController.childViewControllers
+                    let vcArray = topController.children
                     
                     let lastVC = vcArray[vcArray.count-1]
                     
@@ -103,8 +103,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if runningEventID != 0 {
             
             if let topController = UIApplication.shared.keyWindow?.rootViewController {
-                if topController.childViewControllers.count == 1 {
-                    let vc = topController.childViewControllers[0] as! MainViewController
+                if topController.children.count == 1 {
+                    let vc = topController.children[0] as! MainViewController
                         vc.performSegue(withIdentifier: "MainToEvent", sender: self)
                 }
             }

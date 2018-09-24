@@ -11,20 +11,21 @@ import RealmSwift
 
 class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    var sortByTime = true
+    
+    let realm = try! Realm()
     var isGrouped = false
     
     
     var currentEvent = Event()
     let myfunc = appFunctions()
+    let mydef = appUserDefaults()
     
     @IBOutlet weak var lblDistance: UILabel!
     
     
     @IBOutlet weak var myToolbar: UIToolbar!
     @IBOutlet weak var myTableView: UITableView!
-    @IBOutlet weak var btnSortByImprovement: UIButton!
-    @IBOutlet weak var btnSortByTime: UIButton!
+  
     
     @IBOutlet weak var tbTime: UIBarButtonItem!
     
@@ -33,38 +34,36 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var resultList : [EventResult] = [] //use if not in group Mode
     var groupDict : [String : [EventResult]] = [:]
-    var sectionGroups : [Group] = []
+    var sectionGroups : [PresetEventAgeGroups] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
        navigationItem.setHidesBackButton(true, animated: false)
-        //register the custom cell
+       
+        if let pse = currentEvent.presetEvent {
+            if pse.eventAgeGroups.count != 0 {
+                isGrouped = true
+            }
+        }
         myTableView.register(UINib(nibName: "ResultCell", bundle: nil), forCellReuseIdentifier: "ResultCell")
         
-        tbTime.tintColor = UIColor.orange
+        //tbTime.tintColor = UIColor.orange
         getData()
-        changeBtnColour()
+        
         showEventDetails()
         // Do any additional setup after loading the view.
     }
     
     func showEventDetails() {
+        var hdrText = ""
         let dateFormatter = DateFormatter()
         
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-        lblDistance.text = ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters") + dateFormatter.string(from: currentEvent.eventDate)
-        
-        
-        
-    }
-    
-    @IBAction func sortBtnClicked(_ sender: UIButton) {
-        sortByTime = sender.tag == 1
-        //isGrouped = sender.tag == 2
-        changeBtnColour()
-        sortListData()
-        
-        
+        dateFormatter.dateFormat = myfunc.getGlobalDateFormat()
+        if currentEvent.selectedTeams.count > 1 {
+            hdrText = "Dual Meet "
+        }
+        hdrText += ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters") + dateFormatter.string(from: currentEvent.eventDate)
+        lblDistance.text = hdrText
     }
     
     
@@ -72,43 +71,8 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         self.navigationController?.popToRootViewController(animated: true)
     }
     
-    @IBAction func groupBy(_ sender: UIBarButtonItem) {
-        
-        tbTime.tintColor = myToolbar.tintColor
-        tbGroup.tintColor = myToolbar.tintColor
-        
-        isGrouped = sender.tag == 2
-        
-        sender.tintColor = UIColor.orange
-       sortListData()
+
     
-    }
-    
-    func changeBtnColour() {
-        //FFC1DF - pale pink
-        //8EFF25 - brigt green
-        let pinkHex = "FFC1DF"
-        let greenHex = "8EFF25"
-        let onColor : UIColor = UIColor(hexString: pinkHex)!
-        let offColor : UIColor = UIColor(hexString: greenHex)!
-        var onButton : UIButton
-        var offButton : UIButton
-        
-        let onBWidth : CGFloat = 2
-        let offBWidth : CGFloat = 0
-        if sortByTime {
-            onButton = btnSortByTime
-            offButton = btnSortByImprovement
-        }else{
-            offButton = btnSortByTime
-            onButton = btnSortByImprovement
-        }
-        
-        offButton.layer.borderWidth = offBWidth
-        offButton.backgroundColor = offColor
-        onButton.layer.borderWidth = onBWidth
-        onButton.backgroundColor = onColor
-    }
     
     
     //MARK: - TableView data
@@ -130,64 +94,56 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         for grp in sectionGroups {
             var erForGroup : [EventResult] = []
             for er in resultList {
-                if let mem = er.myMember.first {
-                    if let memgrp = mem.myGroup.first {
-                        if memgrp.groupName == grp.groupName {
+                if let agp = er.selectedAgeCategory.first {
+                    
+                        if agp.presetAgeGroupName == grp.presetAgeGroupName {
                             erForGroup.append(er)
                         }
-                    }
+                    
                 }
             }
-            groupDict[grp.groupName] = erForGroup
+            groupDict[grp.presetAgeGroupName] = erForGroup
             //print(groupDict.count)
         }
     }
     
     func buildGroups() {
-        var tempGroups : [Group] = []
+        var tempGroups : [PresetEventAgeGroups] = []
         for er in currentEvent.eventResults {
-            let mem = er.myMember.first
-            if let grp = mem?.myGroup.first {
-                //print(grp.groupName)
+            if let agp = er.selectedAgeCategory.first {
                 if tempGroups.count == 0 {
-                    tempGroups.append(grp)
+                    tempGroups.append(agp)
                 }else{
-                    if tempGroups.index(where: { $0.groupName == grp.groupName }) == nil {
-                        tempGroups.append(grp)
+                    if tempGroups.index(where: { $0.presetAgeGroupName == agp.presetAgeGroupName }) == nil {
+                        tempGroups.append(agp)
                     }
                     
                 }
             }
+           
         }
         
         //yes sections sort by group id not name
-        sectionGroups = tempGroups.sorted(by: { $0.groupID < $1.groupID})
+        sectionGroups = tempGroups.sorted(by: {$0.presetAgeGroupID < $1.presetAgeGroupID})
         //print(sectionGroups.count)
     }
     
     func sortListData() {
         var sortedArray : [EventResult]
         
-        for grp in sectionGroups {
-            
-            if sortByTime {
-                sortedArray = (groupDict[grp.groupName]?.sorted(by: { $0.resultSeconds < $1.resultSeconds}))!
-            } else {
-                sortedArray = (groupDict[grp.groupName]?.sorted(by: { $0.diffSeconds < $1.diffSeconds}))!
+      
+            for grp in sectionGroups {
+                
+                
+                sortedArray = (groupDict[grp.presetAgeGroupName]?.sorted(by: { $0.resultSeconds < $1.resultSeconds}))!
+               
+                groupDict.updateValue(sortedArray, forKey: grp.presetAgeGroupName)
+                
             }
-            groupDict.updateValue(sortedArray, forKey: grp.groupName)
-            
-        }
         
         
         
-        if sortByTime {
-            sortedArray = resultList.sorted(by: { $0.resultSeconds < $1.resultSeconds})
-        }else{
-            sortedArray = resultList.sorted(by: { $0.diffSeconds < $1.diffSeconds})
-        }
-        
-        resultList = sortedArray
+        resultList = resultList.sorted(by: { $0.resultSeconds < $1.resultSeconds})
         myTableView.reloadData()
     }
     
@@ -224,7 +180,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             label.textColor = UIColor.white
             label.textAlignment = .center
             label.font = UIFont(name: "Helvetica", size: 25.0)
-            label.text = sectionGroups[section].groupName
+            label.text = sectionGroups[section].presetAgeGroupName
             //print(sectionGroups[section].groupName)
             headerView.addSubview(label)
             
@@ -239,7 +195,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         var noRows : Int = 1
         if isGrouped {
-            if let myArray = groupDict[sectionGroups[section].groupName] {
+            if let myArray = groupDict[sectionGroups[section].presetAgeGroupName] {
                 noRows = myArray.count
             }
             
@@ -262,7 +218,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         var er = EventResult()
         var hdrText = ""
         if isGrouped {
-            if let myArray = groupDict[sectionGroups[indexPath.section].groupName] {
+            if let myArray = groupDict[sectionGroups[indexPath.section].presetAgeGroupName] {
                 er = myArray[indexPath.row]
             }
             
@@ -275,35 +231,58 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             hdrText = mem.memberName
         }
         
-        if currentEvent.usePoints {
-            hdrText += (" \(er.pointsEarned) points")
+        var pointsearned = 0
+        switch indexPath.row {
+        case  0:
+            cell.imgMedal.image = UIImage(named: "gold7575")
+            pointsearned = 4
+            break
+        case  1:
+            cell.imgMedal.image = UIImage(named: "silver7575")
+            pointsearned = 3
+            break
+        case  2:
+            cell.imgMedal.image = UIImage(named: "bronze7575")
+            pointsearned = 2
+            break
+        case 3:
+            cell.imgMedal.image = nil
+            pointsearned = 1
+            break
+        default:
+            cell.imgMedal.image = nil
+            break
+        }
+        
+        
+        
+        if isGrouped {
+            cell.lblImprovement.text = String(format: "%d Points", pointsearned)
+            cell.lblImprovement.backgroundColor = pointsearned > 0 ? UIColor.green : UIColor.flatPink
+        }else{
+            cell.lblImprovement.text = "Diff: " + myfunc.convertSecondsToTime(timeinseconds: er.diffSeconds)
+            cell.lblImprovement.backgroundColor = er.diffSeconds < 0 ? UIColor.green : UIColor.red
         }
         
         cell.lblHeader.text = hdrText
         cell.lblEstimate.text = "Est: " + myfunc.convertSecondsToTime(timeinseconds: er.expectedSeconds)
-        cell.lblImprovement.text = "Diff: " + myfunc.convertSecondsToTime(timeinseconds: er.diffSeconds)
+        
         cell.lblResult.text = "Result: " + myfunc.convertSecondsToTime(timeinseconds: er.resultSeconds)
         
-        cell.lblImprovement.backgroundColor = er.diffSeconds < 0 ? UIColor.green : UIColor.red
         
         
-        /*Setthe medals*/
+        
+        /*Setthe medals and award points*/
        
-            switch indexPath.row {
-                case  0:
-                    cell.imgMedal.image = UIImage(named: "gold7575")
-                    break
-                case  1:
-                    cell.imgMedal.image = UIImage(named: "silver7575")
-                    break
-                case  2:
-                    cell.imgMedal.image = UIImage(named: "bronze7575")
-                    break
-                default:
-                    cell.imgMedal.image = nil
-                    break
+        if pointsearned != 0 && isGrouped {
+            do {
+                try realm.write {
+                    er.pointsEarned = pointsearned
+                }
+            }catch{
+                
             }
-            
+        }
     
         
      }

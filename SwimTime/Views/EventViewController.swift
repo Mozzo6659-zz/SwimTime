@@ -99,6 +99,10 @@ class EventViewController: UIViewController,
         
         defSwimClub = myDefs.getDefSwimClub()
         
+        if currentEvent.eventID  == 0 && currentEvent.selectedTeams.count == 0 {
+            currentEvent.selectedTeams.append(defSwimClub)
+        }
+        
         loadPickerViews()
         
         myTableView.delegate = self
@@ -201,7 +205,7 @@ class EventViewController: UIViewController,
     @IBAction func btnPickPresetEvent(_ sender: UIButton) {
         removeKeyBoard()
         pickerPresetEvent.isHidden = false
-         pickerPresetEvent.bringSubview(toFront: self.view)
+         pickerPresetEvent.bringSubviewToFront(self.view)
     }
     
     
@@ -209,7 +213,7 @@ class EventViewController: UIViewController,
             removeKeyBoard()
             pickerTeams.isHidden = false
             pickingTeam1 = sender.tag == 1
-       pickerTeams.bringSubview(toFront: self.view)
+       pickerTeams.bringSubviewToFront(self.view)
     }
     
     
@@ -433,15 +437,18 @@ class EventViewController: UIViewController,
                     eventIsRunning = false
                     doEventStart()
                 }else{
-                    if eventHasAgeGroups  {
+                    if eventHasAgeGroups && !timerOn {
                         loadGroupTableData()
+                    }else{
+                        groupDict.removeAll()
+                        sectionGroups.removeAll()
                     }
                 }
             }
 
         }
         
-            myTableView.reloadData()
+        myTableView.reloadData()
         
     }
     
@@ -458,7 +465,7 @@ class EventViewController: UIViewController,
             /*var groupDict : [String : [EventResult]] = [:]
             var sectionGroups : [PresetEventAgeGroups] = []
              */
-            if let grp = er.selectedAgeCatgeory.first {
+            if let grp = er.selectedAgeCategory.first {
             
                 if sectionGroups.count == 0 {
                     sectionGroups.append(grp)
@@ -496,7 +503,7 @@ class EventViewController: UIViewController,
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         if useSectionsinTableView() {
-            print("\(sectionGroups[section].presetAgeGroupName)")
+            //print("\(sectionGroups[section].presetAgeGroupName)")
             return (groupDict[sectionGroups[section].presetAgeGroupName]?.count)!
         }else{
             return 1
@@ -570,7 +577,7 @@ class EventViewController: UIViewController,
         }
         txtLabel += mem.memberName
         
-        var dtText = String(format:"   Age: %d",mem.age())
+        var dtText = String(format:"  (%@)   Age: %d",mem.gender,mem.age())
         dtText = dtText + String(format:"  Team: %@",grp.clubName)
             
         
@@ -641,7 +648,7 @@ class EventViewController: UIViewController,
     
     
     // Override to support editing the table view.
-   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let er = eventResults![indexPath.row + indexPath.section]
             do {
@@ -776,6 +783,7 @@ class EventViewController: UIViewController,
                         
                         currentEvent.eventDate = df.date(from: lblEventDate.text!)!
                         if currentEvent.eventID == 0 {
+                            
                             currentEvent.eventID = myDefs.getNextEventId()
                             realm.add(currentEvent)
                         }
@@ -842,12 +850,14 @@ func doEventStart() {
     
     if saveEvent() {
         moveStartViewUp()
+        loadEventResults()
+        //myTableView.reloadData()
     }
     
 }
     
     func useSectionsinTableView() -> Bool {
-        return (!eventIsRunning) && eventHasAgeGroups
+        return (!timerOn) && eventHasAgeGroups
     }
     func moveStartViewUp() {
         let xPosition = origDetailsFrame.origin.x + 3.0

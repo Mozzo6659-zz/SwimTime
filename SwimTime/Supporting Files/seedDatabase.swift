@@ -205,7 +205,7 @@ class seedDatabase {
     
     func makeAgeGroup(id:Int,presetEventId: Int, minage: Int, maxage: Int, staggerseconds: Int ,agegrpName:String,useoverminforselect:Bool) -> PresetEventAgeGroups {
         let agegrp = PresetEventAgeGroups()
-        
+        agegrp.presetAgeGroupID = id
         agegrp.presetEventID = presetEventId
         agegrp.minAge = minage
         agegrp.maxAge = maxage

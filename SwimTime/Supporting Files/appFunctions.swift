@@ -28,7 +28,7 @@ class appFunctions {
             let fileURL = dir.appendingPathComponent(photoName)
             
             
-            let data = UIImageJPEGRepresentation(img, 1.0)
+            let data = img.jpegData(compressionQuality: 1.0)
             
            // print(fileURL.absoluteString)
             
