@@ -8,7 +8,11 @@
 
 import Foundation
 import UIKit
+import RealmSwift
+
 class appFunctions {
+    
+    let realm = try! Realm()
     
     //MARK: - Photo Functions
     func makePhotoName(memberid:Int) -> String {
@@ -164,5 +168,14 @@ class appFunctions {
         //return components.hour!
         return hour
     }
-    
+    func isDuplicateClub(newClubname: String) -> Bool {
+        let myarray = realm.objects(SwimClub.self)
+        
+        if let _  = myarray.index(where: {$0.clubName == newClubname}) {
+            return true
+        }else{
+            return false
+        }
+        
+    }
 }

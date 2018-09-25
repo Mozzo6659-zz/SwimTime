@@ -704,7 +704,7 @@ class EventViewController: UIViewController,
     }
     @IBAction func addNewTeam(_ sender: UIButton) {
         let useTeam1 = (sender.tag==1)
-        
+        var bContinue = false
         var userTextField = UITextField() //textfile used in the closure
         userTextField.autocapitalizationType = .words
         
@@ -717,34 +717,40 @@ class EventViewController: UIViewController,
             let newName = userTextField.text!
             
             if !newName.isEmpty {
-                do {
-                    try self.realm.write {
-                        let newClub = SwimClub()
-                        newClub.clubID = self.myDefs.getNextClubId()
-                        newClub.clubName = newName
-                        newClub.isDefault = false
-                        self.realm.add(newClub)
-                        self.loadPickerViews()
-                        if useTeam1 {
-                            self.lblIPTeam1.text = newName
-                            self.currentEvent.selectedTeams[0] = newClub
-                            
-                        }else{
-                            self.lblIPTeam2.text = newName
-                            if self.currentEvent.selectedTeams.count == 1 {
-                                self.currentEvent.selectedTeams.append(newClub)
+                bContinue = !self.myFunc.isDuplicateClub(newClubname: newName)
+            }
+            
+            if bContinue {
+                
+                    do {
+                        try self.realm.write {
+                            let newClub = SwimClub()
+                            newClub.clubID = self.myDefs.getNextClubId()
+                            newClub.clubName = newName
+                            newClub.isDefault = false
+                            self.realm.add(newClub)
+                            self.loadPickerViews()
+                            if useTeam1 {
+                                self.lblIPTeam1.text = newName
+                                self.currentEvent.selectedTeams[0] = newClub
                                 
                             }else{
-                                self.currentEvent.selectedTeams[1] = newClub
-                               
+                                self.lblIPTeam2.text = newName
+                                if self.currentEvent.selectedTeams.count == 1 {
+                                    self.currentEvent.selectedTeams.append(newClub)
+                                    
+                                }else{
+                                    self.currentEvent.selectedTeams[1] = newClub
+                                   
+                                }
                             }
+                            self.loadPickerViewTeams()
+                            self.lastSelectedTeam = newClub
                         }
-                        self.loadPickerViewTeams()
-                        self.lastSelectedTeam = newClub
+                    } catch {
+                        print("Error saving items: \(error)")
                     }
-                } catch {
-                    print("Error saving items: \(error)")
-                }
+               
             }
         }
         

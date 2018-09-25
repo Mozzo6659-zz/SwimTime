@@ -149,7 +149,10 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
             (action) in
             
             //var item = Item(thetitle: userTextField.text!)
-                let newName = userTextField.text!
+            let newName = userTextField.text!
+            if !newName.isEmpty {
+                bContinue = !self.myFunc.isDuplicateClub(newClubname: newName)
+            }
             
             if !newName.isEmpty {
                 do {
