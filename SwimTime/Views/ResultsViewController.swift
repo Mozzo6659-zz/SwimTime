@@ -13,13 +13,15 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     
     let realm = try! Realm()
-    var isGrouped = false
+    //var isGrouped = false preset events wiht age groups are grouped by age group and gender. Exhibition event are grouped by gender.
     
-    
+    var usePreset = false
     var currentEvent = Event()
     let myfunc = appFunctions()
     let mydef = appUserDefaults()
     
+    let grpfemale = " - Female"
+    let grpmale = " - Male"
     @IBOutlet weak var lblDistance: UILabel!
     
     
@@ -34,19 +36,20 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var resultList : [EventResult] = [] //use if not in group Mode
     var groupDict : [String : [EventResult]] = [:]
-    var sectionGroups : [PresetEventAgeGroups] = []
+    //var sectionGroups : [String] = []
+    //one array for all members not in the event and their age at event time
+    var sectionGroups = [(id: 0, groupTitle: "", grpGender: "")]
     
     override func viewDidLoad() {
         super.viewDidLoad()
        navigationItem.setHidesBackButton(true, animated: false)
        
-        if let pse = currentEvent.presetEvent {
-            if pse.eventAgeGroups.count != 0 {
-                isGrouped = true
-            }
-        }
+        
         myTableView.register(UINib(nibName: "ResultCell", bundle: nil), forCellReuseIdentifier: "ResultCell")
         
+        if let pse = currentEvent.presetEvent {
+            usePreset = pse.eventAgeGroups.count != 0
+        }
         //tbTime.tintColor = UIColor.orange
         getData()
         
@@ -62,7 +65,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         if currentEvent.selectedTeams.count > 1 {
             hdrText = "Dual Meet "
         }
-        hdrText += ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters") + dateFormatter.string(from: currentEvent.eventDate)
+        hdrText += ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters ") + dateFormatter.string(from: currentEvent.eventDate)
         lblDistance.text = hdrText
     }
     
@@ -78,9 +81,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     //MARK: - TableView data
     
     func getData() {
-        //BUILD EVERYTHING ANYWAY TH JUTS CHANGE THE SORT ON A BUTTN PRESS
-        //first lets get all the groups in the evet reuslts
-        //these will be our sections
+        
         buildGroups()
         buildLists()
         sortListData()
@@ -94,37 +95,69 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         for grp in sectionGroups {
             var erForGroup : [EventResult] = []
             for er in resultList {
-                if let agp = er.selectedAgeCategory.first {
-                    
-                        if agp.presetAgeGroupName == grp.presetAgeGroupName {
-                            erForGroup.append(er)
+                
+                    if let mem = er.myMember.first {
+                        if usePreset {
+                            if let agp = er.selectedAgeCategory.first {
+                                if grp.grpGender == mem.gender && grp.id == agp.presetAgeGroupID {
+                                    
+                                            erForGroup.append(er)
+                                }
+                                    
+                            }
+                            
+                        }else{
+                            if mem.gender == grp.groupTitle {
+                                erForGroup.append(er)
+                            }
                         }
-                    
-                }
+                    }
+               
             }
-            groupDict[grp.presetAgeGroupName] = erForGroup
-            //print(groupDict.count)
+            groupDict[grp.groupTitle] = erForGroup
+            
         }
     }
     
     func buildGroups() {
-        var tempGroups : [PresetEventAgeGroups] = []
-        for er in currentEvent.eventResults {
-            if let agp = er.selectedAgeCategory.first {
-                if tempGroups.count == 0 {
-                    tempGroups.append(agp)
-                }else{
-                    if tempGroups.index(where: { $0.presetAgeGroupName == agp.presetAgeGroupName }) == nil {
-                        tempGroups.append(agp)
-                    }
+
+        sectionGroups.removeAll()
+     
+        
+            for er in currentEvent.eventResults {
+                if let mem = er.myMember.first {
+                    if usePreset {
+                        
+                        if let agp = er.selectedAgeCategory.first {
+                            
+                            let gpfname = agp.presetAgeGroupName + grpfemale
+                            let gpmname = agp.presetAgeGroupName + grpmale
+                            
+                             if mem.gender == "Female" {
+                                if sectionGroups.index(where: { $0.groupTitle == gpfname }) == nil {
+                                    sectionGroups.append((id: agp.presetAgeGroupID, groupTitle: gpfname, grpGender: mem.gender))
+                                }
+                             }else{
+                                if sectionGroups.index(where: { $0.groupTitle == gpmname }) == nil {
+                                    sectionGroups.append((id: agp.presetAgeGroupID, groupTitle: gpmname, grpGender: mem.gender))
+                                }
+                            }
+
+                        }
                     
+                    }else{
+                        
+                            if sectionGroups.index(where: { $0.groupTitle == mem.gender }) == nil {
+                                sectionGroups.append((id: mem.gender == "Male" ? 0 : 1 , groupTitle: mem.gender,grpGender: mem.gender))
+                            }
+                       
+                    }
                 }
+            
             }
-           
-        }
+        
         
         //yes sections sort by group id not name
-        sectionGroups = tempGroups.sorted(by: {$0.presetAgeGroupID < $1.presetAgeGroupID})
         //print(sectionGroups.count)
     }
     
@@ -135,28 +168,23 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             for grp in sectionGroups {
                 
                 
-                sortedArray = (groupDict[grp.presetAgeGroupName]?.sorted(by: { $0.resultSeconds < $1.resultSeconds}))!
+                sortedArray = (groupDict[grp.groupTitle]?.sorted(by: { $0.resultSeconds < $1.resultSeconds}))!
                
-                groupDict.updateValue(sortedArray, forKey: grp.presetAgeGroupName)
+                groupDict.updateValue(sortedArray, forKey: grp.groupTitle)
                 
             }
         
         
         
-        resultList = resultList.sorted(by: { $0.resultSeconds < $1.resultSeconds})
+        //resultList = resultList.sorted(by: { $0.resultSeconds < $1.resultSeconds})
         myTableView.reloadData()
     }
     
     //MARK: - Tableview stuff
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        var intSections = 1
-        if isGrouped {
-            intSections = sectionGroups.count
-            //print("\(intSections)")
-        }
+        return sectionGroups.count
         
-        return intSections
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -171,7 +199,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         let headerView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: myTableView.frame.size.width - (offset * 2.0), height: 100.0))
         
-        if isGrouped {
+        
             headerView.backgroundColor = UIColor.black
             let label = UILabel(frame: CGRect(x: 0, y: -5, width: myTableView.frame.size.width, height: 30.0))
             label.clipsToBounds = true
@@ -180,13 +208,11 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             label.textColor = UIColor.white
             label.textAlignment = .center
             label.font = UIFont(name: "Helvetica", size: 25.0)
-            label.text = sectionGroups[section].presetAgeGroupName
+            label.text = sectionGroups[section].groupTitle
             //print(sectionGroups[section].groupName)
             headerView.addSubview(label)
             
-        }else{
-            headerView.backgroundColor = UIColor.clear
-        }
+        
         
         return headerView
 }
@@ -194,14 +220,12 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         var noRows : Int = 1
-        if isGrouped {
-            if let myArray = groupDict[sectionGroups[section].presetAgeGroupName] {
+        
+        if let myArray = groupDict[sectionGroups[section].groupTitle] {
                 noRows = myArray.count
-            }
-            
-        }else{
-            noRows = resultList.count
         }
+            
+        
         
         return noRows
     }
@@ -217,14 +241,12 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
      func configureCell(cell:ResultCell, atIndexPath indexPath:IndexPath) {
         var er = EventResult()
         var hdrText = ""
-        if isGrouped {
-            if let myArray = groupDict[sectionGroups[indexPath.section].presetAgeGroupName] {
+        
+            if let myArray = groupDict[sectionGroups[indexPath.section].groupTitle] {
                 er = myArray[indexPath.row]
             }
             
-        }else{
-            er = resultList[indexPath.row]
-        }
+        
         
         if let mem = er.myMember.first {
             //print(mem.memberName)
@@ -256,7 +278,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         
         
-        if isGrouped {
+        if usePreset {
             cell.lblImprovement.text = String(format: "%d Points", pointsearned)
             cell.lblImprovement.backgroundColor = pointsearned > 0 ? UIColor.green : UIColor.flatPink
         }else{
@@ -274,7 +296,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         /*Setthe medals and award points*/
        
-        if pointsearned != 0 && isGrouped {
+        if pointsearned != 0 && usePreset {
             do {
                 try realm.write {
                     er.pointsEarned = pointsearned

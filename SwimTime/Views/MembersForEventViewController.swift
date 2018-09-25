@@ -115,12 +115,12 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     
     @IBAction func filterClicked(_ sender: UIButton) {
-        if sender.tag == 1 {
-                        pickerTeams.isHidden = false
+        if sender.tag == 0 {
+                pickerTeams.isHidden = false
             
-                    }else{
-                        pickerAgeGroups.isHidden = false
-                    }
+        }else{
+             pickerAgeGroups.isHidden = false
+        }
     }
     
 

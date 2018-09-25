@@ -29,5 +29,25 @@ class EventResult : Object {
     
     let myEvent = LinkingObjects(fromType: Event.self, property: "eventResults")
     
-   
+//    func ageCategoryName() -> String {
+//        if let ag = selectedAgeCategory.first {
+//            return ag.presetAgeGroupName
+//        }else{
+//            return ""
+//        }
+//    }
+//    func ageCategoryID() -> Int {
+//        if let ag = selectedAgeCategory.first {
+//            return ag.presetAgeGroupID
+//        }else{
+//            return 0
+//        }
+//    }
+//    func memGender() -> String {
+//        if let mem = myMember.first {
+//            return mem.gender
+//        }else{
+//            return ""
+//        }
+//    }
 }

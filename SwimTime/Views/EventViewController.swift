@@ -739,6 +739,8 @@ class EventViewController: UIViewController,
                                
                             }
                         }
+                        self.loadPickerViewTeams()
+                        self.lastSelectedTeam = newClub
                     }
                 } catch {
                     print("Error saving items: \(error)")
@@ -753,6 +755,7 @@ class EventViewController: UIViewController,
         
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create New Team"
+            alertTextField.autocapitalizationType = .words
             userTextField = alertTextField
         }
         
@@ -977,8 +980,8 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         
          if pickerView.tag == 1 {
-            
-            return pickerTeamItems![row].clubName
+            lastSelectedTeam = pickerTeamItems![row]
+            return lastSelectedTeam!.clubName
          }else{
             return pickerPresetEventItems![row].getPresetName()
         }
