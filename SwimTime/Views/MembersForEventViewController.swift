@@ -116,7 +116,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     @IBAction func filterClicked(_ sender: UIButton) {
         if sender.tag == 0 {
-                pickerTeams.isHidden = false
+            pickerTeams.isHidden = false
             
         }else{
              pickerAgeGroups.isHidden = false
@@ -143,23 +143,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                 self.filterView.isHidden = true
             }
         })
-        //filterView.isHidden = filterShowing
-        
-        
-//        let newtbFrame = CGRect(x: origtableframe.origin.x, y: origtableframe.origin.y - origFilterViewHeight, width: origtableframe.width, height: origtableframe.size.height + origFilterViewHeight)
-//        UIView.animate(withDuration: 1
-//            , animations: {
-//                if self.filterShowing {
-//                    self.myTableView.setContentOffset(.zero, animated: true)
-//                }
-//                self.filterView.frame.size.height = self.filterShowing ? self.origFilterViewHeight : 1.0
-//                if self.filterShowing {
-//                    self.myTableView.frame = self.origtableframe
-//                }else{
-//                    self.myTableView.frame = newtbFrame
-//                }
-//                self.filterView.isHidden = !self.filterShowing
-//        })
+   
 
     }
     
@@ -181,44 +165,45 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
              delegate?.updateDefaultFilters(team: lastTeamFilter!, ageGroup: nil)
         }
         
-
-        if membersList?.count != 0 {
-        
-            do {
-                try realm.write {
-                    for mem in membersList! {
-                        if mem.selectedForEvent {
-                            mem.selectedForEvent = false
-                            let er = EventResult()
-                            er.eventResultId = mydefs.getNextEventResultId()
-                            if selectedEvent.useRaceNos {
-                                er.raceNo = mydefs.getNextRaceNo()
+        if let _ = membersList?.count {
+            if membersList?.count != 0 {
+            
+                do {
+                    try realm.write {
+                        for mem in membersList! {
+                            if mem.selectedForEvent {
+                                mem.selectedForEvent = false
+                                let er = EventResult()
+                                er.eventResultId = mydefs.getNextEventResultId()
+                                if selectedEvent.useRaceNos {
+                                    er.raceNo = mydefs.getNextRaceNo()
+                                    
+                                }
+                                er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
                                 
+                                er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
+                                
+                                
+                                let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
+                                
+                                if let psage = pse?.PresetAgeGroup {
+                                    er.selectedAgeCategory.removeAll()
+                                    er.selectedAgeCategory.append(psage)
+                                    er.staggerStartBy = psage.staggerSeconds
+                                    er.expectedSeconds += psage.staggerSeconds
+                                }
+                               
+                                
+                                realm.add(er)
+                                mem.eventResults.append(er)
+                                selectedEvent.eventResults.append(er)
                             }
-                            er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
-                            
-                            er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
-                            
-                            
-                            let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
-                            
-                            if let psage = pse?.PresetAgeGroup {
-                                er.selectedAgeCategory.removeAll()
-                                er.selectedAgeCategory.append(psage)
-                                er.staggerStartBy = psage.staggerSeconds
-                                er.expectedSeconds += psage.staggerSeconds
-                            }
-                           
-                            
-                            realm.add(er)
-                            mem.eventResults.append(er)
-                            selectedEvent.eventResults.append(er)
                         }
+                        
                     }
-                    
+                }catch{
+                    showError(errmsg: "Cant save members")
                 }
-            }catch{
-                showError(errmsg: "Cant save members")
             }
         }
         self.navigationController?.popViewController(animated: true)
@@ -530,15 +515,21 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     // MARK: - Navigation
     
-    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == quickEntrySeg {
+            let vc = segue.destination as! MembersViewController
+            if let thisclub = lastTeamFilter {
+                vc.selectedClub = thisclub
+            }
+        }
+    }
     
     //MARK: - Errors
     func showError(errmsg:String) {
         let alert = UIAlertController(title: "Error", message: errmsg, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-        
+
         present(alert, animated: true, completion: nil)
-        
         
     }
     

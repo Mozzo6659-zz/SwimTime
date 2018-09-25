@@ -931,7 +931,7 @@ func doEventStart() {
 //MARK: - PickerView
 
 extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
-    //Ive got two pickerviewws. One wht Preset meet inof and pne wiht club info thats used in 2 places
+    //Ive got two pickerviewws. One with Preset meet info and one with club info thats used in 2 places
     func loadPickerViews() {
         pickerTeams = UIPickerView()
         pickerPresetEvent = UIPickerView()
@@ -1008,6 +1008,8 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
                     
                     
                 }
+            
+            lastSelectedTeam = thisteam
             
         }else{
             

@@ -55,7 +55,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         configureView()
         
         if (selectedMember.memberID == 0 ) {
-            //selectedGroup = pickerItems![0]
+            
             startNewMember()
             //[btnSave setHidden:quickEntry];
         }else{
@@ -187,7 +187,8 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         
 
     }
-    @IBAction func takePhoto(_ sender: UIButton) {
+    
+    @IBAction func takePhoto(_ sender: Any) {
         
         present(imagePicker, animated: true, completion: nil)
 
@@ -390,7 +391,11 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         btnMale.setImage(getTickedImage(), for: .normal)
         btnFemale.setImage(getUnTickedImage(), for: .normal)
         
-        selectedClub = defSwimClub
+        if selectedClub.clubID == 0 {
+            selectedClub = defSwimClub
+        }
+        
+        
         lblGroup.text = selectedClub.clubName
         selectedMember = Member()
     }
