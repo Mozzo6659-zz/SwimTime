@@ -171,7 +171,7 @@ class seedDatabase {
         let ageGrp3 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 12, maxage: 14, staggerseconds: 120,agegrpName:"12 and over",useoverminforselect: true)
         myageGrps.append(ageGrp3)
         
-        let ageGrp4 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 15, maxage: 24, staggerseconds: 0,agegrpName:"12 and over",useoverminforselect: true)
+        let ageGrp4 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 15, maxage: 24, staggerseconds: 0,agegrpName:"15 and over",useoverminforselect: true)
         myageGrps.append(ageGrp4)
         
         let ageGrp5 = makeAgeGroup(id: myDefs.getNextPresetAgeGroupID(),presetEventId: eventID, minage: 25, maxage: 100, staggerseconds: 0,agegrpName:"25 and over",useoverminforselect: true)
@@ -317,7 +317,7 @@ class seedDatabase {
         if clubArray.count == 0 {
             let defsc = SwimClub()
             defsc.clubName = "Seas the Limit"
-            defsc.clubID = 1
+            defsc.clubID = myDefs.getNextClubId()
             defsc.isDefault = true
             do {
                 

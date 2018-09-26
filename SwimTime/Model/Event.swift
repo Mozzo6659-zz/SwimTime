@@ -28,26 +28,26 @@ class Event : Object {
     let selectedTeams = List<SwimClub>() //preset event clubs selected
      //currnetly not using this. the idea was to set up filters tfor selecting members that would be persisted
     //leave it for now. Preset event has its won filters
-    @objc dynamic var ageFilterMin : Int = 0
-    @objc dynamic var ageFilterMax : Int = 0
-    @objc dynamic var genderFilter : String = ""
+    //@objc dynamic var ageFilterMin : Int = 0
+    //@objc dynamic var ageFilterMax : Int = 0
+    //@objc dynamic var genderFilter : String = ""
     
     
     
     
     //currnetly not using this. the idea was to set up filters tfor selecting members that would be persisted//leave ot for now
-    func getAgeFilter() -> String {
-        var sFilter = ""
-
-        if (ageFilterMin != 0 || ageFilterMax != 0) {
-            if ageFilterMin == ageFilterMax {
-                sFilter = "\(ageFilterMin) years only"
-            }else{
-                sFilter = "Ages \(ageFilterMin) to \(ageFilterMax)"
-            }
-
-        }
-        return sFilter
-    }
+//    func getAgeFilter() -> String {
+//        var sFilter = ""
+//
+//        if (ageFilterMin != 0 || ageFilterMax != 0) {
+//            if ageFilterMin == ageFilterMax {
+//                sFilter = "\(ageFilterMin) years only"
+//            }else{
+//                sFilter = "Ages \(ageFilterMin) to \(ageFilterMax)"
+//            }
+//
+//        }
+//        return sFilter
+//    }
     
 }

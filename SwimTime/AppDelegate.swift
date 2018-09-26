@@ -12,7 +12,7 @@ import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+//<div>Icons made by <a href="https://www.flaticon.com/authors/roundicons"
     var window: UIWindow?
     let realm = try! Realm()
 
@@ -29,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         seedDB.addThesePresetEvents()
         //checkExplorer()
         //addMembers()
-        checkSort()
+        //checkSort()
         
         UIApplication.shared.applicationIconBadgeNumber = 0 //incase there was a badge
         return true

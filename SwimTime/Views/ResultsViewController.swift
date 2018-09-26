@@ -24,6 +24,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     let grpmale = " - Male"
     @IBOutlet weak var lblDistance: UILabel!
     
+    @IBOutlet weak var lblPoints: UILabel!
     
     @IBOutlet weak var myToolbar: UIToolbar!
     @IBOutlet weak var myTableView: UITableView!
@@ -67,6 +68,30 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
         hdrText += ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters ") + dateFormatter.string(from: currentEvent.eventDate)
         lblDistance.text = hdrText
+        
+        if usePreset && currentEvent.selectedTeams.count > 1 {
+            //tally all the points
+            var team1pts = 0
+            var team2pts = 0
+            let club1 = currentEvent.selectedTeams[0].clubName
+            let club2 = currentEvent.selectedTeams[1].clubName
+            for er in currentEvent.eventResults {
+                if let mem = er.myMember.first {
+                    if let sc = mem.myClub.first {
+                        if sc.clubName == club1 {
+                            team1pts += er.pointsEarned
+                        }else{
+                            team2pts += er.pointsEarned
+                        }
+                    }
+                }
+                
+            }
+            lblPoints.text = String(format:"%@ %d points - %@ %d points",club1,team1pts,club2,team2pts)
+            
+        }else{
+            lblPoints.isHidden = true
+        }
     }
     
     
@@ -120,7 +145,10 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func buildGroups() {
-
+        //everything is gouped . For event where a preset with age groups wasnt used its grouped by gender.
+        //for preset events where age groups are used its grouped by the age groups
+        
+        
         sectionGroups.removeAll()
      
         
@@ -250,7 +278,15 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         if let mem = er.myMember.first {
             //print(mem.memberName)
-            hdrText = mem.memberName
+            if let ev = er.myEvent.first {
+                if ev.useRaceNos {
+                    hdrText = String(format:"%d - ",er.raceNo)
+                }
+            }
+            hdrText += mem.memberName
+            if usePreset {
+                hdrText += String(format: "  (%@)", (mem.myClub.first?.clubName)!)
+            }
         }
         
         var pointsearned = 0
@@ -279,6 +315,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         
         if usePreset {
+            
             cell.lblImprovement.text = String(format: "%d Points", pointsearned)
             cell.lblImprovement.backgroundColor = pointsearned > 0 ? UIColor.green : UIColor.flatPink
         }else{
@@ -289,7 +326,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         cell.lblHeader.text = hdrText
         cell.lblEstimate.text = "Est: " + myfunc.convertSecondsToTime(timeinseconds: er.expectedSeconds)
         
-        cell.lblResult.text = "Result: " + myfunc.convertSecondsToTime(timeinseconds: er.resultSeconds)
+        cell.lblResult.text = "Time: " + myfunc.convertSecondsToTime(timeinseconds: er.resultSeconds)
         
         
         

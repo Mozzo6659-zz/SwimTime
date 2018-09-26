@@ -128,9 +128,22 @@ class MainViewController: UIViewController {
     
     //MARK: - Dev Stuff
     @IBAction func btnDevClicked(_ sender: UIButton) {
-        let myseed = seedDatabase()
+        //let myseed = seedDatabase()
         
-        myseed.addtheseMembers()
+        //myseed.addtheseMembers()
+        
+        //I was getting age groups with no name ??
+         let pickerAgeGroupItems = Array(realm.objects(PresetEventAgeGroups.self).sorted(byKeyPath: "presetAgeGroupID"))
+        
+        for ag in pickerAgeGroupItems {
+            var sptext = ""
+            if ag.presetAgeGroupName.isEmpty {
+                sptext = "fuckin nuthin"
+            }else{
+               sptext = ag.presetAgeGroupName
+            }
+            print(sptext)
+        }
         
     }
 }

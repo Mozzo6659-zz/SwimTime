@@ -13,6 +13,4 @@ class Group : Object {
     @objc dynamic var groupID : Int = 0
     @objc dynamic var groupName : String = ""
     let members = List<Member>()
-
-    
 }

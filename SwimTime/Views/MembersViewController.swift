@@ -142,6 +142,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     func addNewTeam() {
         var userTextField = UITextField() //module lel textfile used in the closure
         userTextField.autocapitalizationType = .words
+        var bContinue = false
         
         let alert = UIAlertController(title: "Add New Team", message: "", preferredStyle: .alert)
         
@@ -151,10 +152,10 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
             //var item = Item(thetitle: userTextField.text!)
             let newName = userTextField.text!
             if !newName.isEmpty {
-                bContinue = !self.myFunc.isDuplicateClub(newClubname: newName)
+                bContinue = !self.myfunc.isDuplicateClub(newClubname: newName)
             }
             
-            if !newName.isEmpty {
+            if bContinue {
                 do {
                     try self.realm.write {
                         let newClub = SwimClub()

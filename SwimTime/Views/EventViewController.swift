@@ -17,6 +17,8 @@ class EventViewController: UIViewController,
     var returnFromMembers = false
     var eventIsRunning = false //if true then the current even is running so we start it back off
     
+    var isRelay = false
+    
     var usePresetEvents = false
     var noSeconds : Int = 1
     
@@ -37,7 +39,12 @@ class EventViewController: UIViewController,
     
     
     var groupDict : [String : [EventResult]] = [:]
-    var sectionGroups : [PresetEventAgeGroups] = []
+    var sectionAgeGroups : [PresetEventAgeGroups] = []
+    
+    
+    //each group will be example Seas the limit Team A
+    var sectionRelayGroups : [(displayname:String, clubname:String, relayNo:Int)] = []
+    
     
     private var datepicker : UIDatePicker?
     
@@ -53,6 +60,7 @@ class EventViewController: UIViewController,
     var origInternalDetailsFrame = CGRect(x: 8.0, y: 60.0, width: 750.0, height: 170.0)
     
     var pickerViewFrame = CGRect(x: 120.0, y: 100.0, width: 600.00, height: 143.0)
+    var defSwimClub = SwimClub()
     
     @IBOutlet weak var txtLocation: UITextField!
     @IBOutlet weak var txtDistance: UITextField!
@@ -72,7 +80,7 @@ class EventViewController: UIViewController,
     
     @IBOutlet weak var lblEventDate: UILabel!
     
-   var defSwimClub = SwimClub()
+   
     
     @IBOutlet weak var btnEventDate: UITextField! //yes ots a text filed
     
@@ -103,6 +111,11 @@ class EventViewController: UIViewController,
             currentEvent.selectedTeams.append(defSwimClub)
         }
         
+        if currentEvent.eventID != 0 {
+            if let pse = currentEvent.presetEvent {
+                isRelay = pse.isRelay
+            }
+        }
         loadPickerViews()
         
         myTableView.delegate = self
@@ -182,10 +195,19 @@ class EventViewController: UIViewController,
     
     
     
+   
+    
+    
     func configureDatePicker() {
         datepicker = UIDatePicker()
         datepicker?.datePickerMode = .date
-       btnEventDate.inputView = datepicker
+        btnEventDate.inputView = datepicker
+        if currentEvent.eventID == 0 {
+            datepicker?.date = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        }else{
+           datepicker?.date = currentEvent.eventDate
+        }
+        
         datepicker?.addTarget(self, action: #selector(EventViewController.dateChanged(datepicker:)), for: .valueChanged)
         
     }
@@ -193,7 +215,8 @@ class EventViewController: UIViewController,
     @objc func dateChanged(datepicker:UIDatePicker) {
         
         lblEventDate.text = myFunc.formatDate(thedate: datepicker.date)
-        //COME BACK - need to updare ages ??
+        
+        //COME BACK - need to update photos and member names blah blah ??
         removeKeyBoard()
         
     }
@@ -220,6 +243,9 @@ class EventViewController: UIViewController,
     @IBAction func useRaceNosChanged(_ sender: UISwitch) {
         removeKeyBoard()
         useRaceNos = sender.isOn
+        if currentEvent.eventID != 0 {
+            resetEvent()
+        }
     }
     
     @IBAction func btnResetClicked(_ sender: UIButton) {
@@ -229,14 +255,18 @@ class EventViewController: UIViewController,
             stopTimer()
         }
         
-      
+      resetEvent()
+        
+    }
+    
+    func resetEvent() {
         do {
             try realm.write {
                 if let dist = Int(txtDistance.text!) {
                     currentEvent.eventDistance = dist
                 }
                 currentEvent.useRaceNos = opRaceNo.isOn
-            
+                
                 for er in currentEvent.eventResults {
                     let mem = er.myMember.first!
                     er.resultSeconds = 0
@@ -244,6 +274,7 @@ class EventViewController: UIViewController,
                     if useRaceNos && er.raceNo == 0 {
                         er.raceNo = myDefs.getNextRaceNo()
                     }
+                    er.activeForRelay = false
                     //print("\(er.expectedSeconds)")
                 }
                 
@@ -255,15 +286,13 @@ class EventViewController: UIViewController,
             showError(errmsg: "Cant Reset")
         }
         
-       changeBorderColours()
+        changeBorderColours()
         
         lblTimeDisplay.text = "00:00:00"
         noSeconds=1;
         btnStart.setTitle("Start", for: .normal)
         myTableView.reloadData()
     }
-    
-    
     @IBAction func btnDone(_ sender: UIBarButtonItem) {
         //delete event if no members in event
         
@@ -402,8 +431,9 @@ class EventViewController: UIViewController,
             if currentEvent.hasPresetEvent {
                 lblIPMeet.text = currentEvent.presetEvent?.getPresetName()
                 lblIPTeam1.text = currentEvent.selectedTeams[0].clubName
+                lastSelectedTeam = currentEvent.selectedTeams[0]
                 if currentEvent.selectedTeams.count > 1 {
-                    lblIPTeam2.text = currentEvent.selectedTeams[0].clubName
+                    lblIPTeam2.text = currentEvent.selectedTeams[1].clubName
                 }
             }
         }else{
@@ -413,18 +443,28 @@ class EventViewController: UIViewController,
         
         lblEventDate.text = sDateText
         txtLocation.text = currentEvent.eventLocation
-        opRaceNo.isOn = currentEvent.useRaceNos
         
+        opRaceNo.isOn = currentEvent.useRaceNos
+        useRaceNos = currentEvent.useRaceNos
         
     }
     
     func loadEventResults() {
        
         if currentEvent.eventResults.count != 0 {
-            eventResults = currentEvent.eventResults.filter("resultSeconds=0").sorted(byKeyPath: "expectedSeconds", ascending: true)
+            if isRelay {
+                if timerOn {
+                    eventResults = currentEvent.eventResults.filter("activeForRelay=true").sorted(byKeyPath: "getRelayOrder()", ascending: true)
+                }else{
+                    eventResults = currentEvent.eventResults.sorted(byKeyPath: "getRelayOrder()", ascending: true)
+                }
+            }else{
+                eventResults = currentEvent.eventResults.filter("resultSeconds=0").sorted(byKeyPath: "expectedSeconds", ascending: true)
+            }
             
             if eventResults?.count != 0 {
                 if eventIsRunning  {
+                    //come back from a home button close where an event was running
                     let secondsElapsed = myDefs.getRunningEventSecondsStopped()
                     let addseconds = myFunc.getDateDiffSeconds(fromDate: myDefs.getRunningEventStopDate())
                     
@@ -437,11 +477,12 @@ class EventViewController: UIViewController,
                     eventIsRunning = false
                     doEventStart()
                 }else{
-                    if eventHasAgeGroups && !timerOn {
+                    if (eventHasAgeGroups || isRelay) && !timerOn {
                         loadGroupTableData()
                     }else{
                         groupDict.removeAll()
-                        sectionGroups.removeAll()
+                        sectionAgeGroups.removeAll()
+                        sectionRelayGroups.removeAll()
                     }
                 }
             }
@@ -456,43 +497,77 @@ class EventViewController: UIViewController,
         if groupDict.count != 0 {
             groupDict.removeAll()
         }
-        if sectionGroups.count != 0 {
-            sectionGroups.removeAll()
+        
+        if sectionAgeGroups.count != 0 {
+            sectionAgeGroups.removeAll()
         }
         
+        if sectionRelayGroups.count != 0 {
+            sectionRelayGroups.removeAll()
+        }
         
-        for er in eventResults! {
-            /*var groupDict : [String : [EventResult]] = [:]
-            var sectionGroups : [PresetEventAgeGroups] = []
-             */
-            if let grp = er.selectedAgeCategory.first {
-            
-                if sectionGroups.count == 0 {
-                    sectionGroups.append(grp)
-                }else{
-                    if let _ = sectionGroups.index(where: {$0.presetAgeGroupName == grp.presetAgeGroupName}) {
-                        
+        if useAgeGroupSectionsinTableView() {
+            for er in eventResults! {
+                /*var groupDict : [String : [EventResult]] = [:]
+                var sectionGroups : [PresetEventAgeGroups] = []
+                 */
+                if let grp = er.selectedAgeCategory.first {
+                
+                    if sectionAgeGroups.count == 0 {
+                        sectionAgeGroups.append(grp)
                     }else{
-                        sectionGroups.append(grp)
+                        if let _ = sectionAgeGroups.index(where: {$0.presetAgeGroupName == grp.presetAgeGroupName}) {
+                            
+                        }else{
+                            sectionAgeGroups.append(grp)
+                        }
                     }
+                   
+                    //groupDict[grp.presetAgeGroupName]?.append(er)
+                    //print("\(groupDict[grp.presetAgeGroupName]?.count ?? "Help")")
                 }
-               
-                //groupDict[grp.presetAgeGroupName]?.append(er)
-                //print("\(groupDict[grp.presetAgeGroupName]?.count ?? "Help")")
+                sectionAgeGroups = sectionAgeGroups.sorted(by: {$0.presetAgeGroupID < $1.presetAgeGroupID})
             }
             
+            for sd in sectionAgeGroups {
+                var mArr = Array(eventResults!.filter("ANY selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName))
+                mArr = mArr.sorted(by: {$0.myMember.first!.gender < $1.myMember.first!.gender})
+                groupDict[sd.presetAgeGroupName] = mArr
+            }
+        }else{
+            if useRelaySectionsInTableView() {
+                 for er in eventResults! {
+                    //var sectionRelayGroups : [(displayname:String, clubname:String, relayLetter:String)] = []
+                    if let em = er.myMember.first {
+                        if let cb = em.myClub.first {
+                            let sDisplay = String(format:"%@ - Team %@",cb.clubName,er.getRelayLetter())
+                            if sectionRelayGroups.count == 0 {
+                                sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))
+                            }else{
+                                if let _ = sectionRelayGroups.index(where: {$0.displayname == sDisplay}) {
+                                    
+                                }else{
+                                   sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))
+                                }
+                            }
+                        }
+                        
+                    }
+                 }
+                //COME BACK
+//                sectionRelayGroups = sectionRelayGroups.sorted(by: {$0.relayLetter < $1.relayLetter})
+//                for sd in sectionRelayGroups {
+//                    var mArr = Array(eventResults!.filter("ANY myMember.myClub.clubName = %@ AND relayNo = %d",sd.clubname,sd.relayNo))
+//                    mArr = mArr.sorted(by: {$0.display})
+//                    groupDict[sd.displayname] = mArr
+//                }
+            }
         }
-        
-        for sd in sectionGroups {
-            let mArr = Array(eventResults!.filter("ANY selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName))
-            groupDict[sd.presetAgeGroupName] = mArr
-        }
-        
     }
     func numberOfSections(in tableView: UITableView) -> Int {
         
-        if useSectionsinTableView() {
-            return sectionGroups.count
+        if useAgeGroupSectionsinTableView() {
+            return sectionAgeGroups.count
         }else{
             return eventResults?.count ?? 0
         }
@@ -502,16 +577,16 @@ class EventViewController: UIViewController,
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        if useSectionsinTableView() {
+        if useAgeGroupSectionsinTableView() {
             //print("\(sectionGroups[section].presetAgeGroupName)")
-            return (groupDict[sectionGroups[section].presetAgeGroupName]?.count)!
+            return (groupDict[sectionAgeGroups[section].presetAgeGroupName]?.count)!
         }else{
             return 1
         }
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        if useSectionsinTableView() {
+        if useAgeGroupSectionsinTableView() {
             return 30.0
         }else{
             return 3.0
@@ -525,7 +600,11 @@ class EventViewController: UIViewController,
     
         let headerView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: myTableView.frame.size.width - (offset * 2.0), height: 100.0))
     
-        if useSectionsinTableView() {
+        if useAgeGroupSectionsinTableView() {
+            var sHeader = sectionAgeGroups[section].presetAgeGroupName
+            if let myArray = groupDict[sectionAgeGroups[section].presetAgeGroupName] {
+                sHeader += String(format:"  (%d entrants)" ,myArray.count)
+            }
             headerView.backgroundColor = UIColor.black
             let label = UILabel(frame: CGRect(x: 0, y: -5, width: myTableView.frame.size.width, height: 30.0))
             label.clipsToBounds = true
@@ -534,7 +613,7 @@ class EventViewController: UIViewController,
             label.textColor = UIColor.white
             label.textAlignment = .center
             label.font = UIFont(name: "Helvetica", size: 25.0)
-            label.text = sectionGroups[section].presetAgeGroupName
+            label.text = sHeader
             //print(sectionGroups[section].groupName)
             headerView.addSubview(label)
             
@@ -554,8 +633,8 @@ class EventViewController: UIViewController,
     
     func configureCell(cell:UITableViewCell, atIndexPath indexPath:IndexPath) {
         var er = EventResult()
-        if useSectionsinTableView() {
-            if let myArray = groupDict[sectionGroups[indexPath.section].presetAgeGroupName] {
+        if useAgeGroupSectionsinTableView() {
+            if let myArray = groupDict[sectionAgeGroups[indexPath.section].presetAgeGroupName] {
                 er = myArray[indexPath.row]
             }
            
@@ -570,6 +649,7 @@ class EventViewController: UIViewController,
         cell.detailTextLabel?.font = UIFont(name: "Helvetica", size: 20.0)
         
         //NSLog(@"memberid=%d name=%@",lh.member.memberid,lh.member.membername);
+        
         var txtLabel : String = ""
         
         if currentEvent.useRaceNos {
@@ -681,13 +761,16 @@ class EventViewController: UIViewController,
             vc.selectedEvent = currentEvent
             vc.usePreset = usePresetEvents
             if let sc = lastSelectedTeam {
+                //print("\(sc.clubName)")
                 vc.lastTeamFilter = sc
             }else{
                 vc.lastTeamFilter = currentEvent.selectedTeams[0]
             }
             if let agp = lastSelectedAgeGroup {
+                //print(agp.presetAgeGroupName)
                 vc.lastAgeGroupFilter = agp
             }
+            vc.delegate = self
         }else {
             if segue.identifier == eventToResultsseg {
                 let vc = segue.destination as! ResultsViewController
@@ -703,6 +786,8 @@ class EventViewController: UIViewController,
         
     }
     @IBAction func addNewTeam(_ sender: UIButton) {
+        removePickerViews()
+        
         let useTeam1 = (sender.tag==1)
         var bContinue = false
         var userTextField = UITextField() //textfile used in the closure
@@ -729,7 +814,6 @@ class EventViewController: UIViewController,
                             newClub.clubName = newName
                             newClub.isDefault = false
                             self.realm.add(newClub)
-                            self.loadPickerViews()
                             if useTeam1 {
                                 self.lblIPTeam1.text = newName
                                 self.currentEvent.selectedTeams[0] = newClub
@@ -746,6 +830,7 @@ class EventViewController: UIViewController,
                             }
                             self.loadPickerViewTeams()
                             self.lastSelectedTeam = newClub
+                            //print(newClub.clubName)
                         }
                     } catch {
                         print("Error saving items: \(error)")
@@ -865,15 +950,20 @@ func doEventStart() {
     
 }
     
-    func useSectionsinTableView() -> Bool {
+    func useAgeGroupSectionsinTableView() -> Bool {
         return (!timerOn) && eventHasAgeGroups
     }
+    
+    func useRelaySectionsInTableView() -> Bool {
+        return (!timerOn) && isRelay
+    }
+    
     func moveStartViewUp() {
         let xPosition = origDetailsFrame.origin.x + 3.0
-        //View will slide 20px up
-        let yPosition = origDetailsFrame.origin.y + 5.0 //off set from the top
         
-        let myTableNewHeight = origTableFrame.size.height + (origDetailsFrame.size.height - 5.0)
+        let yPosition = origDetailsFrame.origin.y + 8.0 //off set from the top
+        
+        let myTableNewHeight = origTableFrame.size.height + (origDetailsFrame.size.height)
         let myTableYPosition = origDetailsFrame.origin.y + origStartFrame.size.height
         
         UIView.animate(withDuration: 1, animations: {
@@ -919,6 +1009,7 @@ func doEventStart() {
     func updateDefaultFilters(team : SwimClub,ageGroup: PresetEventAgeGroups?) {
         lastSelectedTeam = team
         if let ag = ageGroup {
+            //print(ag.presetAgeGroupName)
             lastSelectedAgeGroup = ag
         }
         
@@ -950,7 +1041,11 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
         view.addSubview(pickerPresetEvent)
         loadPickerViewTeams()
         loadPickViewPresetEvents()
+        removePickerViews()
         
+    }
+    
+    func removePickerViews() {
         pickerTeams.isHidden = true
         pickerPresetEvent.isHidden = true
     }
@@ -986,8 +1081,9 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         
          if pickerView.tag == 1 {
-            lastSelectedTeam = pickerTeamItems![row]
-            return lastSelectedTeam!.clubName
+            //let sc = pickerTeamItems![row]
+            //print("\(lastSelectedTeam!.clubName)")
+            return pickerTeamItems![row].clubName
          }else{
             return pickerPresetEventItems![row].getPresetName()
         }
@@ -1016,7 +1112,7 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
                 }
             
             lastSelectedTeam = thisteam
-            
+            //print("\(thisteam.clubName)")
         }else{
             
             let thispse = pickerPresetEventItems![row]
@@ -1033,8 +1129,9 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
                 lblIPMeet.text = pickerPresetEventItems![row].getPresetName()
                 
                 currentEvent.presetEvent = thispse
-                
                 eventHasAgeGroups = thispse.eventAgeGroups.count != 0
+                isRelay = thispse.isRelay
+                
             }
            
         }

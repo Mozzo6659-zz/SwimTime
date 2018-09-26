@@ -17,8 +17,9 @@ class EventResult : Object {
     @objc dynamic var pointsEarned : Int = 0
     @objc dynamic var staggerStartBy : Int = 0
     @objc dynamic var raceNo : Int = 0
-    @objc dynamic var teamNo : Int = 0
-     @objc dynamic var teamOrder : Int = 0
+    @objc dynamic var relayNo : Int = 0
+    @objc dynamic var activeForRelay : Bool = false //used ina realy to know whos racing currently
+     @objc dynamic var relayOrder : Int = 0
      @objc dynamic var ageAtEvent : Int = 0
     @objc dynamic var diffSeconds : Int = 0
     
@@ -29,6 +30,32 @@ class EventResult : Object {
     
     let myEvent = LinkingObjects(fromType: Event.self, property: "eventResults")
     
+    func getRelayLetter() -> String {
+        var strLetter = ""
+        switch relayNo {
+        case 1 :
+            strLetter = "A"
+            break
+        case 2 :
+            strLetter = "B"
+            break
+        case 3 :
+            strLetter = "C"
+            break
+        case 4 :
+            strLetter = "B"
+            break
+            
+        default :
+            break
+            
+        }
+        return strLetter
+    }
+    func getRelayOrder() -> String {
+        
+        return String(format:"%@%d",getRelayLetter(),relayNo)
+    }
 //    func ageCategoryName() -> String {
 //        if let ag = selectedAgeCategory.first {
 //            return ag.presetAgeGroupName
