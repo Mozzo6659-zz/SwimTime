@@ -20,7 +20,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     var membersList : Results<Member>?
     var myfunc = appFunctions()
     var mydefs = appUserDefaults()
-    
+    var isRelay = false
     var pickerTeams : UIPickerView!
     var pickerAgeGroups : UIPickerView!
     
@@ -31,6 +31,8 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     var lastTeamFilter : SwimClub?
     
     var selectedEvent = Event()
+    
+    var currentRelayNo = 1 //this is the relay numer for this club. ser cant chnage clubs while selecting relay people
     
     var usePreset : Bool = false
     var origtableframe  : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
@@ -69,7 +71,10 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     override func viewDidLoad() {
         super.viewDidLoad()
         
-    
+        if let pse = selectedEvent.presetEvent {
+            isRelay = pse.isRelay
+        }
+        
         
         navigationItem.setHidesBackButton(true, animated: false)
         //adjuts the height
@@ -92,8 +97,9 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
         hideShowFilter(self)
         
-        
         loadPresetEventMembers()
+        
+        currentRelayNo = getNextRelayNo(clubid: getClubID()) //last team filter is always set
         
         if loadMembers() {
             myTableView.reloadData()
@@ -171,9 +177,6 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     
     @IBAction func doneClicked(_ sender: UIBarButtonItem) {
-        //2 If we have a delegate set, call the method userEnteredANewCityName
-        
-        
         
         if let _ = membersList?.count {
             if membersList?.count != 0 {
@@ -238,26 +241,27 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                 for er in selectedEvent.eventResults {
                     let mem = er.myMember.first!
                     if let agrp = er.selectedAgeCategory.first {
-                        addMemberToPreset(mem: mem,agegrp: agrp)
+                        addMemberToPreset(mem: mem,agegrp: agrp,relayno: er.relayNo, relayorder: er.relayOrder)
                     }else{
-                       addMemberToPreset(mem: mem,agegrp: nil)
+                        addMemberToPreset(mem: mem,agegrp: nil,relayno: er.relayNo, relayorder: er.relayOrder)
                     }
                     
-                    
                 }
+            
             
         }
         
     }
     
-    func addMemberToPreset(mem:Member,agegrp:PresetEventAgeGroups?) {
+    func addMemberToPreset(mem:Member,agegrp:PresetEventAgeGroups?,relayno:Int=0,relayorder:Int=0) {
         let pse = PresetEventMember()
         pse.memberid = mem.memberID
         pse.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)
         pse.gender = mem.gender
         pse.clubID = (mem.myClub.first?.clubID)!
         //print("\(pse.clubID)")
-        pse.relayLetter = ""
+        pse.relayNo = relayno
+        pse.relayOrder = relayorder
         if let ag =  agegrp  {
             //print("agegrpid=\(ag.presetAgeGroupID) name=\(ag.presetAgeGroupName)")
             pse.PresetAgeGroup = ag
@@ -266,11 +270,69 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
 
         memForEvent.append(pse)
     }
+    
+    
+    func getNextRelayNo(clubid:Int) -> Int {
+        //we need to go through the selected list and find either a relayno thats not used or a relayNo that is used but has less than 4 members
+        var iNextRelayNo = 1
+        
+            for er in memForEvent {
+                if er.clubID == clubid && er.relayNo == iNextRelayNo {
+                    // see if there are 4 people
+                    let myarr = memForEvent.filter({$0.clubID == clubid && $0.relayNo == iNextRelayNo})
+                    if myarr.count == 4 {
+                        iNextRelayNo += 1 //found 4 members so add 1
+                    }else{
+                        break
+                    }
+                    
+                }
+                
+            }
+        
+        
+        return iNextRelayNo
+        
+    }
+    
+    func getRelayOrderForMember(thismemberid:Int) -> Int {
+        
+        if memForEvent.count != 0 {
+            if let pse = memForEvent.filter({$0.memberid == thismemberid}).first {
+                return pse.relayOrder
+            }else{
+                return 0
+            }
+            
+        }else{
+            return 0
+        }
+    }
+    func getNextRelayOrder(clubid:Int) -> Int {
+        var iNextRelayOrder = 1
+        
+            for er in memForEvent {
+                if er.clubID == clubid && er.relayNo == currentRelayNo {
+                    // see if there are 4 people
+                    let myarr = memForEvent.filter({$0.clubID == clubid && $0.relayNo == currentRelayNo})
+                    if myarr.count < 4 { //checkmemis valid will check there is not 4 for currentRelayno
+                        iNextRelayOrder += 1 //found 4 members so add 1
+                    }else{
+                        break
+                    }
+                    
+                }
+                
+            }
+        
+        return iNextRelayOrder
+    }
+    
     func checkMemIsvalid(mem:Member) -> Bool {
         var errMsg = ""
         if usePreset {
             if let pse = selectedEvent.presetEvent {
-                if pse.eventAgeGroups.count != 0 && memForEvent.count != 0 {
+                if memForEvent.count != 0 {
                     if pse.maxPerEvent != 0 {
                         if pse.maxPerEvent == memForEvent.count {
                             errMsg = "Maximum number for the Race exceeded. Max entrants is \(pse.maxPerEvent)"
@@ -287,8 +349,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                         
                     }
                     
-                    //0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID}
-                    if pse.maxPerGenderAndAgeGroup != 0 {
+                    if pse.maxPerGenderAndAgeGroup != 0 && pse.eventAgeGroups.count != 0 {
                         if let myclub = mem.myClub.first {
                             //print("\(mem.gender) agegrpid=\(lastAgeGroupFilter!.presetAgeGroupID) clubid=\(myclub.clubID)")
                             let matchingmems  = memForEvent.filter({$0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID})
@@ -299,7 +360,16 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                             
                            
                         }
+                    }else{
+                        if isRelay && errMsg.isEmpty {
+                            //have checked member numbers and the like. cant add this guy form currentRelayNo if 4 already in
+                            let marr = memForEvent.filter({$0.clubID == getClubID() && $0.relayNo == currentRelayNo})
+                            if marr.count == pse.maxPerRelay {
+                                errMsg = "Max for this relay and Team is \(pse.maxPerRelay)"
+                            }
+                        }
                     }
+                
                 }
             }
             
@@ -308,18 +378,29 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         if !errMsg.isEmpty {
             showError(errmsg: errMsg)
         }else{
-            if selectedEvent.presetEvent?.eventAgeGroups.count != 0 {
-                addMemberToPreset(mem: mem, agegrp: lastAgeGroupFilter)
-            }else{
-                addMemberToPreset(mem: mem, agegrp: nil)
-            }
-           
+            
+                if selectedEvent.presetEvent?.eventAgeGroups.count != 0 {
+                    addMemberToPreset(mem: mem, agegrp: lastAgeGroupFilter)
+                }else{
+                    if isRelay {
+                        addMemberToPreset(mem: mem, agegrp: nil,relayno: currentRelayNo,relayorder: getNextRelayOrder(clubid: getClubID()))
+                    }else{
+                       addMemberToPreset(mem: mem, agegrp: nil)
+                    }
+                    
+                }
             
         }
         return errMsg.isEmpty
     }
     
-    
+    func getClubID() -> Int {
+        if let thisclub = lastTeamFilter?.clubID {
+            return thisclub
+        }else{
+            return 0
+        }
+    }
     func loadMembers() -> Bool{
         //Im trying to list Members that are NOT in this event
         
@@ -463,8 +544,27 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         cell.accessoryView?.isHidden = false
         
         if lh.selectedForEvent {
-            let imageView = UIImageView(image: UIImage(named: "ticknew"))
-            
+            var theimg = "ticknew"
+            if isRelay {
+                let thismemrelayorder = getRelayOrderForMember(thismemberid: lh.memberID)
+                switch thismemrelayorder {
+                case 1 :
+                    theimg = "one"
+                    break
+                case 2 :
+                    theimg = "two"
+                    break
+                case 3 :
+                    theimg = "three"
+                    break
+                case 4 :
+                    theimg = "four"
+                    break
+                default :
+                    break
+                }
+            }
+            let imageView = UIImageView(image: UIImage(named: theimg))
             
             imageView.sizeToFit()
             cell.accessoryView = imageView
@@ -507,6 +607,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         var bok = false
         
         if mem.selectedForEvent  {
+            //remove if was selected
             bok = true
             if let mxm = memForEvent.index(where: {$0.memberid == mem.memberID}) {
                 memForEvent.remove(at: mxm)
@@ -523,6 +624,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
             do {
                 try realm.write {
                     mem.selectedForEvent = !mem.selectedForEvent
+                    
                     
                 }
             }catch{

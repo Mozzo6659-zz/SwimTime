@@ -14,7 +14,7 @@ class PresetEventMember {
     var ageAtEvent : Int = 0
     var gender : String = "Male"
     var clubID : Int = 0
-    var relayLetter : String = ""//(A,B,C,D)
+    var relayNo : Int = 0
     var relayOrder : Int = 1
     var PresetAgeGroup = PresetEventAgeGroups() //chad is gonna pick this
 }

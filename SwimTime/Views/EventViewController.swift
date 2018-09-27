@@ -507,69 +507,96 @@ class EventViewController: UIViewController,
         }
         
         if useAgeGroupSectionsinTableView() {
-            for er in eventResults! {
-                /*var groupDict : [String : [EventResult]] = [:]
-                var sectionGroups : [PresetEventAgeGroups] = []
-                 */
-                if let grp = er.selectedAgeCategory.first {
-                
-                    if sectionAgeGroups.count == 0 {
-                        sectionAgeGroups.append(grp)
-                    }else{
-                        if let _ = sectionAgeGroups.index(where: {$0.presetAgeGroupName == grp.presetAgeGroupName}) {
-                            
-                        }else{
-                            sectionAgeGroups.append(grp)
-                        }
-                    }
-                   
-                    //groupDict[grp.presetAgeGroupName]?.append(er)
-                    //print("\(groupDict[grp.presetAgeGroupName]?.count ?? "Help")")
-                }
-                sectionAgeGroups = sectionAgeGroups.sorted(by: {$0.presetAgeGroupID < $1.presetAgeGroupID})
-            }
-            
-            for sd in sectionAgeGroups {
-                var mArr = Array(eventResults!.filter("ANY selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName))
-                mArr = mArr.sorted(by: {$0.myMember.first!.gender < $1.myMember.first!.gender})
-                groupDict[sd.presetAgeGroupName] = mArr
-            }
+            buildSectionsAgeGroup()
         }else{
             if useRelaySectionsInTableView() {
-                 for er in eventResults! {
-                    //var sectionRelayGroups : [(displayname:String, clubname:String, relayLetter:String)] = []
-                    if let em = er.myMember.first {
-                        if let cb = em.myClub.first {
-                            let sDisplay = String(format:"%@ - Team %@",cb.clubName,er.getRelayLetter())
-                            if sectionRelayGroups.count == 0 {
-                                sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))
-                            }else{
-                                if let _ = sectionRelayGroups.index(where: {$0.displayname == sDisplay}) {
-                                    
-                                }else{
-                                   sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))
-                                }
-                            }
-                        }
-                        
-                    }
-                 }
-                //COME BACK
-//                sectionRelayGroups = sectionRelayGroups.sorted(by: {$0.relayLetter < $1.relayLetter})
-//                for sd in sectionRelayGroups {
-//                    var mArr = Array(eventResults!.filter("ANY myMember.myClub.clubName = %@ AND relayNo = %d",sd.clubname,sd.relayNo))
-//                    mArr = mArr.sorted(by: {$0.display})
-//                    groupDict[sd.displayname] = mArr
-//                }
+                builSectionsRelay()
             }
         }
     }
+    
+    func buildSectionsAgeGroup() {
+        for er in eventResults! {
+            /*var groupDict : [String : [EventResult]] = [:]
+             var sectionGroups : [PresetEventAgeGroups] = []
+             */
+            if let grp = er.selectedAgeCategory.first {
+                
+                if sectionAgeGroups.count == 0 {
+                    sectionAgeGroups.append(grp)
+                }else{
+                    if let _ = sectionAgeGroups.index(where: {$0.presetAgeGroupName == grp.presetAgeGroupName}) {
+                        
+                    }else{
+                        sectionAgeGroups.append(grp)
+                    }
+                }
+                
+                //groupDict[grp.presetAgeGroupName]?.append(er)
+                //print("\(groupDict[grp.presetAgeGroupName]?.count ?? "Help")")
+            }
+            sectionAgeGroups = sectionAgeGroups.sorted(by: {$0.presetAgeGroupID < $1.presetAgeGroupID})
+        }
+        
+        for sd in sectionAgeGroups {
+            var mArr = Array(eventResults!.filter("ANY selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName))
+            mArr = mArr.sorted(by: {$0.myMember.first!.gender < $1.myMember.first!.gender})
+            groupDict[sd.presetAgeGroupName] = mArr
+        }
+    }
+    func builSectionsRelay() {
+        //first build our groups of clu - Tema A etc
+       
+            for er in eventResults! {
+                //var sectionRelayGroups : [(displayname:String, clubname:String, relayLetter:String)] = []
+                if let em = er.myMember.first {
+                    if let cb = em.myClub.first {
+                        let sDisplay = String(format:"%@ - Team %@",cb.clubName,er.getRelayLetter())
+                        if sectionRelayGroups.count == 0 {
+                            sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))
+                        }else{
+                            if let _ = sectionRelayGroups.index(where: {$0.displayname == sDisplay}) {
+                                
+                            }else{
+                                sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))
+                            }
+                        }
+                    }
+                    
+                }
+            }
+            
+            sectionRelayGroups = sectionRelayGroups.sorted(by: {$0.relayNo < $1.relayNo})
+            for sd in sectionRelayGroups {
+                var mArr : [EventResult]=[]
+                //cant filter using myMeber.MyClub.clbname in realm
+                for er in eventResults! {
+                    if let mem = er.myMember.first {
+                        if let myclub = mem.myClub.first {
+                            if myclub.clubName == sd.clubname && er.relayNo == sd.relayNo {
+                                mArr.append(er)
+                            }
+                        }
+                    }
+                }
+                mArr = mArr.sorted(by: {$0.relayOrder < $1.relayOrder})
+                groupDict[sd.displayname] = mArr
+            }
+        
+    }
+    
+    
     func numberOfSections(in tableView: UITableView) -> Int {
         
         if useAgeGroupSectionsinTableView() {
             return sectionAgeGroups.count
         }else{
-            return eventResults?.count ?? 0
+            if useRelaySectionsInTableView() {
+                return sectionRelayGroups.count
+            }else{
+                return eventResults?.count ?? 0
+            }
+            
         }
         
         
@@ -581,7 +608,12 @@ class EventViewController: UIViewController,
             //print("\(sectionGroups[section].presetAgeGroupName)")
             return (groupDict[sectionAgeGroups[section].presetAgeGroupName]?.count)!
         }else{
-            return 1
+            if useRelaySectionsInTableView() {
+                return (groupDict[sectionRelayGroups[section].displayname]?.count)!
+            }else{
+                return 1
+            }
+            
         }
     }
     
@@ -639,7 +671,15 @@ class EventViewController: UIViewController,
             }
            
         }else{
-           er = eventResults![indexPath.row + indexPath.section]
+            if useRelaySectionsInTableView() {
+                if let myArray = groupDict[sectionRelayGroups[indexPath.section].displayname] {
+                    er = myArray[indexPath.row]
+                }
+                
+            }else{
+                er = eventResults![indexPath.row + indexPath.section]
+            }
+           
         }
         
         let mem = er.myMember.first!
@@ -648,7 +688,6 @@ class EventViewController: UIViewController,
         cell.textLabel?.font = UIFont(name: "Helvetica", size: 35.0)
         cell.detailTextLabel?.font = UIFont(name: "Helvetica", size: 20.0)
         
-        //NSLog(@"memberid=%d name=%@",lh.member.memberid,lh.member.membername);
         
         var txtLabel : String = ""
         

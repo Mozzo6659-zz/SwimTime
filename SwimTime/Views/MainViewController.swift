@@ -16,6 +16,7 @@ class MainViewController: UIViewController {
     var showPresetEvents = false
     let gotoEventsListSeg = "gotoEventsList"
     let gotoMembersListSeg = "gotoMembersList"
+    let gotoDualMeetListSeg = "gotoDualMeetList"
     
     let myDefs = appUserDefaults()
     let myFunc = appFunctions()
@@ -91,10 +92,12 @@ class MainViewController: UIViewController {
         switch sender.tag {
         case 1:
             seg = gotoMembersListSeg
-        case 2,3,4:
+        case 2,3:
             
             seg = gotoEventsListSeg
             
+        case 4:
+            seg = gotoDualMeetListSeg
         default:
             seg = ""
         }

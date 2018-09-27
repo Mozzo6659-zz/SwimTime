@@ -26,6 +26,8 @@ class EventResult : Object {
     //for reporting Im gonna need this. Chad can put you in any category regardless of how old you are. Im using a lits raher than a blank object. A lst can be empty whihc is fine for this purpose
     var selectedAgeCategory = List<PresetEventAgeGroups>()
     
+   
+    
     let myMember = LinkingObjects(fromType: Member.self, property: "eventResults")
     
     let myEvent = LinkingObjects(fromType: Event.self, property: "eventResults")

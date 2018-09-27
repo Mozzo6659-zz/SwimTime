@@ -12,6 +12,7 @@ import RealmSwift
 class Event : Object {
     @objc dynamic var eventID : Int = 0
     @objc dynamic var webID : Int = 0
+    @objc dynamic var dualMeetID : Int = 0
     @objc dynamic var dataChanged : Bool = false
     @objc dynamic var useRaceNos : Bool = false
     @objc dynamic var usePoints : Bool = false
@@ -21,33 +22,11 @@ class Event : Object {
     @objc dynamic var isFinished : Bool = false
     @objc dynamic var eventDistance : Int = 0
     @objc dynamic var hasPresetEvent : Bool = false
-    
+    @objc dynamic var isExhibitionRelay : Bool = false //allow for an exhibiton relay event
     @objc dynamic var presetEvent : PresetEvent?
     
     let eventResults = List<EventResult>()
     let selectedTeams = List<SwimClub>() //preset event clubs selected
-     //currnetly not using this. the idea was to set up filters tfor selecting members that would be persisted
-    //leave it for now. Preset event has its won filters
-    //@objc dynamic var ageFilterMin : Int = 0
-    //@objc dynamic var ageFilterMax : Int = 0
-    //@objc dynamic var genderFilter : String = ""
-    
-    
-    
-    
-    //currnetly not using this. the idea was to set up filters tfor selecting members that would be persisted//leave ot for now
-//    func getAgeFilter() -> String {
-//        var sFilter = ""
-//
-//        if (ageFilterMin != 0 || ageFilterMax != 0) {
-//            if ageFilterMin == ageFilterMax {
-//                sFilter = "\(ageFilterMin) years only"
-//            }else{
-//                sFilter = "Ages \(ageFilterMin) to \(ageFilterMax)"
-//            }
-//
-//        }
-//        return sFilter
-//    }
+    let myDualMeet = LinkingObjects(fromType: DualMeet.self, property: "selectedEvents")
     
 }

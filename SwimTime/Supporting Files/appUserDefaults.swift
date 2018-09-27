@@ -15,6 +15,7 @@ class appUserDefaults {
     var defaults = UserDefaults.standard
     let nextMemberKey = "NextMemberID"
     let nextEventKey = "NextEventID"
+    let nextDualMeetKey = "NextDualMeetID"
     let nextEventResultKey = "NextEventResultID"
     let nextRaceNoKey = "NextRaceNo"
     let nextTeamNoKey = "NextTeamNo"
@@ -94,7 +95,10 @@ class appUserDefaults {
          return getNextId(thisKey: nextEventKey)
        
     }
-    
+    func getNextDualMeetId() -> Int {
+        return getNextId(thisKey: nextDualMeetKey)
+        
+    }
     func getNextEventResultId() -> Int {
         return getNextId(thisKey: nextEventResultKey)
         
