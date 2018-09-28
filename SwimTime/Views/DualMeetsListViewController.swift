@@ -19,6 +19,9 @@ class DualMeetsListViewController: UITableViewController {
     var showFinished = false
     var selectedMeet = DualMeet()
     let meetseg = "meetListToMeet"
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -81,6 +84,7 @@ class DualMeetsListViewController: UITableViewController {
         var dtText = "0 Teams selected"
         if dm.selectedTeams.count != 0 {
             //I wont save unless there is 2 teams
+            dtText = String(format:"%d Teams selected ",dm.selectedTeams.count)
             for tm in dm.selectedTeams {
                 dtText += tm.clubName + ","
             }
@@ -95,7 +99,7 @@ class DualMeetsListViewController: UITableViewController {
     
     func loadDualMeets() {
         
-        let filterstring : String = showFinished ? "ANY selectedEvents.isFinished=true" : "ANY selectedEvents.isFinished=false"
+        let filterstring : String = showFinished ? "isFinished=true" : "isFinished=false"
         
         
         meetList = realm.objects(DualMeet.self).filter(filterstring).sorted(byKeyPath: "meetDate", ascending: false)
@@ -129,8 +133,31 @@ class DualMeetsListViewController: UITableViewController {
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            // COME BACK
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            //need t tsake member out of th club and any event results
+            let dm = meetList![indexPath.row + indexPath.section]
+            
+            let events = dm.selectedEvents
+            
+            do {
+                try realm.write {
+                    
+                    for ev in events {
+                        if ev.eventResults.count != 0 {
+                            let evResults = ev.eventResults
+                            realm.delete(evResults)
+                        }
+                        
+                    }
+                    realm.delete(events)
+                    //delete the dual member
+                    realm.delete(dm)
+                }
+            } catch {
+                self.showError(errmsg: "Cant delete Dual meet")
+            }
+            loadDualMeets()
+            tableView.reloadData()
+            
         }
     }
     
@@ -156,12 +183,23 @@ class DualMeetsListViewController: UITableViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == meetseg {
-            
+            backFromDualMeetEntry = true
             let vc = segue.destination as! DualMeetViewController
             vc.currentMeet = selectedMeet
             
         }
     }
  
+    //MARK: - Errors
+    func showError(errmsg:String) {
+        let alert = UIAlertController(title: "Error", message: errmsg, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+        
+        
+    }
+    
 
 }
+

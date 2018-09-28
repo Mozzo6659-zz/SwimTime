@@ -218,7 +218,7 @@ class EventsListViewController: UITableViewController {
                 vc.currentEvent = selectedEvent
                 
             }
-            vc.usePresetEvents = showPreset
+            //vc.usePresetEvents = showPreset
             
             
         }else if segue.identifier == eventResultseg {

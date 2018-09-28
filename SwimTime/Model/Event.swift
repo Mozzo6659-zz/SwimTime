@@ -26,7 +26,7 @@ class Event : Object {
     @objc dynamic var presetEvent : PresetEvent?
     
     let eventResults = List<EventResult>()
-    let selectedTeams = List<SwimClub>() //preset event clubs selected
+    //let selectedTeams = List<SwimClub>() //moved to dual meet
     let myDualMeet = LinkingObjects(fromType: DualMeet.self, property: "selectedEvents")
     
 }

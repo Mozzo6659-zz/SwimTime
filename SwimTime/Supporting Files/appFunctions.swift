@@ -90,6 +90,12 @@ class appFunctions {
     
     }
 
+    func dateFromString(stringdate:String) -> Date {
+        let df = DateFormatter()
+        df.dateFormat = getGlobalDateFormat()
+        
+        return df.date(from: stringdate)!
+    }
     func validateMinutesSeconds(howmany:Int) -> String {
         var errmsg = ""
         

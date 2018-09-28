@@ -11,28 +11,33 @@ import RealmSwift
 class EventViewController: UIViewController,
  UITableViewDataSource,UITableViewDelegate,StoreFiltersDelegate {
 
+    let realm = try! Realm()
+    
     var timer : Timer!
     var timerOn = false
     var useRaceNos = false
     var returnFromMembers = false
+    var isDualMeet = false
     var eventIsRunning = false //if true then the current even is running so we start it back off
     
     var isRelay = false
     
-    var usePresetEvents = false
+    //var usePresetEvents = false
     var noSeconds : Int = 1
     
+    //used for filtering the members for eventlist
     var lastSelectedAgeGroup : PresetEventAgeGroups?
     var lastSelectedTeam : SwimClub?
     
-    var pickingTeam1 : Bool = false //when the team picker view cmes up i need to know which label to retrun the result
     
-    let realm = try! Realm()
     
-    var currentEvent = Event()
+    
+    //if called from the dua meet window then selectedDualMeet will be set. //COME BACK watch for returning event from home button
+    var selectedDualMeet = DualMeet()
+    var currentEvent = Event() //this will be
     
     var eventResults : Results<EventResult>?
-    var pickerTeamItems : Results<SwimClub>?
+    
     var pickerPresetEventItems : Results<PresetEvent>?
     var eventHasAgeGroups = false
     //var presetEventExtension = PresetEventExtension()
@@ -71,11 +76,9 @@ class EventViewController: UIViewController,
     @IBOutlet weak var lblIPTeam1: UILabel!
     @IBOutlet weak var lblIPTeam2: UILabel!
     
-    @IBOutlet weak var btnPickTeams1: UIButton!
     
     @IBOutlet weak var btnPickEvent: UIButton!
     
-    @IBOutlet weak var btnPickTeams2: UIButton!
     
     
     @IBOutlet weak var lblEventDate: UILabel!
@@ -99,23 +102,26 @@ class EventViewController: UIViewController,
     @IBOutlet weak var dualmeetView: UIView!
     
     
-    var pickerTeams : UIPickerView!
+    
     var pickerPresetEvent : UIPickerView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        defSwimClub = myDefs.getDefSwimClub()
-        
-        if currentEvent.eventID  == 0 && currentEvent.selectedTeams.count == 0 {
-            currentEvent.selectedTeams.append(defSwimClub)
+        if selectedDualMeet.dualMeetID != 0 {
+            isDualMeet = true
+            defSwimClub = selectedDualMeet.selectedTeams[0]
+        }else{
+           defSwimClub = myDefs.getDefSwimClub()
         }
+        
         
         if currentEvent.eventID != 0 {
             if let pse = currentEvent.presetEvent {
                 isRelay = pse.isRelay
             }
         }
+        
         loadPickerViews()
         
         myTableView.delegate = self
@@ -146,18 +152,21 @@ class EventViewController: UIViewController,
         
         loadEventResults()
         
-        if usePresetEvents {
+        if isDualMeet {
            dualmeetView.frame = origInternalDetailsFrame
             
         }else{
             exhibitionView.frame = origInternalDetailsFrame
         }
         
-        exhibitionView.isHidden = usePresetEvents
-        dualmeetView.isHidden = !usePresetEvents
+        exhibitionView.isHidden = isDualMeet
+        dualmeetView.isHidden = !isDualMeet
+        btnEventDate.isHidden = isDualMeet
         
-        if usePresetEvents  {
-            initPresetEvent()
+        txtLocation.isUserInteractionEnabled = !isDualMeet
+        
+        if isDualMeet  {
+            
             if currentEvent.eventID != 0 && currentEvent.eventResults.count != 0 {
                 dualmeetView.isUserInteractionEnabled = false //cant chnage if its been saved
             }
@@ -168,21 +177,7 @@ class EventViewController: UIViewController,
        
     }
 
-    func initPresetEvent() {
-        if currentEvent.eventID == 0 {
-            //set team 1 to be the default swim club
-            lblIPTeam1.text = defSwimClub.clubName
-            
-                do {
-                    try realm.write {
-                        self.currentEvent.selectedTeams.append(defSwimClub)
-                    }
-                }catch{
-                    self.showError(errmsg: "Could not initailise")
-                }
-            
-        }
-    }
+    
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setToolbarHidden(true, animated: false)
         if returnFromMembers {
@@ -199,16 +194,18 @@ class EventViewController: UIViewController,
     
     
     func configureDatePicker() {
-        datepicker = UIDatePicker()
-        datepicker?.datePickerMode = .date
-        btnEventDate.inputView = datepicker
-        if currentEvent.eventID == 0 {
-            datepicker?.date = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
-        }else{
-           datepicker?.date = currentEvent.eventDate
-        }
         
-        datepicker?.addTarget(self, action: #selector(EventViewController.dateChanged(datepicker:)), for: .valueChanged)
+        
+            datepicker = UIDatePicker()
+            datepicker?.datePickerMode = .date
+            btnEventDate.inputView = datepicker
+            if currentEvent.eventID == 0 {
+                datepicker?.date = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+            }else{
+               datepicker?.date = currentEvent.eventDate
+            }
+            
+            datepicker?.addTarget(self, action: #selector(EventViewController.dateChanged(datepicker:)), for: .valueChanged)
         
     }
     
@@ -229,14 +226,6 @@ class EventViewController: UIViewController,
         removeKeyBoard()
         pickerPresetEvent.isHidden = false
          pickerPresetEvent.bringSubviewToFront(self.view)
-    }
-    
-    
-    @IBAction func btnPickTeams(_ sender: UIButton) {
-            removeKeyBoard()
-            pickerTeams.isHidden = false
-            pickingTeam1 = sender.tag == 1
-       pickerTeams.bringSubviewToFront(self.view)
     }
     
     
@@ -425,27 +414,33 @@ class EventViewController: UIViewController,
     
     func loadEventDetails() {
         var sDateText = ""
-        if currentEvent.eventDistance != 0 {
-            txtDistance.text = "\(currentEvent.eventDistance)"
-            sDateText = myFunc.formatDate(thedate: currentEvent.eventDate)
-            if currentEvent.hasPresetEvent {
-                lblIPMeet.text = currentEvent.presetEvent?.getPresetName()
-                lblIPTeam1.text = currentEvent.selectedTeams[0].clubName
-                lastSelectedTeam = currentEvent.selectedTeams[0]
-                if currentEvent.selectedTeams.count > 1 {
-                    lblIPTeam2.text = currentEvent.selectedTeams[1].clubName
-                }
+        var sLocation = ""
+        if isDualMeet {
+            lblIPMeet.text = currentEvent.presetEvent?.getPresetName()
+            lblIPTeam1.text = selectedDualMeet.selectedTeams[0].clubName
+            sDateText =  myFunc.formatDate(thedate: selectedDualMeet.meetDate)
+            sLocation = selectedDualMeet.meetLocation
+            lastSelectedTeam = selectedDualMeet.selectedTeams[0]
+            if selectedDualMeet.selectedTeams.count > 1 {
+                lblIPTeam2.text = selectedDualMeet.selectedTeams[1].clubName
             }
+           
         }else{
-            txtDistance.text = ""
+            if currentEvent.eventDistance != 0 {
+                txtDistance.text = "\(currentEvent.eventDistance)"
+                sLocation = currentEvent.eventLocation
+                sDateText = myFunc.formatDate(thedate: currentEvent.eventDate)
+                
+            
+            }
+            
         }
-        
-        
-        lblEventDate.text = sDateText
-        txtLocation.text = currentEvent.eventLocation
         
         opRaceNo.isOn = currentEvent.useRaceNos
         useRaceNos = currentEvent.useRaceNos
+        
+        lblEventDate.text = sDateText
+        txtLocation.text = sLocation
         
     }
     
@@ -798,12 +793,18 @@ class EventViewController: UIViewController,
             returnFromMembers = true
             let vc = segue.destination as! MembersForEventViewController
             vc.selectedEvent = currentEvent
-            vc.usePreset = usePresetEvents
+            if isDualMeet {
+                vc.selectedTeams = Array(selectedDualMeet.selectedTeams)
+            }
+            //vc.usePreset = usePresetEvents
             if let sc = lastSelectedTeam {
                 //print("\(sc.clubName)")
                 vc.lastTeamFilter = sc
             }else{
-                vc.lastTeamFilter = currentEvent.selectedTeams[0]
+                if isDualMeet {
+                    vc.lastTeamFilter = selectedDualMeet.selectedTeams[0]
+                }
+                
             }
             if let agp = lastSelectedAgeGroup {
                 //print(agp.presetAgeGroupName)
@@ -824,88 +825,16 @@ class EventViewController: UIViewController,
             
         
     }
-    @IBAction func addNewTeam(_ sender: UIButton) {
-        removePickerViews()
-        
-        let useTeam1 = (sender.tag==1)
-        var bContinue = false
-        var userTextField = UITextField() //textfile used in the closure
-        userTextField.autocapitalizationType = .words
-        
-        let alert = UIAlertController(title: "Add New Team", message: "", preferredStyle: .alert)
-        
-        let alertAction = UIAlertAction(title: "Add Team", style: .default) {
-            (action) in
-            
-            //var item = Item(thetitle: userTextField.text!)
-            let newName = userTextField.text!
-            
-            if !newName.isEmpty {
-                bContinue = !self.myFunc.isDuplicateClub(newClubname: newName)
-            }
-            
-            if bContinue {
-                
-                    do {
-                        try self.realm.write {
-                            let newClub = SwimClub()
-                            newClub.clubID = self.myDefs.getNextClubId()
-                            newClub.clubName = newName
-                            newClub.isDefault = false
-                            self.realm.add(newClub)
-                            if useTeam1 {
-                                self.lblIPTeam1.text = newName
-                                self.currentEvent.selectedTeams[0] = newClub
-                                
-                            }else{
-                                self.lblIPTeam2.text = newName
-                                if self.currentEvent.selectedTeams.count == 1 {
-                                    self.currentEvent.selectedTeams.append(newClub)
-                                    
-                                }else{
-                                    self.currentEvent.selectedTeams[1] = newClub
-                                   
-                                }
-                            }
-                            self.loadPickerViewTeams()
-                            self.lastSelectedTeam = newClub
-                            //print(newClub.clubName)
-                        }
-                    } catch {
-                        print("Error saving items: \(error)")
-                    }
-               
-            }
-        }
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) {
-            (action) in
-            self.removeKeyBoard()
-        }
-        
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Create New Team"
-            alertTextField.autocapitalizationType = .words
-            userTextField = alertTextField
-        }
-        
-        alert.addAction(cancelAction)
-        alert.addAction(alertAction)
-        
-        present(alert, animated: true, completion: nil)
-        //self.saveData(item: item)
-        
-    }
+    
     
     func saveEvent() -> Bool {
         var ok = false
             if validateEvent() {
-                let df = DateFormatter()
-                df.dateFormat = myFunc.getGlobalDateFormat()
+                
                 do {
                     try realm.write {
                         currentEvent.eventLocation = txtLocation.text!
-                        if usePresetEvents {
+                        if isDualMeet {
                             currentEvent.hasPresetEvent=true
                             currentEvent.eventDistance = currentEvent.presetEvent!.distance
                             
@@ -914,11 +843,14 @@ class EventViewController: UIViewController,
                             currentEvent.useRaceNos = useRaceNos
                         }
                         
-                        currentEvent.eventDate = df.date(from: lblEventDate.text!)!
+                        currentEvent.eventDate = myFunc.dateFromString(stringdate: self.lblEventDate.text!)
                         if currentEvent.eventID == 0 {
                             
                             currentEvent.eventID = myDefs.getNextEventId()
                             realm.add(currentEvent)
+                            if self.isDualMeet {
+                                selectedDualMeet.selectedEvents.append(currentEvent)
+                            }
                         }
                         ok = true
                     }
@@ -951,13 +883,7 @@ class EventViewController: UIViewController,
             sErrmsg = "Please select an Event Date"
         }
         
-        if usePresetEvents {
-            if let _ = currentEvent.presetEvent {
-                
-            }else{
-                sErrmsg = "Please select a Preset Distance"
-            }
-        }else {
+        if !isDualMeet {
             if let sDistance = txtDistance.text {
                 if sDistance.isEmpty {
                     sErrmsg = "Please enter a distance"
@@ -1069,23 +995,22 @@ func doEventStart() {
 extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     //Ive got two pickerviewws. One with Preset meet info and one with club info thats used in 2 places
     func loadPickerViews() {
-        pickerTeams = UIPickerView()
+       
         pickerPresetEvent = UIPickerView()
-        configurePickerView(pckview: pickerTeams)
-        pickerTeams.tag = 1
-        configurePickerView(pckview: pickerPresetEvent)
-        pickerPresetEvent.tag = 2
         
-        view.addSubview(pickerTeams)
+        configurePickerView(pckview: pickerPresetEvent)
+        
+        
+        
         view.addSubview(pickerPresetEvent)
-        loadPickerViewTeams()
+        
         loadPickViewPresetEvents()
         removePickerViews()
         
     }
     
     func removePickerViews() {
-        pickerTeams.isHidden = true
+        
         pickerPresetEvent.isHidden = true
     }
     
@@ -1098,9 +1023,7 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
         pckview.dataSource = self
     }
     
-    func loadPickerViewTeams() {
-        pickerTeamItems = realm.objects(SwimClub.self).sorted(byKeyPath: "clubID")
-    }
+    
     
     func loadPickViewPresetEvents() {
         pickerPresetEventItems = realm.objects(PresetEvent.self).sorted(byKeyPath: "presetEventID")
@@ -1111,21 +1034,15 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        if pickerView.tag == 1 {
-            return pickerTeamItems!.count
-        }else{
+        
             return pickerPresetEventItems!.count
-        }
+        
     }
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         
-         if pickerView.tag == 1 {
-            //let sc = pickerTeamItems![row]
-            //print("\(lastSelectedTeam!.clubName)")
-            return pickerTeamItems![row].clubName
-         }else{
+        
             return pickerPresetEventItems![row].getPresetName()
-        }
+       
         
         
     }
@@ -1133,32 +1050,13 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
 
         var bOK = true
-        if pickerView.tag == 1 {
-            let thisteam = pickerTeamItems![row]
-            
-                if pickingTeam1 {
-                    lblIPTeam1.text = thisteam.clubName
-                    currentEvent.selectedTeams[0] = thisteam //0 will always exist
-                }else{
-                    lblIPTeam2.text = thisteam.clubName
-                    if currentEvent.selectedTeams.count == 1 {
-                        currentEvent.selectedTeams.append(thisteam)
-                    }else{
-                        currentEvent.selectedTeams[1] = thisteam
-                    }
-                    
-                    
-                }
-            
-            lastSelectedTeam = thisteam
-            //print("\(thisteam.clubName)")
-        }else{
+        
             
             let thispse = pickerPresetEventItems![row]
             if let pse = currentEvent.presetEvent {
                 if currentEvent.eventResults.count != 0 && pse.presetEventID != thispse.presetEventID {
                    bOK = false
-                    showError(errmsg: "Once members are selected you cant change the event rules")
+                    showError(errmsg: "Once members are selected you cant change the race rules")
                 }
                 
                 
@@ -1173,7 +1071,7 @@ extension EventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
                 
             }
            
-        }
+        
         pickerView.isHidden = true
         //Im gonna remove the member from the list
         

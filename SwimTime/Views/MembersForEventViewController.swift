@@ -31,10 +31,14 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     var lastTeamFilter : SwimClub?
     
     var selectedEvent = Event()
+    var selectedTeams : [SwimClub] = []
+    
     
     var currentRelayNo = 1 //this is the relay numer for this club. ser cant chnage clubs while selecting relay people
     
     var usePreset : Bool = false
+    
+    
     var origtableframe  : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     var origFilterFrame : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     var pickerViewFrame = CGRect(x: 1.0, y: 1.0 , width: 1.0, height: 1.0)
@@ -73,6 +77,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
         if let pse = selectedEvent.presetEvent {
             isRelay = pse.isRelay
+            usePreset = true
         }
         
         
@@ -679,7 +684,7 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
     }
     
     private func loadPickerViewTeams() {
-        pickerTeamItems = Array(selectedEvent.selectedTeams)
+        pickerTeamItems = selectedTeams
         if pickerTeamItems.count == 1 {
             btnTeam.isHidden = true
         }

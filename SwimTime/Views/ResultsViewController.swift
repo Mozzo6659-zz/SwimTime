@@ -17,11 +17,15 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     var usePreset = false
     var currentEvent = Event()
+    var selectedDualMeet = DualMeet()
+    var selectedTeams : [SwimClub] = []
     let myfunc = appFunctions()
     let mydef = appUserDefaults()
     
     let grpfemale = " - Female"
     let grpmale = " - Male"
+    
+    var isDualMeet = false
     @IBOutlet weak var lblDistance: UILabel!
     
     @IBOutlet weak var lblPoints: UILabel!
@@ -52,6 +56,11 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             usePreset = pse.eventAgeGroups.count != 0
         }
         //tbTime.tintColor = UIColor.orange
+        
+        if selectedDualMeet.dualMeetID != 0 {
+            isDualMeet = true
+            selectedTeams = Array(selectedDualMeet.selectedTeams)
+        }
         getData()
         
         showEventDetails()
@@ -63,18 +72,18 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         let dateFormatter = DateFormatter()
         
         dateFormatter.dateFormat = myfunc.getGlobalDateFormat()
-        if currentEvent.selectedTeams.count > 1 {
-            hdrText = "Dual Meet "
-        }
+//        if currentEvent.selectedTeams.count > 1 {
+//            hdrText = "Dual Meet "
+//        }
         hdrText += ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters ") + dateFormatter.string(from: currentEvent.eventDate)
         lblDistance.text = hdrText
         
-        if usePreset && currentEvent.selectedTeams.count > 1 {
+        if isDualMeet && selectedTeams.count > 1 {
             //tally all the points
             var team1pts = 0
             var team2pts = 0
-            let club1 = currentEvent.selectedTeams[0].clubName
-            let club2 = currentEvent.selectedTeams[1].clubName
+            let club1 = selectedTeams[0].clubName
+            let club2 = selectedTeams[1].clubName
             for er in currentEvent.eventResults {
                 if let mem = er.myMember.first {
                     if let sc = mem.myClub.first {
