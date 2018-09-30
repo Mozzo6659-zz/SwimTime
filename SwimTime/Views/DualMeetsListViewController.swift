@@ -56,6 +56,11 @@ class DualMeetsListViewController: UITableViewController {
     
     // MARK: - Table view data source
 
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedMeet = (meetList?[indexPath.section + indexPath.row])!
+        //print("\(selectedMeet.dualMeetID)")
+        performSegue(withIdentifier: meetseg, sender: self)
+    }
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
         return meetList?.count ?? 0
@@ -185,6 +190,7 @@ class DualMeetsListViewController: UITableViewController {
         if segue.identifier == meetseg {
             backFromDualMeetEntry = true
             let vc = segue.destination as! DualMeetViewController
+            //print("\(selectedMeet.dualMeetID)")
             vc.currentMeet = selectedMeet
             
         }

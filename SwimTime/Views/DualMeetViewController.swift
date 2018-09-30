@@ -54,10 +54,12 @@ class DualMeetViewController: UIViewController {
         if currentMeet.dualMeetID  == 0 && currentMeet.selectedTeams.count == 0 {
             currentMeet.selectedTeams.append(defSwimClub)
         }
-        
+       
         configureDatePicker()
+        
         loadPickerViews()
         loadMeetDetails()
+        loadEvents()
         
     }
     
@@ -104,8 +106,8 @@ class DualMeetViewController: UIViewController {
         
         if currentMeet.selectedTeams.count != 0 {
             lblTeam1.text = currentMeet.selectedTeams[0].clubName
-            if currentMeet.selectedTeams.count == 1 {
-                lblTeam1.text = currentMeet.selectedTeams[0].clubName
+            if currentMeet.selectedTeams.count > 1 {
+                lblTeam2.text = currentMeet.selectedTeams[1].clubName
             }
         }
     }
@@ -185,6 +187,12 @@ class DualMeetViewController: UIViewController {
             saveDetails()
             performSegue(withIdentifier: eventSeg, sender: self)
         }
+    }
+    
+    
+    @IBAction func goBack(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
+        
     }
     
     @IBAction func addNewTeam(_ sender: UIButton) {
@@ -387,11 +395,11 @@ extension DualMeetViewController : UITableViewDelegate,UITableViewDataSource {
 extension DualMeetViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     //Ive got two pickerviewws. One with Preset meet info and one with club info thats used in 2 places
     func loadPickerViews() {
-        pickerTeams = UIPickerView()
+         pickerTeams = myFunc.makePickerView()
+        pickerTeams.delegate = self
+        pickerTeams.dataSource = self
         
-        configurePickerView(pckview: pickerTeams)
         pickerTeams.tag = 1
-        
         
         view.addSubview(pickerTeams)
         
@@ -406,14 +414,6 @@ extension DualMeetViewController : UIPickerViewDelegate,UIPickerViewDataSource {
         
     }
     
-    func configurePickerView(pckview:UIPickerView) {
-        
-        pckview.frame = pickerViewFrame
-        pckview.backgroundColor = UIColor(hexString: "89D8FC")
-        pckview.layer.cornerRadius = 10.0
-        pckview.delegate = self
-        pckview.dataSource = self
-    }
     
     func loadPickerViewTeams() {
         pickerTeamItems = realm.objects(SwimClub.self).sorted(byKeyPath: "clubID")
@@ -443,8 +443,6 @@ extension DualMeetViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
-        var bOK = true
-        
         
             let thisteam = pickerTeamItems![row]
             
@@ -465,7 +463,8 @@ extension DualMeetViewController : UIPickerViewDelegate,UIPickerViewDataSource {
        //COME BACK NEED TO VAIDATE CANT CHANGE TEAM ONCE EVENTS ARE IN
         
         pickerView.isHidden = true
-        //Im gonna remove the member from the list
+        
+        
         
     }
     
