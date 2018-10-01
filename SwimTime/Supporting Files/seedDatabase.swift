@@ -225,44 +225,44 @@ class seedDatabase {
     }
     
     //MARK: - Members
-    func addtheseMembers() {
+    func addtheseMembers(thisclubid:Int) {
         
-        let currentmembers = realm.objects(Member.self)
+        let currentmembers = realm.objects(Member.self).filter("ANY myClub.clubID = %d",thisclubid)
         
         if currentmembers.count == 0 {
         
-            addmember(memid: 187,memName: "Illya Vashinsky",memDOB: "2001-11-08",memGroupID: 0,email: "",oneKSeconds: 780,gender: "Male",clubid: 1)
-            addmember(memid: 188,memName: "Daisy Message",memDOB: "2001-06-26",memGroupID: 0,email: "",oneKSeconds: 795,gender: "Female",clubid: 1)
-            addmember(memid: 189,memName: "Chad Schneider",memDOB: "1973-10-31",memGroupID: 0,email: "",oneKSeconds: 870,gender: "Male",clubid: 1)
-            addmember(memid: 190,memName: "Ashley Goldshmidt",memDOB: "2007-04-14",memGroupID: 0,email: "deanne@intrac.com.au",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 191,memName: "Milla McKellar",memDOB: "2007-04-17",memGroupID: 0,email: "milla07@optusnet.com.au",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 192,memName: "Stephanie Sinapi",memDOB: "2005-06-23",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 193,memName: "Anthony Sinapi",memDOB: "2003-01-28",memGroupID: 0,email: "anthony@rothesayconstructions.com.au",oneKSeconds: 1200,gender: "Male",clubid: 1)
-            addmember(memid: 194,memName: "Susan Elliott",memDOB: "1974-01-08",memGroupID: 0,email: "susannicoleelliott@Gmail.au",oneKSeconds: 900,gender: "Female",clubid: 1)
-            addmember(memid: 195,memName: "Pippa Elliott",memDOB: "2012-11-16",memGroupID: 0,email: "",oneKSeconds: 3300,gender: "Female",clubid: 1)
+            addmember(memid: 187,memName: "Illya Vashinsky",memDOB: "2001-11-08",memGroupID: 0,email: "",oneKSeconds: 780,gender: "Male",clubid: thisclubid)
+            addmember(memid: 188,memName: "Daisy Message",memDOB: "2001-06-26",memGroupID: 0,email: "",oneKSeconds: 795,gender: "Female",clubid: thisclubid)
+            addmember(memid: 189,memName: "Chad Schneider",memDOB: "1973-10-31",memGroupID: 0,email: "",oneKSeconds: 870,gender: "Male",clubid: thisclubid)
+            addmember(memid: 190,memName: "Ashley Goldshmidt",memDOB: "2007-04-14",memGroupID: 0,email: "deanne@intrac.com.au",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 191,memName: "Milla McKellar",memDOB: "2007-04-17",memGroupID: 0,email: "milla07@optusnet.com.au",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 192,memName: "Stephanie Sinapi",memDOB: "2005-06-23",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 193,memName: "Anthony Sinapi",memDOB: "2003-01-28",memGroupID: 0,email: "anthony@rothesayconstructions.com.au",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
+            addmember(memid: 194,memName: "Susan Elliott",memDOB: "1974-01-08",memGroupID: 0,email: "susannicoleelliott@Gmail.au",oneKSeconds: 900,gender: "Female",clubid: thisclubid)
+            addmember(memid: 195,memName: "Pippa Elliott",memDOB: "2012-11-16",memGroupID: 0,email: "",oneKSeconds: 3300,gender: "Female",clubid: thisclubid)
             addmember(memid: 196,memName: "Zara Elliott",memDOB: "2009-05-26",memGroupID: 0,email: "",oneKSeconds: 2400,gender: "Female",clubid: 1)
-            addmember(memid: 197,memName: "Michael Elliott",memDOB: "1980-02-22",memGroupID: 0,email: "",oneKSeconds: 1500,gender: "Male",clubid: 1)
-            addmember(memid: 198,memName: "Grace Widowson",memDOB: "2005-10-17",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 200,memName: "Saliva Summeraver",memDOB: "2007-06-11",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 201,memName: "Ant Summeraver",memDOB: "1973-05-18",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: 1)
-            addmember(memid: 202,memName: "Rebecca Simmis",memDOB: "1975-11-17",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 203,memName: "Alexandra Coghlan",memDOB: "2005-04-06",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 204,memName: "Isabella Coghlan",memDOB: "2002-03-29",memGroupID: 0,email: "Isabella.coghlan@ariasolutions.com.au",oneKSeconds: 780,gender: "Female",clubid: 1)
-            addmember(memid: 206,memName: "Thomas Park",memDOB: "2007-03-24",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: 1)
-            addmember(memid: 207,memName: "Matthew Park",memDOB: "2009-09-03",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: 1)
-            addmember(memid: 208,memName: "Madison Calan",memDOB: "2007-07-31",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 209,memName: "William Calan",memDOB: "2010-05-12",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: 1)
-            addmember(memid: 210,memName: "Victoria Park",memDOB: "1972-12-06",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 211,memName: "Ben Pelican",memDOB: "2007-11-01",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: 1)
-            addmember(memid: 212,memName: "Rachel Pelikan",memDOB: "1976-02-18",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 213,memName: "Isaac Pelikan",memDOB: "2011-04-07",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: 1)
-            addmember(memid: 214,memName: "Antonia Sarcasmo",memDOB: "2009-08-09",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 215,memName: "Lucia Sarcasmo",memDOB: "2007-02-15",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 216,memName: "Emersen Stopher",memDOB: "2007-06-25",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 217,memName: "Ella Summeraver",memDOB: "2005-09-21",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 218,memName: "Zali Summeraver",memDOB: "2007-06-11",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 219,memName: "Aria Stopher",memDOB: "2004-10-13",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: 1)
-            addmember(memid: 220,memName: "Dan Stopher",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: 1)
+            addmember(memid: 197,memName: "Michael Elliott",memDOB: "1980-02-22",memGroupID: 0,email: "",oneKSeconds: 1500,gender: "Male",clubid: thisclubid)
+            addmember(memid: 198,memName: "Grace Widowson",memDOB: "2005-10-17",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 200,memName: "Saliva Summeraver",memDOB: "2007-06-11",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 201,memName: "Ant Summeraver",memDOB: "1973-05-18",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
+            addmember(memid: 202,memName: "Rebecca Simmis",memDOB: "1975-11-17",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 203,memName: "Alexandra Coghlan",memDOB: "2005-04-06",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 204,memName: "Isabella Coghlan",memDOB: "2002-03-29",memGroupID: 0,email: "Isabella.coghlan@ariasolutions.com.au",oneKSeconds: 780,gender: "Female",clubid: thisclubid)
+            addmember(memid: 206,memName: "Thomas Park",memDOB: "2007-03-24",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
+            addmember(memid: 207,memName: "Matthew Park",memDOB: "2009-09-03",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
+            addmember(memid: 208,memName: "Madison Calan",memDOB: "2007-07-31",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 209,memName: "William Calan",memDOB: "2010-05-12",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
+            addmember(memid: 210,memName: "Victoria Park",memDOB: "1972-12-06",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 211,memName: "Ben Pelican",memDOB: "2007-11-01",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
+            addmember(memid: 212,memName: "Rachel Pelikan",memDOB: "1976-02-18",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 213,memName: "Isaac Pelikan",memDOB: "2011-04-07",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
+            addmember(memid: 214,memName: "Antonia Sarcasmo",memDOB: "2009-08-09",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 215,memName: "Lucia Sarcasmo",memDOB: "2007-02-15",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 216,memName: "Emersen Stopher",memDOB: "2007-06-25",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 217,memName: "Ella Summeraver",memDOB: "2005-09-21",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 218,memName: "Zali Summeraver",memDOB: "2007-06-11",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 219,memName: "Aria Stopher",memDOB: "2004-10-13",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+            addmember(memid: 220,memName: "Dan Stopher",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
             //print("\(lastmemid)")
             myDefs.setNextMemberID(memid: lastmemid+1)
         }
@@ -273,16 +273,22 @@ class seedDatabase {
         
         let defSwimCub = realm.objects(SwimClub.self).filter("clubID=\(clubid)").first
         //let groups = realm.objects(Group.self)
+        var membername = memName
+        var memberid = memid
         
         let dtf = DateFormatter()
         
+        if clubid == 2 {
+            membername = "MA" + memName
+            memberid += 200
+        }
         dtf.dateFormat = "yyyy-MM-dd"
         do {
             try realm.write {
                 let mem = Member()
-                mem.memberID = memid
+                mem.memberID = memberid
                 mem.webID = memid
-                mem.memberName = memName
+                mem.memberName = membername
                 mem.dateOfBirth = dtf.date(from: memDOB)!
                 mem.onekSeconds = oneKSeconds
                 mem.emailAddress = email
@@ -297,8 +303,8 @@ class seedDatabase {
                 
                 defSwimCub?.members.append(mem)
                 
-                if memid > lastmemid {
-                    lastmemid = memid
+                if memberid > lastmemid {
+                    lastmemid = memberid
                 }
                 
             }

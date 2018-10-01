@@ -8,14 +8,16 @@
 
 import UIKit
 import RealmSwift
-class DualMeetViewController: UIViewController {
+class DualMeetViewController: UIViewController, DualMeetDelegate {
+   
+    
     
     
     let realm = try! Realm()
     
     let myFunc = appFunctions()
     let myDefs = appUserDefaults()
-    var backFromEvent = false
+    
     var currentMeet = DualMeet()
     
     var selectedEvent = Event() //used to pass to event view controller
@@ -64,10 +66,7 @@ class DualMeetViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if backFromEvent {
-            loadEvents()
-            myTableView.reloadData()
-        }
+        
     }
     //MARK: - Data gathering and manipulation
     
@@ -310,13 +309,19 @@ class DualMeetViewController: UIViewController {
 
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        
         if segue.identifier == eventSeg {
             let vc = segue.destination as! EventViewController
             vc.selectedDualMeet = currentMeet
             vc.currentEvent = selectedEvent
+            vc.dualMeetdelegate = self
         }
+    }
+    func updateDualMeet(dualMeet: DualMeet) {
+        currentMeet = dualMeet
+        loadEvents()
+        myTableView.reloadData()
+        
     }
 
 }

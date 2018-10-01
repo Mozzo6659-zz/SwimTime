@@ -34,7 +34,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     var selectedTeams : [SwimClub] = []
     
     
-    var currentRelayNo = 1 //this is the relay numer for this club. ser cant chnage clubs while selecting relay people
+    var currentRelayNo = 1 //this is the relay number for this club.
     
     var usePreset : Bool = false
     
@@ -104,7 +104,10 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
         loadPresetEventMembers()
         
-        currentRelayNo = getNextRelayNo(clubid: getClubID()) //last team filter is always set
+        if isRelay {
+            currentRelayNo = getNextRelayNo(clubid: getClubID()) //last team filter is always set
+            setNavTitle()
+        }
         
         if loadMembers() {
             myTableView.reloadData()
@@ -129,17 +132,21 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     @IBAction func filterClicked(_ sender: UIButton) {
         if sender.tag == 0 {
             if pickerTeams.isHidden {
-                if let sName = lastTeamFilter?.clubName {
-                    if let idx = pickerTeamItems.index(where: {$0.clubName == sName}) {
-                            pickerTeams.selectRow(idx, inComponent: 0, animated: true)
-                        
+                //if is relay mode then cant change clubs unless 0 or 4 are picked for the current club
+                if checkRelayComplete() {
+                    
+                    if let sName = lastTeamFilter?.clubName {
+                        if let idx = pickerTeamItems.index(where: {$0.clubName == sName}) {
+                                pickerTeams.selectRow(idx, inComponent: 0, animated: true)
+                            
+                        }
                     }
+                    pickerTeams.isHidden = false
                 }
-                pickerTeams.isHidden = false
             }else{
                 pickerTeams.isHidden = true
             }
-                
+            
             
         }else{
             if pickerAgeGroups.isHidden {
@@ -223,7 +230,10 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                     er.staggerStartBy = psage.staggerSeconds
                                     er.expectedSeconds += psage.staggerSeconds
                                 }
-                               
+                                if isRelay {
+                                    er.relayNo = pse!.relayNo
+                                    er.relayOrder = pse!.relayOrder
+                                }
                                 
                                 realm.add(er)
                                 mem.eventResults.append(er)
@@ -246,6 +256,29 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     }
     
     // MARK: - my Data stuff
+    func checkRelayComplete() -> Bool {
+        var ok = true
+        if isRelay {
+            let clubid = lastTeamFilter!.clubID
+            let myarr = memForEvent.filter({$0.clubID == clubid && $0.relayNo == currentRelayNo})
+            
+            if myarr.count < 4 && myarr.count > 0 {
+                ok = false
+                showError(errmsg: "Current relay needs 4 members")
+            }
+        }
+        
+        return ok
+    }
+    func setNavTitle() {
+         //last team filter is always set
+        //print(lastTeamFilter?.clubName ?? "Fuck off")
+        //print(getRelayLetter())
+        
+        self.navigationItem.title = lastTeamFilter!.clubName + " Team " + getRelayLetter()
+    
+        
+    }
     func loadPresetEventMembers() {
         
         //wil use this list to validate how many ppl as agegroups are allowed in each time
@@ -309,6 +342,79 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
     }
     
+    func getRelayLetter() -> String {
+        var strLetter = ""
+        switch currentRelayNo {
+        case 1 :
+            strLetter = "A"
+            break
+        case 2 :
+            strLetter = "B"
+            break
+        case 3 :
+            strLetter = "C"
+            break
+        case 4 :
+            strLetter = "B"
+            break
+            
+        default :
+            break
+            
+        }
+        return strLetter
+    }
+    func getCurrentRelayNo() -> Int {
+        var nextRelayNo = 1
+        var b1found = false
+        var b2found = false
+        var b3found = false
+        var b4found = false
+        if let st = lastTeamFilter {
+            for index in 1...4 {
+                let myarr = memForEvent.filter({$0.clubID == st.clubID && $0.relayNo == index})
+                if myarr.count != 0 {
+                    switch index {
+                    case 1 :
+                        b1found = true
+                        break
+                    case 2 :
+                        b2found = true
+                        break
+                    case 3 :
+                        b3found = true
+                        break
+                    case 4 :
+                        b4found = true
+                        break
+                    default :
+                        break
+                    }
+                }
+            }
+            
+            
+            
+        }
+        
+        switch false {
+        case b1found :
+            nextRelayNo = 1
+            break
+        case b2found :
+            nextRelayNo = 2
+            break
+        case b3found :
+            nextRelayNo = 3
+            break
+        case b4found :
+            nextRelayNo = 4
+            break
+        default :
+            break
+        }
+        return nextRelayNo
+    }
     func getRelayOrderForMember(thismemberid:Int) -> Int {
         
         if memForEvent.count != 0 {
@@ -323,21 +429,51 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         }
     }
     func getNextRelayOrder(clubid:Int) -> Int {
-        var iNextRelayOrder = 1
         
-            for er in memForEvent {
-                if er.clubID == clubid && er.relayNo == currentRelayNo {
-                    // see if there are 4 people
-                    let myarr = memForEvent.filter({$0.clubID == clubid && $0.relayNo == currentRelayNo})
-                    if myarr.count < 4 { //checkmemis valid will check there is not 4 for currentRelayno
-                        iNextRelayOrder += 1 //found 4 members so add 1
-                    }else{
-                        break
-                    }
-                    
+        //checkmemisvalid will check there is not 4 for currentRelayno
+           var iNextRelayOrder = 1
+        
+            var b1found = false
+            var b2found = false
+            var b3found = false
+            var b4found = false
+        
+        let myarr = memForEvent.filter({$0.clubID == clubid && $0.relayNo == currentRelayNo})
+        
+        if myarr.count != 0 {
+            for er in myarr {
+                if er.relayOrder == 1 {
+                    b1found = true
                 }
-                
+                if er.relayOrder == 2 {
+                    b2found = true
+                }
+                if er.relayOrder == 3 {
+                    b3found = true
+                }
+                if er.relayOrder == 4 {
+                    b4found = true
+                }
             }
+            
+        }
+        
+        switch false {
+        case b1found :
+            iNextRelayOrder = 1
+            break
+        case b2found :
+            iNextRelayOrder = 2
+            break
+        case b3found :
+            iNextRelayOrder = 3
+            break
+        case b4found :
+            iNextRelayOrder = 4
+            break
+        default :
+            break
+        }
         
         return iNextRelayOrder
     }
@@ -778,6 +914,10 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
         if pickerView.tag == 1 {
             lastTeamFilter = pickerTeamItems[row]
             lblTeam.text = lastTeamFilter?.clubName
+            if isRelay {
+                currentRelayNo = getNextRelayNo(clubid: lastTeamFilter!.clubID)
+                setNavTitle()
+            }
         }else{
             
             lastAgeGroupFilter = pickerAgeGroupItems[row]

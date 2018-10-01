@@ -54,10 +54,13 @@ class EventResult : Object {
         }
         return strLetter
     }
+    
     func getRelayOrder() -> String {
         
         return String(format:"%@%d",getRelayLetter(),relayNo)
     }
+    
+    
 //    func ageCategoryName() -> String {
 //        if let ag = selectedAgeCategory.first {
 //            return ag.presetAgeGroupName

@@ -8,10 +8,16 @@
 
 import UIKit
 import RealmSwift
+
+protocol DualMeetDelegate {
+    func updateDualMeet(dualMeet:DualMeet)
+}
+
 class EventViewController: UIViewController,
  UITableViewDataSource,UITableViewDelegate,StoreFiltersDelegate {
 
     let realm = try! Realm()
+    var dualMeetdelegate : DualMeetDelegate?
     
     var timer : Timer!
     var timerOn = false
@@ -36,7 +42,7 @@ class EventViewController: UIViewController,
     var selectedDualMeet = DualMeet()
     var currentEvent = Event() //this will be
     
-    var eventResults : Results<EventResult>?
+    var eventResults : [EventResult] = []
     
     var pickerPresetEventItems : Results<PresetEvent>?
     var eventHasAgeGroups = false
@@ -107,6 +113,8 @@ class EventViewController: UIViewController,
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
         
         if selectedDualMeet.dualMeetID != 0 {
             isDualMeet = true
@@ -295,11 +303,15 @@ class EventViewController: UIViewController,
                             realm.delete(currentEvent)
                             
                         }
+                        if self.isDualMeet {
+                            self.dualMeetdelegate?.updateDualMeet(dualMeet:selectedDualMeet)
+                        }
                     }catch{
                         showError(errmsg: "Cant delete empty event")
                     }
                     
                 }
+                
             }
            
             
@@ -377,8 +389,8 @@ class EventViewController: UIViewController,
         do {
             try realm.write {
                 currentEvent.isFinished = true
-                if self.eventResults?.count != 0 {
-                    for er in self.eventResults! {
+                if self.eventResults.count != 0 {
+                    for er in self.eventResults {
                         if er.resultSeconds == 0 {
                             //didnt finish so remove them from the event
                             let mem = er.myMember.first
@@ -448,16 +460,19 @@ class EventViewController: UIViewController,
        
         if currentEvent.eventResults.count != 0 {
             if isRelay {
+                eventResults = Array(currentEvent.eventResults)
                 if timerOn {
-                    eventResults = currentEvent.eventResults.filter("activeForRelay=true").sorted(byKeyPath: "getRelayOrder()", ascending: true)
+                    eventResults = Array(currentEvent.eventResults.filter("ractiveForRelay=true")).sorted(by: {$0.relayNo < $1.relayNo && $0.relayOrder < $1.relayOrder})
+                    
                 }else{
-                    eventResults = currentEvent.eventResults.sorted(byKeyPath: "getRelayOrder()", ascending: true)
+                    //eventResults = currentEvent.eventResults.sorted(byKeyPath: "getRelayOrder()", ascending: true)
+                    eventResults = Array(currentEvent.eventResults).sorted(by: {$0.relayNo < $1.relayNo && $0.relayOrder < $1.relayOrder})
                 }
             }else{
-                eventResults = currentEvent.eventResults.filter("resultSeconds=0").sorted(byKeyPath: "expectedSeconds", ascending: true)
+                eventResults = Array(currentEvent.eventResults.filter("resultSeconds=0").sorted(byKeyPath: "expectedSeconds", ascending: true))
             }
             
-            if eventResults?.count != 0 {
+            if eventResults.count != 0 {
                 if eventIsRunning  {
                     //come back from a home button close where an event was running
                     let secondsElapsed = myDefs.getRunningEventSecondsStopped()
@@ -511,7 +526,7 @@ class EventViewController: UIViewController,
     }
     
     func buildSectionsAgeGroup() {
-        for er in eventResults! {
+        for er in eventResults {
             /*var groupDict : [String : [EventResult]] = [:]
              var sectionGroups : [PresetEventAgeGroups] = []
              */
@@ -534,7 +549,8 @@ class EventViewController: UIViewController,
         }
         
         for sd in sectionAgeGroups {
-            var mArr = Array(eventResults!.filter("ANY selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName))
+            //var mArr = eventResults.filter("selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName)
+            var mArr = eventResults.filter({$0.selectedAgeCategory.first!.presetAgeGroupName==sd.presetAgeGroupName})
             mArr = mArr.sorted(by: {$0.myMember.first!.gender < $1.myMember.first!.gender})
             groupDict[sd.presetAgeGroupName] = mArr
         }
@@ -542,11 +558,12 @@ class EventViewController: UIViewController,
     func builSectionsRelay() {
         //first build our groups of clu - Tema A etc
        
-            for er in eventResults! {
+            for er in eventResults {
                 //var sectionRelayGroups : [(displayname:String, clubname:String, relayLetter:String)] = []
                 if let em = er.myMember.first {
                     if let cb = em.myClub.first {
                         let sDisplay = String(format:"%@ - Team %@",cb.clubName,er.getRelayLetter())
+                        //print("RelayNo \(er.relayNo) order= \(er.relayOrder)")
                         if sectionRelayGroups.count == 0 {
                             sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))
                         }else{
@@ -565,7 +582,7 @@ class EventViewController: UIViewController,
             for sd in sectionRelayGroups {
                 var mArr : [EventResult]=[]
                 //cant filter using myMeber.MyClub.clbname in realm
-                for er in eventResults! {
+                for er in eventResults {
                     if let mem = er.myMember.first {
                         if let myclub = mem.myClub.first {
                             if myclub.clubName == sd.clubname && er.relayNo == sd.relayNo {
@@ -575,6 +592,7 @@ class EventViewController: UIViewController,
                     }
                 }
                 mArr = mArr.sorted(by: {$0.relayOrder < $1.relayOrder})
+                //print(sd.displayname)
                 groupDict[sd.displayname] = mArr
             }
         
@@ -589,7 +607,7 @@ class EventViewController: UIViewController,
             if useRelaySectionsInTableView() {
                 return sectionRelayGroups.count
             }else{
-                return eventResults?.count ?? 0
+                return eventResults.count
             }
             
         }
@@ -613,7 +631,7 @@ class EventViewController: UIViewController,
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        if useAgeGroupSectionsinTableView() {
+        if useAgeGroupSectionsinTableView() || useRelaySectionsInTableView() {
             return 30.0
         }else{
             return 3.0
@@ -623,17 +641,22 @@ class EventViewController: UIViewController,
     
    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let offset : CGFloat = 5.0
-
+        var sHeader = ""
     
         let headerView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: myTableView.frame.size.width - (offset * 2.0), height: 100.0))
     
-        if useAgeGroupSectionsinTableView() {
-            var sHeader = sectionAgeGroups[section].presetAgeGroupName
-            if let myArray = groupDict[sectionAgeGroups[section].presetAgeGroupName] {
-                sHeader += String(format:"  (%d entrants)" ,myArray.count)
+        if useAgeGroupSectionsinTableView() || useRelaySectionsInTableView() {
+            if useAgeGroupSectionsinTableView() {
+                sHeader = sectionAgeGroups[section].presetAgeGroupName
+                if let myArray = groupDict[sectionAgeGroups[section].presetAgeGroupName] {
+                    sHeader += String(format:"  (%d entrants)" ,myArray.count)
+                }
+            }else{
+                sHeader = sectionRelayGroups[section].displayname
             }
+           
             headerView.backgroundColor = UIColor.black
-            let label = UILabel(frame: CGRect(x: 0, y: -5, width: myTableView.frame.size.width, height: 30.0))
+            let label = UILabel(frame: CGRect(x: 0, y: 1.5, width: myTableView.frame.size.width, height: 30.0))
             label.clipsToBounds = true
             label.layer.cornerRadius = 5.0
             label.backgroundColor = UIColor.black
@@ -672,7 +695,7 @@ class EventViewController: UIViewController,
                 }
                 
             }else{
-                er = eventResults![indexPath.row + indexPath.section]
+                er = eventResults[indexPath.row + indexPath.section]
             }
            
         }
@@ -724,7 +747,7 @@ class EventViewController: UIViewController,
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let er = eventResults![indexPath.row + indexPath.section]
+        let er = eventResults[indexPath.row + indexPath.section]
         if timerOn {
             do {
                 try realm.write {
@@ -743,7 +766,7 @@ class EventViewController: UIViewController,
             }
             
             loadEventResults()
-            if eventResults?.count == 0 {
+            if eventResults.count == 0 {
                 
                 finishEvent()
             }
@@ -764,7 +787,7 @@ class EventViewController: UIViewController,
     // Override to support editing the table view.
    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            let er = eventResults![indexPath.row + indexPath.section]
+            let er = eventResults[indexPath.row + indexPath.section]
             do {
                 try realm.write {
                     let mem = er.myMember.first
@@ -890,6 +913,12 @@ class EventViewController: UIViewController,
                 }
             }else{
                 sErrmsg = "Please enter a distance"
+            }
+        }else{
+            if let _ = currentEvent.presetEvent {
+                
+            }else{
+                sErrmsg = "Please enter a preset distance race"
             }
         }
         
