@@ -41,7 +41,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     var origtableframe  : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
     var origFilterFrame : CGRect = CGRect(x: 1.0, y: 1.0, width: 1.0, height: 1.0)
-    var pickerViewFrame = CGRect(x: 1.0, y: 1.0 , width: 1.0, height: 1.0)
+    //var pickerViewFrame = CGRect(x: 1.0, y: 1.0 , width: 1.0, height: 1.0)
     
     let quickEntrySeg = "quickEntry"
   
@@ -92,7 +92,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
         filterView.isHidden = true
         
-        pickerViewFrame = CGRect(x: 120.0, y: (view.frame.size.height/2) + origFilterFrame.size.height , width: 600.00, height: 143.0)
+        
         
         self.navigationController?.setToolbarHidden(false, animated: false)
         
@@ -128,23 +128,32 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     @IBAction func filterClicked(_ sender: UIButton) {
         if sender.tag == 0 {
-            if let sName = lastTeamFilter?.clubName {
-                if let idx = pickerTeamItems.index(where: {$0.clubName == sName}) {
-                        pickerTeams.selectRow(idx, inComponent: 0, animated: true)
-                    
+            if pickerTeams.isHidden {
+                if let sName = lastTeamFilter?.clubName {
+                    if let idx = pickerTeamItems.index(where: {$0.clubName == sName}) {
+                            pickerTeams.selectRow(idx, inComponent: 0, animated: true)
+                        
+                    }
                 }
+                pickerTeams.isHidden = false
+            }else{
+                pickerTeams.isHidden = true
             }
                 
-            pickerTeams.isHidden = false
             
         }else{
-            if let sName = lastAgeGroupFilter?.presetAgeGroupName {
-                if let idx = pickerAgeGroupItems.index(where: {$0.presetAgeGroupName == sName}) {
-                    //print("name=\(sName) index=\(idx)")
-                    pickerAgeGroups.selectRow(idx, inComponent: 0, animated: true)
+            if pickerAgeGroups.isHidden {
+                if let sName = lastAgeGroupFilter?.presetAgeGroupName {
+                    if let idx = pickerAgeGroupItems.index(where: {$0.presetAgeGroupName == sName}) {
+                        //print("name=\(sName) index=\(idx)")
+                        pickerAgeGroups.selectRow(idx, inComponent: 0, animated: true)
+                    }
                 }
+                pickerAgeGroups.isHidden = false
+            }else{
+                pickerAgeGroups.isHidden = true
             }
-             pickerAgeGroups.isHidden = false
+            
         }
     }
     
@@ -666,12 +675,28 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
 }
 extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataSource {
     func loadPickerViews() {
-        pickerTeams = UIPickerView()
-        pickerAgeGroups = UIPickerView()
-        configurePickerView(pckview: pickerTeams)
+        pickerTeams = myfunc.makePickerView()
+        pickerAgeGroups = myfunc.makePickerView()
+        pickerTeams.delegate = self
+        pickerTeams.dataSource = self
+        
+        pickerAgeGroups.delegate = self
+        pickerAgeGroups.dataSource = self
+        
+        
+        //configurePickerView(pckview: pickerTeams)
         pickerTeams.tag = 1
-        configurePickerView(pckview: pickerAgeGroups)
         pickerAgeGroups.tag = 2
+        
+        let defpickerViewFrame = myfunc.getPickerViewFrame()
+        
+        let pickerViewFrame = CGRect(x: defpickerViewFrame.origin.x , y: (view.frame.size.height/2) + origFilterFrame.size.height, width: defpickerViewFrame.size.width, height: defpickerViewFrame.size.height)
+        
+        
+        pickerTeams.frame = pickerViewFrame
+        pickerAgeGroups.frame = pickerViewFrame
+        
+        
         
         view.addSubview(pickerTeams)
         view.addSubview(pickerAgeGroups)
@@ -721,15 +746,6 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
         //print("count=\(pickerAgeGroupItems.count)")
     }
     
-    func configurePickerView(pckview:UIPickerView) {
-        
-        pckview.frame = pickerViewFrame
-        pckview.backgroundColor = UIColor(hexString: "FFC991")
-        pckview.clipsToBounds = true
-        pckview.layer.cornerRadius = 10.0
-        pckview.delegate = self
-        pckview.dataSource = self
-    }
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -749,7 +765,7 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
             
             return pickerTeamItems[row].clubName
         }else{
-            //print(pickerAgeGroupItems[row].presetAgeGroupName)
+            print(pickerAgeGroupItems[row].presetAgeGroupName)
             return pickerAgeGroupItems[row].presetAgeGroupName
             
         }

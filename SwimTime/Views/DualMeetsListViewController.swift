@@ -86,6 +86,8 @@ class DualMeetsListViewController: UITableViewController {
         cell.detailTextLabel?.textColor = UIColor.red
         
         cell.detailTextLabel?.font = UIFont(name:"Helvetica", size:20.0)
+        
+        
         var dtText = "0 Teams selected"
         if dm.selectedTeams.count != 0 {
             //I wont save unless there is 2 teams

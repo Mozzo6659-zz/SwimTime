@@ -282,7 +282,7 @@ class DualMeetViewController: UIViewController {
             bok = false
         }else{
             if currentMeet.selectedEvents.count != 0 {
-                showError(errmsg: "Cant change teams once races are enytered")
+                showError(errmsg: "Cant change teams once races are entered")
                 bok = false
             }
         }
@@ -351,6 +351,9 @@ extension DualMeetViewController : UITableViewDelegate,UITableViewDataSource {
             detailText = String(format:"%d entrants",ev.eventResults.count)
         }
         
+        if ev.isFinished {
+            detailText += " RACE COMPLETED"
+        }
         cell.textLabel?.font = UIFont(name:"Helvetica", size:40.0)
         
         cell.detailTextLabel?.font = UIFont(name:"Helvetica", size:20.0);

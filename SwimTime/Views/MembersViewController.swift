@@ -13,6 +13,7 @@ import RealmSwift
 class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UIImagePickerControllerDelegate,UINavigationControllerDelegate {
 
     
+     var pickerView: UIPickerView!
     
     @IBOutlet weak var txtName: UITextField!
     @IBOutlet weak var txtOnekHrs: UITextField!
@@ -31,7 +32,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     @IBOutlet weak var txtEmail: UITextField!
     @IBOutlet weak var imgPhoto: UIImageView!
     
-    @IBOutlet weak var pickerView: UIPickerView!
+   
     
     let realm = try! Realm()
     var myfunc = appFunctions()
@@ -48,6 +49,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pickerView = myfunc.makePickerView()
         
         defSwimClub = myDefs.getDefSwimClub()
         navigationItem.setHidesBackButton(true, animated: false)
