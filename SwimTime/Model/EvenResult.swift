@@ -59,7 +59,15 @@ class EventResult : Object {
         
         return String(format:"%@%d",getRelayLetter(),relayNo)
     }
-    
+    func getClubID() -> Int {
+        var clubid = 0
+        if let mem = myMember.first {
+            if let theclub = mem.myClub.first {
+                clubid = theclub.clubID
+            }
+        }
+        return clubid
+    }
     
 //    func ageCategoryName() -> String {
 //        if let ag = selectedAgeCategory.first {

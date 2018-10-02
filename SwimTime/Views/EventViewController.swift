@@ -267,6 +267,7 @@ class EventViewController: UIViewController,
                 for er in currentEvent.eventResults {
                     let mem = er.myMember.first!
                     er.resultSeconds = 0
+                    er.activeForRelay = false
                     er.expectedSeconds = myFunc.adjustOnekSecondsForDistance(distance: currentEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                     if useRaceNos && er.raceNo == 0 {
                         er.raceNo = myDefs.getNextRaceNo()
@@ -456,13 +457,31 @@ class EventViewController: UIViewController,
         
     }
     
+    func startRelay() {
+        //idea here is to get al the no 1 swimmers and mark them as ativefor event
+        do {
+            try realm.write {
+                for er in self.currentEvent.eventResults {
+                    if er.relayOrder == 1 {
+                        er.activeForRelay = true
+                    }else{
+                        er.activeForRelay = false
+                    }
+                }
+            }
+        }catch{
+            showError(errmsg: "Cant start relay")
+        }
+        
+        
+    }
     func loadEventResults() {
        
         if currentEvent.eventResults.count != 0 {
             if isRelay {
                 eventResults = Array(currentEvent.eventResults)
                 if timerOn {
-                    eventResults = Array(currentEvent.eventResults.filter("ractiveForRelay=true")).sorted(by: {$0.relayNo < $1.relayNo && $0.relayOrder < $1.relayOrder})
+                    eventResults = Array(currentEvent.eventResults.filter("activeForRelay=true")).sorted(by: {$0.relayNo < $1.relayNo && $0.relayOrder < $1.relayOrder})
                     
                 }else{
                     //eventResults = currentEvent.eventResults.sorted(byKeyPath: "getRelayOrder()", ascending: true)
@@ -711,6 +730,13 @@ class EventViewController: UIViewController,
         
         if currentEvent.useRaceNos {
             txtLabel = ("\(er.raceNo) - ")
+        }else{
+            if isRelay && timerOn {
+                
+                cell.textLabel?.font = UIFont(name: "Helvetica", size: 30.0)
+                
+                txtLabel = String(format:"%@ Team %@ (%d) ",grp.clubName, er.getRelayLetter(),er.relayOrder)
+            }
         }
         txtLabel += mem.memberName
         
@@ -758,6 +784,22 @@ class EventViewController: UIViewController,
                     if let mem = er.myMember.first {
                         er.ageAtEvent = mem.age() //this is how old they are when the event was started
                     }
+                    if self.isRelay {
+                        
+                        er.activeForRelay = false
+                        if er.relayOrder < 4 {
+                            //let iNextOrder = er.relayOrder + 1
+                            let myNextgroup = Array(self.currentEvent.eventResults).filter({$0.getClubID() == er.getClubID() && $0.relayNo == er.relayNo && $0.relayOrder == er.relayOrder + 1})
+                            //let myNextgroup = myArr.filter({$0.relayNo == er.relayNo && $0.relayOrder == er.relayOrder + 1})
+                            
+                            if myNextgroup.count != 0 {
+                                let nexter = myNextgroup.first
+                                nexter?.staggerStartBy = resultseconds
+                                nexter?.expectedSeconds += resultseconds
+                                nexter?.activeForRelay = true
+                            }
+                        }
+                    }
                 }
                 
                 
@@ -770,6 +812,7 @@ class EventViewController: UIViewController,
                 
                 finishEvent()
             }
+            
         }else{
             //MARK: -COME BACK 1
             //go to member update estimate and maybe a photo change club
@@ -816,8 +859,10 @@ class EventViewController: UIViewController,
             returnFromMembers = true
             let vc = segue.destination as! MembersForEventViewController
             vc.selectedEvent = currentEvent
+            
             if isDualMeet {
                 vc.selectedTeams = Array(selectedDualMeet.selectedTeams)
+                
             }
             //vc.usePreset = usePresetEvents
             if let sc = lastSelectedTeam {
@@ -837,6 +882,7 @@ class EventViewController: UIViewController,
         }else {
             if segue.identifier == eventToResultsseg {
                 let vc = segue.destination as! ResultsViewController
+                vc.selectedDualMeet = selectedDualMeet
                 vc.currentEvent = currentEvent
             }
         }
@@ -938,6 +984,9 @@ func doEventStart() {
     
     if saveEvent() {
         moveStartViewUp()
+        if isRelay {
+            startRelay()
+        }
         loadEventResults()
         //myTableView.reloadData()
     }
