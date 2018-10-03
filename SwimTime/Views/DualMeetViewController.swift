@@ -22,6 +22,7 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
     
     var selectedEvent = Event() //used to pass to event view controller
     let eventSeg = "DualMeetToEvent"
+    let resultSeg = "DualMeetToResults"
     
     var defSwimClub = SwimClub()
     private var datepicker : UIDatePicker?
@@ -184,6 +185,7 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
     @IBAction func addRace(_ sender: UIBarButtonItem) {
         if validateDetails() {
             saveDetails()
+            selectedEvent = Event()
             performSegue(withIdentifier: eventSeg, sender: self)
         }
     }
@@ -195,75 +197,82 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
     }
     
     @IBAction func addNewTeam(_ sender: UIButton) {
+        var bok = true
         removePickerViews()
         
-        let useTeam1 = (sender.tag==1)
-        var bContinue = false
-        var userTextField = UITextField() //textfile used in the closure
-        userTextField.autocapitalizationType = .words
+        if currentMeet.selectedEvents.count != 0 {
+            showError(errmsg: "Cant change teams once races are entered")
+            bok = false
+        }
         
-        let alert = UIAlertController(title: "Add New Team", message: "", preferredStyle: .alert)
-        
-        let alertAction = UIAlertAction(title: "Add Team", style: .default) {
-            (action) in
+        if bok {
+            let useTeam1 = (sender.tag==1)
+            var bContinue = false
+            var userTextField = UITextField() //textfile used in the closure
+            userTextField.autocapitalizationType = .words
             
-            //var item = Item(thetitle: userTextField.text!)
-            let newName = userTextField.text!
+            let alert = UIAlertController(title: "Add New Team", message: "", preferredStyle: .alert)
             
-            if !newName.isEmpty {
-                bContinue = !self.myFunc.isDuplicateClub(newClubname: newName)
-            }
-            
-            if bContinue {
+            let alertAction = UIAlertAction(title: "Add Team", style: .default) {
+                (action) in
                 
-                do {
-                    try self.realm.write {
-                        let newClub = SwimClub()
-                        newClub.clubID = self.myDefs.getNextClubId()
-                        newClub.clubName = newName
-                        newClub.isDefault = false
-                        self.realm.add(newClub)
-                        if useTeam1 {
-                            self.lblTeam1.text = newName
-                            self.currentMeet.selectedTeams[0] = newClub
-                            
-                        }else{
-                            self.lblTeam2.text = newName
-                            if self.currentMeet.selectedTeams.count == 1 {
-                                self.currentMeet.selectedTeams.append(newClub)
-                                
-                            }else{
-                                self.currentMeet.selectedTeams[1] = newClub
-                                
-                            }
-                        }
-                        self.loadPickerViewTeams()
-                        
-                    }
-                } catch {
-                    print("Error saving items: \(error)")
+                //var item = Item(thetitle: userTextField.text!)
+                let newName = userTextField.text!
+                
+                if !newName.isEmpty {
+                    bContinue = !self.myFunc.isDuplicateClub(newClubname: newName)
                 }
                 
+                if bContinue {
+                    
+                    do {
+                        try self.realm.write {
+                            let newClub = SwimClub()
+                            newClub.clubID = self.myDefs.getNextClubId()
+                            newClub.clubName = newName
+                            newClub.isDefault = false
+                            self.realm.add(newClub)
+                            if useTeam1 {
+                                self.lblTeam1.text = newName
+                                self.currentMeet.selectedTeams[0] = newClub
+                                
+                            }else{
+                                self.lblTeam2.text = newName
+                                if self.currentMeet.selectedTeams.count == 1 {
+                                    self.currentMeet.selectedTeams.append(newClub)
+                                    
+                                }else{
+                                    self.currentMeet.selectedTeams[1] = newClub
+                                    
+                                }
+                            }
+                            self.loadPickerViewTeams()
+                            
+                        }
+                    } catch {
+                        print("Error saving items: \(error)")
+                    }
+                    
+                }
             }
-        }
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) {
-            (action) in
-            self.removeKeyBoard()
-        }
-        
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Create New Team"
-            alertTextField.autocapitalizationType = .words
-            userTextField = alertTextField
-        }
-        
-        alert.addAction(cancelAction)
-        alert.addAction(alertAction)
-        
-        present(alert, animated: true, completion: nil)
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) {
+                (action) in
+                self.removeKeyBoard()
+            }
+            
+            alert.addTextField { (alertTextField) in
+                alertTextField.placeholder = "Create New Team"
+                alertTextField.autocapitalizationType = .words
+                userTextField = alertTextField
+            }
+            
+            alert.addAction(cancelAction)
+            alert.addAction(alertAction)
+            
+            present(alert, animated: true, completion: nil)
         //self.saveData(item: item)
-        
+        }
     }
     
     
@@ -315,8 +324,16 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
             vc.selectedDualMeet = currentMeet
             vc.currentEvent = selectedEvent
             vc.dualMeetdelegate = self
+        }else{
+            if segue.identifier == resultSeg {
+                let vc = segue.destination as! ResultsViewController
+                vc.selectedDualMeet = currentMeet
+                vc.currentEvent = selectedEvent
+                
+            }
         }
     }
+    
     func updateDualMeet(dualMeet: DualMeet) {
         currentMeet = dualMeet
         loadEvents()
@@ -384,7 +401,11 @@ extension DualMeetViewController : UITableViewDelegate,UITableViewDataSource {
     
    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectedEvent = eventList![indexPath.row + indexPath.section]
-        performSegue(withIdentifier: eventSeg, sender: self)
+        if selectedEvent.isFinished {
+            performSegue(withIdentifier: resultSeg, sender: self)
+        }else{
+            performSegue(withIdentifier: eventSeg, sender: self)
+        }
     }
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.

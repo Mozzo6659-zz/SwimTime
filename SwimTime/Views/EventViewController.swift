@@ -304,9 +304,7 @@ class EventViewController: UIViewController,
                             realm.delete(currentEvent)
                             
                         }
-                        if self.isDualMeet {
-                            self.dualMeetdelegate?.updateDualMeet(dualMeet:selectedDualMeet)
-                        }
+                        
                     }catch{
                         showError(errmsg: "Cant delete empty event")
                     }
@@ -314,8 +312,9 @@ class EventViewController: UIViewController,
                 }
                 
             }
-           
-            
+            if isDualMeet {
+                dualMeetdelegate?.updateDualMeet(dualMeet:selectedDualMeet)
+            }
             self.navigationController?.popViewController(animated: true)
         }else{
             showError(errmsg: "Finish or Reset the event or press home to exit")
@@ -390,6 +389,8 @@ class EventViewController: UIViewController,
         do {
             try realm.write {
                 currentEvent.isFinished = true
+                
+                
                 if self.eventResults.count != 0 {
                     for er in self.eventResults {
                         if er.resultSeconds == 0 {
@@ -403,7 +404,17 @@ class EventViewController: UIViewController,
                         }
                     }
                 }
-                
+                if self.isDualMeet {
+                    var evNotFinished = 0
+                    for ev in self.selectedDualMeet.selectedEvents {
+                        if ev.eventID != self.currentEvent.eventID && !ev.isFinished {
+                            evNotFinished += 1
+                        }
+                    }
+                    if evNotFinished == 0 {
+                        self.selectedDualMeet.isFinished = true //finish the dual meet once all events are finished
+                    }
+                }
             }
         }catch{
             showError(errmsg: "Cant finish Event")
@@ -428,6 +439,7 @@ class EventViewController: UIViewController,
     func loadEventDetails() {
         var sDateText = ""
         var sLocation = ""
+        
         if isDualMeet {
             lblIPMeet.text = currentEvent.presetEvent?.getPresetName()
             lblIPTeam1.text = selectedDualMeet.selectedTeams[0].clubName
@@ -481,7 +493,7 @@ class EventViewController: UIViewController,
             if isRelay {
                 eventResults = Array(currentEvent.eventResults)
                 if timerOn {
-                    eventResults = Array(currentEvent.eventResults.filter("activeForRelay=true")).sorted(by: {$0.relayNo < $1.relayNo && $0.relayOrder < $1.relayOrder})
+                    eventResults = Array(currentEvent.eventResults.filter("activeForRelay=true")).sorted(by: {$0.relayNo < $1.relayNo && $0.getClubID() < $1.getClubID() && $0.relayOrder < $1.relayOrder})
                     
                 }else{
                     //eventResults = currentEvent.eventResults.sorted(byKeyPath: "getRelayOrder()", ascending: true)
@@ -735,9 +747,11 @@ class EventViewController: UIViewController,
                 
                 cell.textLabel?.font = UIFont(name: "Helvetica", size: 30.0)
                 
-                txtLabel = String(format:"%@ Team %@ (%d) ",grp.clubName, er.getRelayLetter(),er.relayOrder)
+                txtLabel = String(format:"%@ Team %@ - ",grp.clubName, er.getRelayLetter())
             }
         }
+        
+        
         txtLabel += mem.memberName
         
         var dtText = String(format:"  (%@)   Age: %d",mem.gender,mem.age())
@@ -754,20 +768,54 @@ class EventViewController: UIViewController,
         let imgFilePath = myFunc.getFullPhotoPath(memberid: mem.memberID)
         
         let imgMemberPhoto = UIImageView(image: UIImage(contentsOfFile: imgFilePath))
+        
+        
         cell.backgroundColor = UIColor(hexString: "89D8FC") //light blue.-- hard setting ths doesnt seem to work as well
-        if imgMemberPhoto.image != nil {
+        let imgframe = CGRect(x: 0.0, y: 8.0, width: 100.00, height: 90.00)
+        
+        
+        if isRelay && timerOn {
+            var theimg = ""
+            switch er.relayOrder {
+            case 1 :
+                theimg = "one"
+                break
+            case 2 :
+                theimg = "two"
+                break
+            case 3 :
+                theimg = "three"
+                break
+            case 4 :
+                theimg = "four"
+                break
+            default :
+                break
+            }
+        
+            let imgRelayNo = UIImageView(image: UIImage(named: theimg))
+            //let imgRelayNo = UIImageVi
+            imgRelayNo.frame = imgframe
+            imgRelayNo.layer.masksToBounds = true
             
-            let frame = CGRect(x: 0.0, y: 0.0, width: 100.00, height: 100.00)
-            
-            imgMemberPhoto.frame = frame
-            imgMemberPhoto.layer.masksToBounds = true
-            imgMemberPhoto.layer.cornerRadius = 20.0
-            cell.accessoryView = imgMemberPhoto
+            cell.accessoryView = imgRelayNo
             cell.accessoryView?.tintColor = UIColor.clear
             cell.accessoryView?.isHidden = false
             
         }else{
-            cell.accessoryView?.isHidden = true
+            if imgMemberPhoto.image != nil {
+                
+                
+                imgMemberPhoto.frame = imgframe
+                imgMemberPhoto.layer.masksToBounds = true
+                imgMemberPhoto.layer.cornerRadius = 20.0
+                cell.accessoryView = imgMemberPhoto
+                cell.accessoryView?.tintColor = UIColor.clear
+                cell.accessoryView?.isHidden = false
+                
+            }else{
+                cell.accessoryView?.isHidden = true
+            }
         }
        
     }
@@ -830,16 +878,28 @@ class EventViewController: UIViewController,
     // Override to support editing the table view.
    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            var mydelArray : [EventResult] = []
             let er = eventResults[indexPath.row + indexPath.section]
+            let mem = er.myMember.first
+            if isRelay {
+                //if a relay delete all for that club ad relayNo
+                mydelArray = eventResults.filter({$0.getClubID() == mem?.myClub.first?.clubID && $0.relayNo == er.relayNo})
+            }else{
+                mydelArray.append(er)
+            }
             do {
                 try realm.write {
-                    let mem = er.myMember.first
-                    //remove the event result from the member
-                    if let mxm = mem?.eventResults.index(where: {$0.eventResultId == er.eventResultId}) {
-                        mem?.eventResults.remove(at: mxm)
-                    }
-                    realm.delete(er)
                     
+                    //remove the event result from the member
+                    for etoremove in mydelArray {
+                        if  let thismem = etoremove.myMember.first {
+                            if let mxm = thismem.eventResults.index(where: {$0.eventResultId == er.eventResultId}) {
+                                thismem.eventResults.remove(at: mxm)
+                            }
+                            realm.delete(er)
+                        }
+                    }
+                    realm.delete(mydelArray)
                 }
             }catch{
                 showError(errmsg: "Cant remove result")

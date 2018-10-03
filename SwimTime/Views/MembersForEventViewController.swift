@@ -198,61 +198,62 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     
     @IBAction func doneClicked(_ sender: UIBarButtonItem) {
-        
-        if let _ = membersList?.count {
-            if membersList?.count != 0 {
-            
-                do {
-                    try realm.write {
-                        for mem in membersList! {
-                            if mem.selectedForEvent {
-                                mem.selectedForEvent = false
-                                let er = EventResult()
-                                er.eventResultId = mydefs.getNextEventResultId()
-                                if selectedEvent.useRaceNos {
-                                    er.raceNo = mydefs.getNextRaceNo()
+        if checkRelayComplete() {
+            if let _ = membersList?.count {
+                if membersList?.count != 0 {
+                
+                    do {
+                        try realm.write {
+                            for mem in membersList! {
+                                if mem.selectedForEvent {
+                                    mem.selectedForEvent = false
+                                    let er = EventResult()
+                                    er.eventResultId = mydefs.getNextEventResultId()
+                                    if selectedEvent.useRaceNos {
+                                        er.raceNo = mydefs.getNextRaceNo()
+                                        
+                                    }
+                                    er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
                                     
-                                }
-                                er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
-                                
-                                er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
-                                
-                                
-                                let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
-                                
-                                if let psage = pse?.PresetAgeGroup {
-                                    if er.selectedAgeCategory.count == 0 {
-                                        er.selectedAgeCategory.append(psage)
-                                    }else{
-                                        er.selectedAgeCategory[0] = psage
+                                    er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
+                                    
+                                    
+                                    let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
+                                    
+                                    if let psage = pse?.PresetAgeGroup {
+                                        if er.selectedAgeCategory.count == 0 {
+                                            er.selectedAgeCategory.append(psage)
+                                        }else{
+                                            er.selectedAgeCategory[0] = psage
+                                        }
+                                        
+                                        er.staggerStartBy = psage.staggerSeconds
+                                        er.expectedSeconds += psage.staggerSeconds
+                                    }
+                                    if isRelay {
+                                        er.relayNo = pse!.relayNo
+                                        er.relayOrder = pse!.relayOrder
                                     }
                                     
-                                    er.staggerStartBy = psage.staggerSeconds
-                                    er.expectedSeconds += psage.staggerSeconds
+                                    realm.add(er)
+                                    mem.eventResults.append(er)
+                                    selectedEvent.eventResults.append(er)
                                 }
-                                if isRelay {
-                                    er.relayNo = pse!.relayNo
-                                    er.relayOrder = pse!.relayOrder
-                                }
-                                
-                                realm.add(er)
-                                mem.eventResults.append(er)
-                                selectedEvent.eventResults.append(er)
                             }
+                            
                         }
-                        
+                    }catch{
+                        showError(errmsg: "Cant save members")
                     }
-                }catch{
-                    showError(errmsg: "Cant save members")
                 }
             }
+            if let agp = lastAgeGroupFilter {
+                delegate?.updateDefaultFilters(team: lastTeamFilter!, ageGroup: agp)
+            }else{
+                delegate?.updateDefaultFilters(team: lastTeamFilter!, ageGroup: nil)
+            }
+            self.navigationController?.popViewController(animated: true)
         }
-        if let agp = lastAgeGroupFilter {
-            delegate?.updateDefaultFilters(team: lastTeamFilter!, ageGroup: agp)
-        }else{
-            delegate?.updateDefaultFilters(team: lastTeamFilter!, ageGroup: nil)
-        }
-        self.navigationController?.popViewController(animated: true)
     }
     
     // MARK: - my Data stuff
@@ -692,6 +693,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
         cell.accessoryView?.tintColor = UIColor.clear
         cell.accessoryView?.isHidden = false
+        let imgframe = CGRect(x: 0.0, y: 8.0, width: 100.00, height: 90.00)
         
         if lh.selectedForEvent {
             var theimg = "ticknew"
@@ -715,16 +717,17 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                 }
             }
             let imageView = UIImageView(image: UIImage(named: theimg))
-            
-            imageView.sizeToFit()
+            //cell.accessoryView?.frame = imgframe
+            imageView.frame = imgframe
+            imageView.layer.masksToBounds = true
+            //imageView.sizeToFit()
             cell.accessoryView = imageView
             
         }else {
             if imgMemberPhoto.image != nil {
                 
-                let frame = CGRect(x: 0.0, y: 0.0, width: 100.00, height: 100.00)
-                
-                imgMemberPhoto.frame = frame
+               
+                imgMemberPhoto.frame = imgframe
                 imgMemberPhoto.layer.masksToBounds = true
                 imgMemberPhoto.layer.cornerRadius = 20.0
                 cell.accessoryView = imgMemberPhoto

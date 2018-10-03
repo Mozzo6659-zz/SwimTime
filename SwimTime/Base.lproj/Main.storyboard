@@ -404,6 +404,7 @@
                         <outlet property="myTableView" destination="e1q-hG-PKz" id="Eod-eu-fHm"/>
                         <outlet property="txtLocation" destination="ImQ-Tp-3Pn" id="Rzl-jp-T44"/>
                         <segue destination="Uh1-n7-IKA" kind="show" identifier="DualMeetToEvent" id="wpE-mU-HhF"/>
+                        <segue destination="P1y-Ig-7Vg" kind="show" identifier="DualMeetToResults" id="Anp-wj-7fb"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FV6-FX-Wnh" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1119,7 +1120,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PbP-LX-xaK" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2572.65625" y="117.77343749999999"/>
+            <point key="canvasLocation" x="3478" y="261"/>
         </scene>
         <!--Member-->
         <scene sceneID="yEA-kq-2eo">
@@ -1663,7 +1664,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="CWo-Fs-lO3"/>
-        <segue reference="XMo-B0-09e"/>
+        <segue reference="Anp-wj-7fb"/>
         <segue reference="wpE-mU-HhF"/>
     </inferredMetricsTieBreakers>
 </document>
