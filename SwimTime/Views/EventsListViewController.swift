@@ -5,20 +5,23 @@
 //  Created by Mick Mossman on 5/9/18.
 //  Copyright © 2018 Mick Mossman. All rights reserved.
 //
-
+//this can list finished event and finished dual meets when called from the Results button
+//otherwise its only called from the Exhibition button
 import UIKit
 import RealmSwift
 
 class EventsListViewController: UITableViewController {
     let realm = try! Realm()
-    var eventsList : Results<Event>?
+    var eventsList : [EventList] = []
     var myfunc = appFunctions()
     var backFromEvent : Bool = false
     var showFinished : Bool = false //whether the lits show finished event or active events
-    var showPreset : Bool = false
+    //var showPreset : Bool = false
     
     //var selectedMember = Member()
     var selectedEvent = Event()
+    var selectedDualMeet = DualMeet()
+    
     let eventseg = "eventListToEvent"
     let eventResultseg = "eventListToResults"
     
@@ -48,23 +51,55 @@ class EventsListViewController: UITableViewController {
     func loadEvents() -> Bool{
         var found : Bool = false
         
-        var filterstring : String = showFinished ? "isFinished=true" : "isFinished=false"
+        let filterstring : String = showFinished ? "isFinished=true" : "isFinished=false"
         
         
-        if showPreset {
-            filterstring += " AND hasPresetEvent=true"
-            //eventsList = eventsList?.filter("hasPresetEvent=true")
+//        if showPreset {
+//            filterstring += " AND hasPresetEvent=true"
+//            //eventsList = eventsList?.filter("hasPresetEvent=true")
+//        }else{
+//            if !showFinished {
+//                filterstring += " AND hasPresetEvent=false"
+//            }
+//        }
+        
+        let evList  = realm.objects(Event.self).filter(filterstring)
+        
+        //for showFinished load Dual meets separate
+        if showFinished {
+            for ev in evList {
+                if let _ = ev.myDualMeet.first {
+                    
+                }else{
+                    //not a dual meet jutst a finished event
+                    let el = EventList()
+                    el.eventDate = ev.eventDate
+                    el.event = ev
+                    eventsList.append(el)
+                }
+            }
+            let dmlist = realm.objects(DualMeet.self).filter(filterstring)
+            for dm in dmlist {
+                let el = EventList()
+                el.eventDate = dm.meetDate
+                el.dualMeet = dm
+                eventsList.append(el)
+            }
         }else{
-            if !showFinished {
-                filterstring += " AND hasPresetEvent=false"
+            for ev in evList {
+                let el = EventList()
+                if let _ = ev.myDualMeet.first {
+                    //dont inlcud Dual meets just normal events. Dual meets have their own list
+                }else{
+                    el.eventDate = ev.eventDate
+                    el.event = ev
+                    eventsList.append(el)
+                }
+                
             }
         }
         
-        eventsList = realm.objects(Event.self).filter(filterstring).sorted(byKeyPath: "eventDate", ascending: false)
-        
-        
-        
-        if (eventsList?.count == 0) {
+        if (eventsList.count == 0) {
             let noDataLabel = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: tableView.bounds.size.height))
             
             noDataLabel.text             = "No Active Event to List"
@@ -78,6 +113,7 @@ class EventsListViewController: UITableViewController {
             
             //tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         }else{
+            eventsList = eventsList.sorted(by: {$0.eventDate < $1.eventDate})
             tableView.backgroundView=nil;
             found = true
         }
@@ -88,7 +124,7 @@ class EventsListViewController: UITableViewController {
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         
-         return eventsList?.count ?? 0
+         return eventsList.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -107,12 +143,22 @@ class EventsListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedEvent = eventsList![indexPath.row + indexPath.section]
-        if selectedEvent.isFinished {
-              performSegue(withIdentifier: eventResultseg, sender: self)
+        let el = eventsList[indexPath.row + indexPath.section]
+        if showFinished {
+            if el.isEvent() {
+                selectedEvent = el.event
+                selectedDualMeet = DualMeet()
+            }else{
+                selectedDualMeet = el.dualMeet
+                selectedEvent = selectedDualMeet.selectedEvents[0]
+            }
+            performSegue(withIdentifier: eventResultseg, sender: self)
         }else{
-          performSegue(withIdentifier: eventseg, sender: self)
+            selectedEvent = el.event
+            performSegue(withIdentifier: eventseg, sender: self)
         }
+       
+        
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -124,28 +170,35 @@ class EventsListViewController: UITableViewController {
     }
     
     func configureCell(cell:UITableViewCell, atIndexPath indexPath:IndexPath) {
+        var theevent = Event()
+        var thedm = DualMeet()
+        var stext = ""
         
+        let el = eventsList[indexPath.row + indexPath.section]
+        var sdetailText =  myfunc.formatDate(thedate: el.eventDate)
         
-        let lh = eventsList![indexPath.row + indexPath.section]
-        
+        if el.isEvent() {
+            theevent = el.event
+            stext = theevent.eventLocation + (" \(theevent.eventDistance) mtrs")
+            sdetailText += (" \(theevent.eventResults.count) entrants")
+        }else{
+            thedm = el.dualMeet
+            stext = String(format:"%@ Dual Meet ",thedm.meetLocation)
+            sdetailText += (" \(thedm.selectedTeams[0].clubName)")
+            
+            if thedm.selectedTeams.count != 1 {
+                sdetailText += (",\(thedm.selectedTeams[1].clubName)")
+            }
+        }
+        cell.textLabel?.text = stext
+        cell.detailTextLabel?.text = sdetailText
         cell.textLabel?.font = UIFont(name:"Helvetica", size:40.0)
         
-        cell.textLabel?.text = lh.eventLocation + (" \(lh.eventDistance) mtrs"
-        )
         cell.detailTextLabel?.textColor = UIColor.red
         
         cell.detailTextLabel?.font = UIFont(name:"Helvetica", size:20.0)
-        
-
-        let dtfmt = DateFormatter()
-        
-        dtfmt.dateFormat = "dd-MM-yyyy"
-        
-        
-      cell.detailTextLabel?.text = dtfmt.string(from: lh.eventDate) + "  \(lh.eventResults.count) entrants"
-        
+     
         let imgArrow = UIImageView(image: UIImage(named: "rightArrow7575"))
-       
         
         imgArrow.sizeToFit()
         
@@ -161,15 +214,17 @@ class EventsListViewController: UITableViewController {
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return true
+        return !showFinished
     }
     
 
     
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        let el = eventsList[indexPath.row + indexPath.section]
+        //delete not active when shw finished is selected
         
-        let ev = eventsList![indexPath.row + indexPath.section]
+        let ev = el.event
         
         if editingStyle == .delete {
             do {
@@ -218,12 +273,14 @@ class EventsListViewController: UITableViewController {
                 vc.currentEvent = selectedEvent
                 
             }
+            
             //vc.usePresetEvents = showPreset
             
             
         }else if segue.identifier == eventResultseg {
             let vc = segue.destination as! ResultsViewController
             vc.currentEvent = selectedEvent
+            vc.selectedDualMeet = selectedDualMeet
         }
     }
     

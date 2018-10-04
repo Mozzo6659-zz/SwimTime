@@ -35,9 +35,6 @@ class EventViewController: UIViewController,
     var lastSelectedAgeGroup : PresetEventAgeGroups?
     var lastSelectedTeam : SwimClub?
     
-    
-    
-    
     //if called from the dua meet window then selectedDualMeet will be set. //COME BACK watch for returning event from home button
     var selectedDualMeet = DualMeet()
     var currentEvent = Event() //this will be
@@ -121,6 +118,7 @@ class EventViewController: UIViewController,
             defSwimClub = selectedDualMeet.selectedTeams[0]
         }else{
            defSwimClub = myDefs.getDefSwimClub()
+            lastSelectedTeam = defSwimClub
         }
         
         
@@ -493,7 +491,7 @@ class EventViewController: UIViewController,
             if isRelay {
                 eventResults = Array(currentEvent.eventResults)
                 if timerOn {
-                    eventResults = Array(currentEvent.eventResults.filter("activeForRelay=true")).sorted(by: {$0.relayNo < $1.relayNo && $0.getClubID() < $1.getClubID() && $0.relayOrder < $1.relayOrder})
+                    eventResults = Array(currentEvent.eventResults.filter("activeForRelay=true")).sorted(by: {$0.relayNo < $1.relayNo})
                     
                 }else{
                     //eventResults = currentEvent.eventResults.sorted(byKeyPath: "getRelayOrder()", ascending: true)
@@ -561,7 +559,7 @@ class EventViewController: UIViewController,
             /*var groupDict : [String : [EventResult]] = [:]
              var sectionGroups : [PresetEventAgeGroups] = []
              */
-            if let grp = er.selectedAgeCategory.first {
+            if let grp = er.selectedAgeCategory {
                 
                 if sectionAgeGroups.count == 0 {
                     sectionAgeGroups.append(grp)
@@ -581,7 +579,7 @@ class EventViewController: UIViewController,
         
         for sd in sectionAgeGroups {
             //var mArr = eventResults.filter("selectedAgeCategory.presetAgeGroupName = %@",sd.presetAgeGroupName)
-            var mArr = eventResults.filter({$0.selectedAgeCategory.first!.presetAgeGroupName==sd.presetAgeGroupName})
+            var mArr = eventResults.filter({$0.selectedAgeCategory!.presetAgeGroupName==sd.presetAgeGroupName})
             mArr = mArr.sorted(by: {$0.myMember.first!.gender < $1.myMember.first!.gender})
             groupDict[sd.presetAgeGroupName] = mArr
         }
@@ -770,8 +768,8 @@ class EventViewController: UIViewController,
         let imgMemberPhoto = UIImageView(image: UIImage(contentsOfFile: imgFilePath))
         
         
-        cell.backgroundColor = UIColor(hexString: "89D8FC") //light blue.-- hard setting ths doesnt seem to work as well
-        let imgframe = CGRect(x: 0.0, y: 8.0, width: 100.00, height: 90.00)
+        cell.backgroundColor = myFunc.getTableCellBackgroundColour() //light blue.-- hard setting ths doesnt seem to work as well
+        let imgframe = CGRect(x: 0.0, y: 0.0, width: 80.0, height: 75.0)
         
         
         if isRelay && timerOn {
@@ -796,8 +794,10 @@ class EventViewController: UIViewController,
             let imgRelayNo = UIImageView(image: UIImage(named: theimg))
             //let imgRelayNo = UIImageVi
             imgRelayNo.frame = imgframe
-            imgRelayNo.layer.masksToBounds = true
-            
+            //imgRelayNo.layer.masksToBounds = true
+            imgRelayNo.clipsToBounds = true
+            //imgRelayNo.sizeToFit()
+            //cell.accessoryView?.frame = imgframe
             cell.accessoryView = imgRelayNo
             cell.accessoryView?.tintColor = UIColor.clear
             cell.accessoryView?.isHidden = false
@@ -829,6 +829,7 @@ class EventViewController: UIViewController,
                     er.rawresultSeconds = resultseconds
                     er.resultSeconds = resultseconds - er.staggerStartBy
                     er.diffSeconds = er.resultSeconds - er.expectedSeconds
+                    //print("\(er.resultSeconds)")
                     if let mem = er.myMember.first {
                         er.ageAtEvent = mem.age() //this is how old they are when the event was started
                     }
@@ -879,32 +880,55 @@ class EventViewController: UIViewController,
    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             var mydelArray : [EventResult] = []
-            let er = eventResults[indexPath.row + indexPath.section]
-            let mem = er.myMember.first
-            if isRelay {
-                //if a relay delete all for that club ad relayNo
-                mydelArray = eventResults.filter({$0.getClubID() == mem?.myClub.first?.clubID && $0.relayNo == er.relayNo})
+            
+            if useAgeGroupSectionsinTableView() {
+                if let myArray = groupDict[sectionAgeGroups[indexPath.section].presetAgeGroupName] {
+                    
+                     mydelArray.append(myArray[indexPath.row])
+                }
+                
             }else{
-                mydelArray.append(er)
+                if useRelaySectionsInTableView() {
+                    // for a rlay remove all membes of the relay
+                    if let myGroup = groupDict[sectionRelayGroups[indexPath.section].displayname] {
+                        let er = myGroup[indexPath.row]
+                        if let mem = er.myMember.first {
+                            mydelArray = myGroup.filter({$0.getClubID() == mem.myClub.first?.clubID && $0.relayNo == er.relayNo})
+                        }
+                        
+                    }
+                }else{
+                   mydelArray.append(eventResults[indexPath.row + indexPath.section])
+                    
+                }
             }
+            
+            
             do {
                 try realm.write {
                     
                     //remove the event result from the member
                     for etoremove in mydelArray {
                         if  let thismem = etoremove.myMember.first {
-                            if let mxm = thismem.eventResults.index(where: {$0.eventResultId == er.eventResultId}) {
+                            //print(thismem.memberName)
+                            if let mxm = thismem.eventResults.index(where: {$0.eventResultId == etoremove.eventResultId}) {
                                 thismem.eventResults.remove(at: mxm)
                             }
-                            realm.delete(er)
+                            if let evmxm = self.currentEvent.eventResults.index(where: {$0.eventResultId == etoremove.eventResultId}) {
+                                self.currentEvent.eventResults.remove(at: evmxm)
+                            }
+                            realm.delete(etoremove)
                         }
+                        
                     }
-                    realm.delete(mydelArray)
+                    self.loadEventResults()
+                    
                 }
             }catch{
                 showError(errmsg: "Cant remove result")
             }
-            loadEventResults()
+            
+            
         }
     }
     

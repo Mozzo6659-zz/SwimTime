@@ -113,7 +113,7 @@ class MainViewController: UIViewController {
             
             let vc = segue.destination as! EventsListViewController
             vc.showFinished = showFinishedEvents
-            vc.showPreset = showPresetEvents
+            
         }else if segue.identifier == runningEventSeg {
             
             //this segue is called in by the appdelgate if a running event is found

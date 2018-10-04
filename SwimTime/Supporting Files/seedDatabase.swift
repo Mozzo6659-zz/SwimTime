@@ -37,7 +37,10 @@ class seedDatabase {
                 
             }
             
+        }else{
+            //for testing I  gettng preset age groups being added
         }
+        
     }
     
     func addPresetAgeGroups(eventId:Int) {

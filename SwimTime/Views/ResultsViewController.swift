@@ -57,9 +57,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         
         myTableView.register(UINib(nibName: "ResultCell", bundle: nil), forCellReuseIdentifier: "ResultCell")
         
-        if let pse = currentEvent.presetEvent {
-            usePreset = pse.eventAgeGroups.count != 0
-        }
+        
         //tbTime.tintColor = UIColor.orange
         
         if selectedDualMeet.dualMeetID != 0 {
@@ -70,14 +68,28 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         myTableView.delegate = self
         myTableView.dataSource = self
         
+        loadPickerViews()
         getData()
         
         showEventDetails()
+        
         
        
         
         //myTableView.reloadData()
         // Do any additional setup after loading the view.
+    }
+    
+    
+    //MARK: - IBACTIONS
+    
+    @IBAction func changeRace(_ sender: UIButton) {
+        if pickerEvent.isHidden {
+            pickerEvent.isHidden = false
+            pickerEvent.bringSubviewToFront(self.view)
+        }else{
+            pickerEvent.isHidden = true
+        }
     }
     
     func isRelay() -> Bool {
@@ -224,7 +236,9 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func getData() {
-        
+        if let pse = currentEvent.presetEvent {
+            usePreset = pse.eventAgeGroups.count != 0
+        }
         buildGroups()
         buildLists()
         sortListData()
@@ -254,7 +268,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                             if let mem = er.myMember.first {
                                 
                                 if usePreset {
-                                    if let agp = er.selectedAgeCategory.first {
+                                    if let agp = er.selectedAgeCategory {
                                         if grp.grpGender == mem.gender && grp.id == agp.presetAgeGroupID {
                                             //print(mem.memberName + " " +  grp.groupTitle)
                                                     erForGroup.append(er)
@@ -311,7 +325,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                                 }
                             }
                         }else{
-                            if let agp = er.selectedAgeCategory.first {
+                            if let agp = er.selectedAgeCategory {
                                 //prset dual meets where ther are age froups group by gender and age group
                                 let gpfname = agp.presetAgeGroupName + grpfemale
                                 let gpmname = agp.presetAgeGroupName + grpmale

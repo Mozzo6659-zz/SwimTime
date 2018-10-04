@@ -194,14 +194,14 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     }
     
     
-    
-    
-    
-    @IBAction func doneClicked(_ sender: UIBarButtonItem) {
+    func saveListDetails()-> Bool {
+        var bok = false
         if checkRelayComplete() {
+            
+            bok = true
             if let _ = membersList?.count {
                 if membersList?.count != 0 {
-                
+                    
                     do {
                         try realm.write {
                             for mem in membersList! {
@@ -218,21 +218,18 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                     er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                                     
                                     
+                                    
                                     let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
                                     
                                     if let psage = pse?.PresetAgeGroup {
-                                        if er.selectedAgeCategory.count == 0 {
-                                            er.selectedAgeCategory.append(psage)
-                                        }else{
-                                            er.selectedAgeCategory[0] = psage
-                                        }
-                                        
+                                        er.selectedAgeCategory = psage
                                         er.staggerStartBy = psage.staggerSeconds
                                         er.expectedSeconds += psage.staggerSeconds
                                     }
                                     if isRelay {
                                         er.relayNo = pse!.relayNo
                                         er.relayOrder = pse!.relayOrder
+                                        er.expectedSeconds = er.expectedSeconds / 4
                                     }
                                     
                                     realm.add(er)
@@ -247,6 +244,14 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                     }
                 }
             }
+        }
+        
+        return bok
+    }
+    
+    
+    @IBAction func doneClicked(_ sender: UIBarButtonItem) {
+        if saveListDetails() {
             if let agp = lastAgeGroupFilter {
                 delegate?.updateDefaultFilters(team: lastTeamFilter!, ageGroup: agp)
             }else{
@@ -288,7 +293,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
             
                 for er in selectedEvent.eventResults {
                     let mem = er.myMember.first!
-                    if let agrp = er.selectedAgeCategory.first {
+                    if let agrp = er.selectedAgeCategory {
                         addMemberToPreset(mem: mem,agegrp: agrp,relayno: er.relayNo, relayorder: er.relayOrder)
                     }else{
                         addMemberToPreset(mem: mem,agegrp: nil,relayno: er.relayNo, relayorder: er.relayOrder)
@@ -881,8 +886,17 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
         }
     }
     func loadAllAgeGroups() {
-        pickerAgeGroupItems = Array(realm.objects(PresetEventAgeGroups.self).sorted(byKeyPath: "presetAgeGroupID"))
-        //print("count=\(pickerAgeGroupItems.count)")
+        pickerAgeGroupItems = Array(realm.objects(PresetEventAgeGroups.self).sorted(byKeyPath: "presetAgeGroupID")).filter({$0.presetAgeGroupID != 0})
+        
+        //for some reasin Im getting extra age groups create with a 0 id and no name. Have changed the property selectedAgeGroup in EventResult from a list to an optional PresetEventAgeGroup
+        
+//        print("count=\(pickerAgeGroupItems.count)")
+//
+//        for ps in pickerAgeGroupItems {
+//
+//            print(String(format:"id=%d   %@",ps.presetAgeGroupID , ps.presetAgeGroupName))
+//
+//        }
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -893,7 +907,7 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
         if pickerView.tag == 1 {
             return pickerTeamItems.count
         }else{
-            //print("count=\(pickerAgeGroupItems.count)")
+            print("count=\(pickerAgeGroupItems.count)")
             return pickerAgeGroupItems.count
         }
     }

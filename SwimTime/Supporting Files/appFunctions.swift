@@ -197,4 +197,8 @@ class appFunctions {
         
         return pView
     }
+    
+    func getTableCellBackgroundColour() -> UIColor {
+        return UIColor(hexString: "89D8FC")!
+    }
 }

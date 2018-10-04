@@ -35,6 +35,7 @@
 		6FBB5835215C5903001D9219 /* DualMeet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBB5834215C5903001D9219 /* DualMeet.swift */; };
 		6FBB5837215C6112001D9219 /* DualMeetsListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBB5836215C6112001D9219 /* DualMeetsListViewController.swift */; };
 		6FBB5839215C7EE0001D9219 /* DualMeetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBB5838215C7EE0001D9219 /* DualMeetViewController.swift */; };
+		6FC91F142165800E00F11A9A /* EventList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FC91F132165800E00F11A9A /* EventList.swift */; };
 		CE378E1EF6F8A804A5B899A8 /* Pods_SwimTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B178A293D22BCB9A413BC73D /* Pods_SwimTime.framework */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 		6FBB5834215C5903001D9219 /* DualMeet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualMeet.swift; sourceTree = "<group>"; };
 		6FBB5836215C6112001D9219 /* DualMeetsListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualMeetsListViewController.swift; sourceTree = "<group>"; };
 		6FBB5838215C7EE0001D9219 /* DualMeetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualMeetViewController.swift; sourceTree = "<group>"; };
+		6FC91F132165800E00F11A9A /* EventList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventList.swift; sourceTree = "<group>"; };
 		B178A293D22BCB9A413BC73D /* Pods_SwimTime.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwimTime.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D109A052910927502EA5AEF7 /* Pods-SwimTime.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwimTime.release.xcconfig"; path = "Pods/Target Support Files/Pods-SwimTime/Pods-SwimTime.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -162,6 +164,7 @@
 				6FABBE6E214870C0004B8198 /* seedDatabase.swift */,
 				6F3D7243214A085D006C575E /* RequirementNotes.rtf */,
 				6F3D7245214A25FE006C575E /* PresetEventMember.swift */,
+				6FC91F132165800E00F11A9A /* EventList.swift */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FC91F142165800E00F11A9A /* EventList.swift in Sources */,
 				6F1A6CA9213CC9D400A69AC9 /* MembersViewController.swift in Sources */,
 				6F0B018E213F69390034CC2B /* EventsListViewController.swift in Sources */,
 				6FBB5839215C7EE0001D9219 /* DualMeetViewController.swift in Sources */,
