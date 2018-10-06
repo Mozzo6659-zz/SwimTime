@@ -21,10 +21,15 @@ class appUserDefaults {
     let nextTeamNoKey = "NextTeamNo"
     let nextClubIDKey = "NextClubID"
     let runningEventIDKey = "runningEventID"
+    let runningDualMeetIDKey = "runningDualMeetID"
     let runningEventStopDate = "runningEventStopDate"
     let runningEventSecondsStopped = "runningEventSeconds"
     let nextPresetAgeGroupID = "NextPesetAgeGroupId"
     
+    
+    func setRunningDualMeetId(dualMeetID : Int) {
+        defaults.set(dualMeetID, forKey: runningDualMeetIDKey)
+    }
     
     func setRunningEventID(eventID : Int) {
         
@@ -39,6 +44,14 @@ class appUserDefaults {
         
         return eventID
             
+    }
+    
+    func getRunningDualMeetID() -> Int {
+        var dualMeetID = 0
+        if let defid = defaults.object(forKey: runningDualMeetIDKey) as? Int {
+            dualMeetID = defid
+        }
+        return dualMeetID
     }
     func setRunningEevntStopDate(stopDate:Date) {
         defaults.set(stopDate, forKey: runningEventStopDate)

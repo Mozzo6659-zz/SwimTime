@@ -119,7 +119,23 @@ class MainViewController: UIViewController {
             //this segue is called in by the appdelgate if a running event is found
             let vc = segue.destination as! EventViewController
             vc.eventIsRunning = true
-            vc.currentEvent = getRunningEvent()
+            let runningDualMeetId = myDefs.getRunningDualMeetID()
+            if runningDualMeetId != 0 {
+                let runningEventID = myDefs.getRunningEventID()
+                if let runningDualMeet = realm.objects(DualMeet.self).filter("dualMeetID=%d",runningDualMeetId).first {
+                    vc.selectedDualMeet = runningDualMeet
+                    for ev in runningDualMeet.selectedEvents {
+                        if ev.eventID == runningEventID {
+                            vc.currentEvent = ev
+                            break
+                        }
+                    }
+                }
+                
+            }else{
+            
+                vc.currentEvent = getRunningEvent()
+            }
         }
     }
     

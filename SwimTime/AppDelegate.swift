@@ -55,6 +55,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         if vc.timerOn {
                             
                             let myDefs = appUserDefaults()
+                            if vc.isDualMeet {
+                                myDefs.setRunningDualMeetId(dualMeetID: vc.selectedDualMeet.dualMeetID)
+                            }else{
+                               myDefs.setRunningDualMeetId(dualMeetID: 0)
+                            }
                             myDefs.setRunningEventID(eventID: vc.currentEvent.eventID)
                             myDefs.setRunningEevntStopDate(stopDate: Date())
                             myDefs.setRunningEventSecondsStopped(clockseconds: vc.noSeconds)
