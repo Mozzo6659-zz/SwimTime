@@ -16,17 +16,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     //https://stackoverflow.com/questions/34891743/realm-migrations-in-swift
     
     var window: UIWindow?
-    let realm = try! Realm()
-
+    
+   
+    
+    //let realm = try! Realm()
+    //let realm = try! Realm(configuration: config)
+    
+    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        
+        return true
+    }
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         
+        doMigration()
+        
         let seedDB = seedDatabase()
+
+
         seedDB.addGroups()
         seedDB.addInitSwimClub()
         seedDB.addtheseMembers(thisclubid:1)
         seedDB.addtheseMembers(thisclubid:2)
         seedDB.addThesePresetEvents()
+        
+        
         //checkExplorer()
         //addMembers()
         //checkSort()
@@ -35,6 +49,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    func doMigration() {
+        let config = Realm.Configuration(
+            // Set the new schema version. This must be greater than the previously used
+            // version (if you've never set a schema version before, the version is 0).
+            schemaVersion: 1,
+
+            // Set the block which will be called automatically when opening a Realm with
+            // a schema version lower than the one set above
+            migrationBlock: { migration, oldSchemaVersion in
+
+                if oldSchemaVersion < 1 {
+                    migration.enumerateObjects(ofType: "SwimClub", {oldObject,newObject in
+                        newObject?["webID"] = 0
+                    })
+
+                }
+        }
+        )
+        Realm.Configuration.defaultConfiguration = config
+        
+    }
+    
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.

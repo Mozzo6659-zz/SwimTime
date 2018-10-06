@@ -179,6 +179,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create New Team"
+            alertTextField.autocapitalizationType = .words
             userTextField = alertTextField
         }
         

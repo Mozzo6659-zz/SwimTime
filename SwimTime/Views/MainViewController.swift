@@ -23,7 +23,7 @@ class MainViewController: UIViewController {
     let runningEventSeg = "MainToEvent"
     //var runningEventID = 0
     
-    let realm = try! Realm()
+    
     
     @IBOutlet weak var btnMembers: UIButton!
     
@@ -44,25 +44,6 @@ class MainViewController: UIViewController {
         
         self.navigationController?.setToolbarHidden(true, animated: false)
         
-        
-//        runningEventID = myDefs.getRunningEventID()
-//
-//        if runningEventID != 0 {
-//
-//            //check the date isnt more than 20 hours ago
-//
-//
-//            let runDate = myDefs.getRunningEventStopDate()
-//            let hrsDiff = myFunc.getDateDiffHours(fromDate: runDate)
-//
-//            if hrsDiff < 20 {
-//                performSegue(withIdentifier: runningEventSeg, sender: self)
-//            }else{
-//                myDefs.setRunningEventID(eventID: 0)
-//                myDefs.setRunningEventSecondsStopped(clockseconds: 0)
-//            }
-//
-//        }
         
     }
 
@@ -115,7 +96,7 @@ class MainViewController: UIViewController {
             vc.showFinished = showFinishedEvents
             
         }else if segue.identifier == runningEventSeg {
-            
+            let realm = try! Realm()
             //this segue is called in by the appdelgate if a running event is found
             let vc = segue.destination as! EventViewController
             vc.eventIsRunning = true
@@ -140,6 +121,7 @@ class MainViewController: UIViewController {
     }
     
     func getRunningEvent()->Event {
+        let realm = try! Realm()
         let runningEventID = myDefs.getRunningEventID()
         let runningEvent = realm.objects(Event.self).filter("eventID=%d",runningEventID).first
         return runningEvent!
@@ -147,6 +129,8 @@ class MainViewController: UIViewController {
     
     //MARK: - Dev Stuff
     @IBAction func btnDevClicked(_ sender: UIButton) {
+        let realm = try! Realm()
+        
         //let myseed = seedDatabase()
         
         //myseed.addtheseMembers()

@@ -10,7 +10,7 @@ import Foundation
 import RealmSwift
 class appUserDefaults {
     //var nextMemberId = 0
-    let realm = try! Realm()
+    
     
     var defaults = UserDefaults.standard
     let nextMemberKey = "NextMemberID"
@@ -130,6 +130,7 @@ class appUserDefaults {
         
     }
     func getDefSwimClub() -> SwimClub {
+        let realm = try! Realm() //leavwe this here or you cant migrate the db
         let scArray : Results<SwimClub> = realm.objects(SwimClub.self).filter("isDefault = true")
         return scArray.first!
     }

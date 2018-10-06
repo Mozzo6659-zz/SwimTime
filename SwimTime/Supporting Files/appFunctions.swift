@@ -12,7 +12,7 @@ import RealmSwift
 
 class appFunctions {
     
-    let realm = try! Realm()
+    
     
     //MARK: - Photo Functions
     func makePhotoName(memberid:Int) -> String {
@@ -175,6 +175,7 @@ class appFunctions {
         return hour
     }
     func isDuplicateClub(newClubname: String) -> Bool {
+        let realm = try! Realm()
         let myarray = realm.objects(SwimClub.self)
         
         if let _  = myarray.index(where: {$0.clubName == newClubname}) {
