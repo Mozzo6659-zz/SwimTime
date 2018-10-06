@@ -131,9 +131,13 @@ class MainViewController: UIViewController {
     @IBAction func btnDevClicked(_ sender: UIButton) {
         let realm = try! Realm()
         
-        //let myseed = seedDatabase()
         
-        //myseed.addtheseMembers()
+        let mySC = realm.objects(SwimClub.self)
+        
+        for sc in mySC {
+            print(String(format:"%@  webid=%d",sc.clubName,sc.webID))
+        }
+        
         
         //I was getting age groups with no name ??
          let pickerAgeGroupItems = Array(realm.objects(PresetEventAgeGroups.self).sorted(byKeyPath: "presetAgeGroupID"))
