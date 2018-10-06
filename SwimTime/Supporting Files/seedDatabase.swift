@@ -85,6 +85,7 @@ class seedDatabase {
         event.distance = 500
         event.maxPerEvent = 40
         event.maxPerClub = 20
+        event.useStaggerStart = true
         event.maxPerGenderAndAgeGroup = 2
         event.maxClubs = 2
         event.useScoring = true
@@ -98,6 +99,7 @@ class seedDatabase {
         event.distance = 1000
         event.maxPerEvent = 40
         event.maxPerClub = 20
+        event.useStaggerStart = true
         event.maxPerGenderAndAgeGroup = 2
         event.maxClubs = 2
         event.useScoring = true

@@ -19,7 +19,8 @@ class PresetEvent : Object {
     @objc dynamic var maxPerClub : Int = 0
     @objc dynamic var maxPerRelay : Int = 0
     @objc dynamic var maxRelays : Int = 0
-    @objc dynamic var useScoring : Bool = false
+    @objc dynamic var useStaggerStart : Bool = false
+    @objc dynamic var useScoring : Bool = false //this is here but not used. My fault I forgot it was there. Its working so not changing now
     
     let eventAgeGroups = List<PresetEventAgeGroups>()
     

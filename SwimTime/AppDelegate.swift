@@ -13,15 +13,14 @@ import UserNotifications
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 //<div>Icons made by <a href="https://www.flaticon.com/authors/roundicons"
+    //https://stackoverflow.com/questions/34891743/realm-migrations-in-swift
+    
     var window: UIWindow?
     let realm = try! Realm()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-//        let myDEF = appUserDefaults()
-//
-//        let nextmem = myDEF.getNextMemberId()
-//        print("\(nextmem)")
+        
+        
         let seedDB = seedDatabase()
         seedDB.addGroups()
         seedDB.addInitSwimClub()

@@ -359,10 +359,21 @@ class EventViewController: UIViewController,
         //lets save the event here
         view.endEditing(true)
         if !timerOn {
-            removeKeyBoard()
+            var bok = true
+            if let pse = currentEvent.presetEvent {
+                if currentEvent.eventResults.count == pse.maxPerEvent {
+                    bok = false
+                    showError(errmsg: String(format:"Race is full, max entrants is %d",pse.maxPerEvent))
+                }
+            }
             
-            if saveEvent() {
-                performSegue(withIdentifier: eventToMemberseg, sender: self)
+            if bok {
+               
+                removeKeyBoard()
+                
+                if saveEvent() {
+                    performSegue(withIdentifier: eventToMemberseg, sender: self)
+                }
             }
         }else{
             showError(errmsg: "Cant add members while the event is running")
@@ -1077,6 +1088,15 @@ func doEventStart() {
     
 }
     
+    func updateNavTitle() {
+        //if in race mode where everything moves up the chnage the nav title to be the currect race
+        if timerOn {
+            navigationItem.title = currentEvent.getRaceName()
+        }else{
+            navigationItem.title = "Race"
+        }
+    }
+    
     func useAgeGroupSectionsinTableView() -> Bool {
         return (!timerOn) && eventHasAgeGroups
     }
@@ -1086,6 +1106,9 @@ func doEventStart() {
     }
     
     func moveStartViewUp() {
+        
+        updateNavTitle()
+        
         let xPosition = origDetailsFrame.origin.x + 3.0
         
         let yPosition = origDetailsFrame.origin.y + 8.0 //off set from the top
@@ -1095,12 +1118,10 @@ func doEventStart() {
         
         UIView.animate(withDuration: 1, animations: {
             
-            
             self.startView.frame = CGRect(x: xPosition, y: yPosition, width: self.origStartFrame.size.width, height: self.origStartFrame.size.height)
             
             self.myTableView.frame = CGRect(x: self.origTableFrame.origin.x, y: myTableYPosition, width: self.origTableFrame.size.width, height: myTableNewHeight)
             
-           
             self.detailView.frame = CGRect(x: xPosition + self.view.frame.size.width, y: yPosition, width: self.origDetailsFrame.size.width, height: self.origDetailsFrame.size.height)
             
             self.detailView.isHidden = true
@@ -1121,6 +1142,7 @@ func doEventStart() {
             self.detailView.isHidden = false
             self.view.layoutIfNeeded()
         })
+        updateNavTitle()
     }
     
     

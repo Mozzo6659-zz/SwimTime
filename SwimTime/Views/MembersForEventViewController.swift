@@ -102,16 +102,8 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
         hideShowFilter(self)
         
-        loadPresetEventMembers()
-        
-        if isRelay {
-            currentRelayNo = getNextRelayNo(clubid: getClubID()) //last team filter is always set
-            setNavTitle()
-        }
-        
-        if loadMembers() {
-            myTableView.reloadData()
-        }
+        startWindow()
+       
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -130,46 +122,50 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     
     @IBAction func filterClicked(_ sender: UIButton) {
-        if sender.tag == 0 {
-            if pickerTeams.isHidden {
-                //if is relay mode then cant change clubs unless 0 or 4 are picked for the current club
-                if checkRelayComplete() {
-                    
-                    if let sName = lastTeamFilter?.clubName {
-                        if let idx = pickerTeamItems.index(where: {$0.clubName == sName}) {
-                                pickerTeams.selectRow(idx, inComponent: 0, animated: true)
-                            
+        if checkRelayComplete() {
+            if sender.tag == 0 {
+                if pickerTeams.isHidden {
+                    //if is relay mode then cant change clubs unless 0 or 4 are picked for the current club
+                    if checkRelayComplete() {
+                        
+                        if let sName = lastTeamFilter?.clubName {
+                            if let idx = pickerTeamItems.index(where: {$0.clubName == sName}) {
+                                    pickerTeams.selectRow(idx, inComponent: 0, animated: true)
+                                
+                            }
+                        }
+                        pickerTeams.isHidden = false
+                    }
+                }else{
+                    pickerTeams.isHidden = true
+                }
+                
+                
+            }else{
+                if pickerAgeGroups.isHidden {
+                    if let sName = lastAgeGroupFilter?.presetAgeGroupName {
+                        if let idx = pickerAgeGroupItems.index(where: {$0.presetAgeGroupName == sName}) {
+                            //print("name=\(sName) index=\(idx)")
+                            pickerAgeGroups.selectRow(idx, inComponent: 0, animated: true)
                         }
                     }
-                    pickerTeams.isHidden = false
+                    pickerAgeGroups.isHidden = false
+                }else{
+                    pickerAgeGroups.isHidden = true
                 }
-            }else{
-                pickerTeams.isHidden = true
+                
             }
-            
-            
-        }else{
-            if pickerAgeGroups.isHidden {
-                if let sName = lastAgeGroupFilter?.presetAgeGroupName {
-                    if let idx = pickerAgeGroupItems.index(where: {$0.presetAgeGroupName == sName}) {
-                        //print("name=\(sName) index=\(idx)")
-                        pickerAgeGroups.selectRow(idx, inComponent: 0, animated: true)
-                    }
-                }
-                pickerAgeGroups.isHidden = false
-            }else{
-                pickerAgeGroups.isHidden = true
-            }
-            
         }
     }
     
-
-    
+   
     
     @IBAction func hideShowFilter(_ sender: Any) {
         filterShowing = !filterShowing
 
+        //hide the pickerview
+        pickerTeams.isHidden = true
+        pickerAgeGroups.isHidden = true
         
         let hidingFilterFrame = CGRect(x: 200.0, y: origFilterFrame.origin.y, width: origFilterFrame.size.width, height: origFilterFrame.size.height)
         UIView.animate(withDuration: 1, animations: {
@@ -178,6 +174,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                 self.filterView.frame = self.origFilterFrame
                 self.view.bringSubviewToFront(self.filterView)
                 self.filterView.isHidden = false
+            
             }else{
                 self.filterView.frame = self.origFilterFrame
                 self.filterView.frame = hidingFilterFrame
@@ -196,16 +193,24 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     
     func saveListDetails()-> Bool {
         var bok = false
+        var useStagger = false
+        
+        if let psevent = selectedEvent.presetEvent {
+            useStagger = psevent.useStaggerStart
+        }
+        
+        
+        
         if checkRelayComplete() {
+            let memstosave = membersList?.filter("selectedForEvent=true")
             
             bok = true
-            if let _ = membersList?.count {
-                if membersList?.count != 0 {
-                    
+            if memstosave?.count != 0 {
+            
                     do {
                         try realm.write {
-                            for mem in membersList! {
-                                if mem.selectedForEvent {
+                            for mem in memstosave! {
+                                
                                     mem.selectedForEvent = false
                                     let er = EventResult()
                                     er.eventResultId = mydefs.getNextEventResultId()
@@ -223,8 +228,10 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                     
                                     if let psage = pse?.PresetAgeGroup {
                                         er.selectedAgeCategory = psage
-                                        er.staggerStartBy = psage.staggerSeconds
-                                        er.expectedSeconds += psage.staggerSeconds
+                                        if useStagger {
+                                            er.staggerStartBy = psage.staggerSeconds
+                                            er.expectedSeconds += psage.staggerSeconds
+                                        }
                                     }
                                     if isRelay {
                                         er.relayNo = pse!.relayNo
@@ -236,13 +243,13 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                     mem.eventResults.append(er)
                                     selectedEvent.eventResults.append(er)
                                 }
-                            }
+                            
                             
                         }
                     }catch{
                         showError(errmsg: "Cant save members")
                     }
-                }
+                
             }
         }
         
@@ -262,6 +269,22 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     }
     
     // MARK: - my Data stuff
+    
+    func startWindow() {
+        loadPresetEventMembers()
+        
+        if isRelay {
+            currentRelayNo = getNextRelayNo(clubid: getClubID()) //last team filter is
+        }
+        setNavTitle()
+        
+        if loadMembers() {
+            myTableView.reloadData()
+        }
+    }
+    
+    
+    
     func checkRelayComplete() -> Bool {
         var ok = true
         if isRelay {
@@ -277,11 +300,13 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         return ok
     }
     func setNavTitle() {
-         //last team filter is always set
-        //print(lastTeamFilter?.clubName ?? "Fuck off")
-        //print(getRelayLetter())
         
-        self.navigationItem.title = lastTeamFilter!.clubName + " Team " + getRelayLetter()
+        if isRelay {
+            self.navigationItem.title = lastTeamFilter!.clubName + " Team " + getRelayLetter()
+        }else{
+            self.navigationItem.title = selectedEvent.getRaceName()
+        }
+        
     
         
     }
@@ -289,6 +314,8 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         
         //wil use this list to validate how many ppl as agegroups are allowed in each time
         //a member is selected
+        memForEvent.removeAll()
+        
         if usePreset {
             
                 for er in selectedEvent.eventResults {
@@ -928,27 +955,25 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
        
-        if pickerView.tag == 1 {
-            lastTeamFilter = pickerTeamItems[row]
-            lblTeam.text = lastTeamFilter?.clubName
-            if isRelay {
-                currentRelayNo = getNextRelayNo(clubid: lastTeamFilter!.clubID)
-                setNavTitle()
+        if saveListDetails() {
+        
+            if pickerView.tag == 1 {
+                lastTeamFilter = pickerTeamItems[row]
+                lblTeam.text = lastTeamFilter?.clubName
+                if isRelay {
+                    currentRelayNo = getNextRelayNo(clubid: lastTeamFilter!.clubID)
+                    setNavTitle()
+                }
+            }else{
+                
+                lastAgeGroupFilter = pickerAgeGroupItems[row]
+                lblAgeGroup.text = lastAgeGroupFilter?.presetAgeGroupName
             }
-        }else{
             
-            lastAgeGroupFilter = pickerAgeGroupItems[row]
-            lblAgeGroup.text = lastAgeGroupFilter?.presetAgeGroupName
-        }
-        
-        if loadMembers() {
+            startWindow()
             
-        
+            pickerView.isHidden = true
         }
-        myTableView.reloadData()
-        
-        pickerView.isHidden = true
-        
         
     }
 

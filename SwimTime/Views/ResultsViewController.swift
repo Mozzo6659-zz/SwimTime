@@ -9,11 +9,12 @@
 import UIKit
 import RealmSwift
 
+
 class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
     
     let realm = try! Realm()
     //var isGrouped = false preset events wiht age groups are grouped by age group and gender. Exhibition event are grouped by gender.
+    //var dualMeetdelegate : DualMeetDelegate?
     
     var usePreset = false
     var currentEvent = Event() //I wil always pass current event as last active event even if dual meet
@@ -110,9 +111,11 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
 
         hdrText += ("\(currentEvent.eventLocation)  \(currentEvent.eventDistance) meters ") + dateFormatter.string(from: currentEvent.eventDate)
         lblDistance.text = hdrText
-        if usePreset || isRelay() {
-            lblEvent.text = currentEvent.presetEvent?.getPresetName()
+        
+        if let pse = currentEvent.presetEvent {
+            lblEvent.text = pse.getPresetName()
         }
+        
         if isDualMeet {
             calcAllPoints()
         }else{
@@ -138,6 +141,8 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             var bfound = false
             for controller in self.navigationController!.viewControllers as Array {
                 if controller.isKind(of: DualMeetViewController.self) {
+                    let vc = controller as! DualMeetViewController
+                    vc.updateDualMeet(dualMeet: selectedDualMeet)
                     self.navigationController!.popToViewController(controller, animated: true)
                     bfound = true
                     break
@@ -145,6 +150,9 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                         
             }
             if !bfound {
+//                if isDualMeet {
+//                    dualMeetdelegate?.updateDualMeet(dualMeet:selectedDualMeet)
+//                }
                 navigationController?.popViewController(animated: true)
             }
         }else{

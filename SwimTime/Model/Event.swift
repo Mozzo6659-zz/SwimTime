@@ -31,4 +31,12 @@ class Event : Object {
     //let selectedTeams = List<SwimClub>() //moved to dual meet
     let myDualMeet = LinkingObjects(fromType: DualMeet.self, property: "selectedEvents")
     
+    func getRaceName() -> String {
+        if let pse = presetEvent {
+            return pse.getPresetName()
+        }else{
+            return String(format:"%d mtrs",eventDistance)
+        }
+    }
+    
 }
