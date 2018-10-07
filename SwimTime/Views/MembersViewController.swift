@@ -13,7 +13,7 @@ import RealmSwift
 class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UIImagePickerControllerDelegate,UINavigationControllerDelegate {
 
     
-     var pickerView: UIPickerView!
+    var pickerTeams: UIPickerView!
     
     @IBOutlet weak var txtName: UITextField!
     @IBOutlet weak var txtOnekHrs: UITextField!
@@ -49,7 +49,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        pickerView = myfunc.makePickerView()
+        
         
         defSwimClub = myDefs.getDefSwimClub()
         navigationItem.setHidesBackButton(true, animated: false)
@@ -81,12 +81,16 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         imagePicker.sourceType = .camera
         imagePicker.allowsEditing = true
 
-        loadPickerData()
-        pickerView.delegate = self
-        pickerView.dataSource = self
-        pickerView.isHidden = true        
         
-        self.view.bringSubviewToFront(pickerView)
+        loadPickerData()
+        pickerTeams = myfunc.makePickerView()
+        pickerTeams.delegate = self
+        pickerTeams.dataSource = self
+        view.addSubview(pickerTeams)
+        
+        pickerTeams.isHidden = true
+        
+        //self.view.bringSubviewToFront(pickerTeams)
         
     }
 
@@ -96,7 +100,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     
     func loadPickerData() {
         pickerItems = realm.objects(SwimClub.self)
-        
+        //print(String(format:"count=%d",(pickerItems?.count)!))
         
     }
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -132,9 +136,9 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
                 var pnt : CGPoint = lblGroup.center
                 pnt.x = pnt.x - 60.0
                 pnt.y = pnt.y + 60.0
-                
-                pickerView.center = pnt
-                pickerView.isHidden = false
+
+                pickerTeams.center = pnt
+                pickerTeams.isHidden = false
             }
         }else{
             addNewTeam()
@@ -166,7 +170,7 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
                         newClub.isDefault = false
                         self.realm.add(newClub)
                         self.loadPickerData()
-                        self.pickerView.reloadAllComponents()
+                        self.pickerTeams.reloadAllComponents()
                         self.defSwimClub = newClub
                         self.selectedClub = newClub
                         self.lblGroup.text = newClub.clubName
@@ -290,6 +294,8 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
                     if selectedMember.memberID == 0 {
                         selectedMember.memberID = myDefs.getNextMemberId()
                         realm.add(selectedMember)
+                    }else{
+                        selectedMember.dataChanged = true
                     }
                 }
                 

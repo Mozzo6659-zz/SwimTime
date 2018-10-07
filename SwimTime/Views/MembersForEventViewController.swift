@@ -938,7 +938,7 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
         if pickerView.tag == 1 {
             return pickerTeamItems.count
         }else{
-            print("count=\(pickerAgeGroupItems.count)")
+            //print("count=\(pickerAgeGroupItems.count)")
             return pickerAgeGroupItems.count
         }
     }
