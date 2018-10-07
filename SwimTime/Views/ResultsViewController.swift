@@ -150,10 +150,8 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                         
             }
             if !bfound {
-//                if isDualMeet {
-//                    dualMeetdelegate?.updateDualMeet(dualMeet:selectedDualMeet)
-//                }
-                navigationController?.popViewController(animated: true)
+                // if a dual meet and no dual meet vc is found that means they pressed the home button and have come from staight from the main vc the event vc. In that case pop to main vc
+                navigationController?.popToRootViewController(animated: true)
             }
         }else{
             navigationController?.popToRootViewController(animated: true)
@@ -205,19 +203,23 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             lblRacePoints.text = String(format:"%@ %d points - %@ %d points",club1,team1pts,club2,team2pts)
         }
         
+        //print(String(format:"Team1 pts=%d Team2 pts=%d",team1pts,team2pts))
         //now to get all points we need to go through ALL finished events in the Dual meet
         
         let myteamarray = selectedDualMeet.selectedTeams
         for ev in selectedDualMeet.selectedEvents {
             
             if ev.isFinished && ev.eventID != currentEvent.eventID { //not the current event
-                
+                //print(ev.getRaceName())
                 for team in myteamarray {
                     let myArr = Array(ev.eventResults).filter({$0.getClubID() == team.clubID})
                         if team.clubName == club1 {
+                            
                             team1pts += myArr.reduce(0) { $0 + $1.pointsEarned}
+                            //print(String(format:"Team1 pts=%d",team1pts))
                         }else{
                             team2pts += myArr.reduce(0) { $0 + $1.pointsEarned}
+                            //print(String(format:"Team2 pts=%d",team2pts))
                         }
                         if let pse = ev.presetEvent {
                             if pse.isRelay {
@@ -226,8 +228,10 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                                         if ev.clubRelayPoints.count != 0 {
                                             if team.clubName == club1 {
                                                 team1pts += ev.clubRelayPoints[idx]
+                                                //print(String(format:"Team1 Relay pts=%d",ev.clubRelayPoints[idx]))
                                             }else{
                                                 team2pts += ev.clubRelayPoints[idx]
+                                                //print(String(format:"Team2 Relay pts=%d",ev.clubRelayPoints[idx]))
                                             }
                                         }
                                     
@@ -406,13 +410,15 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         idx = 0
         if currentEvent.clubRelayPoints.count == 0 {
             for sr in selectedDualMeet.selectedTeams {
+                //print(sr.clubName)
                 let myarr = sectionGroupRelay.filter({$0.clubname == sr.clubName})
                 if myarr.count != 0 {
-                    let totseconds = myarr.reduce(0) { $0 + $1.totalTimeinseconds }
+                    let totpoints = myarr.reduce(0) { $0 + $1.points }
+                    //print(String(format:"Seconds=%d",totseconds))
                     do {
                         try realm.write {
                             
-                            currentEvent.clubRelayPoints.append(totseconds)
+                            currentEvent.clubRelayPoints.append(totpoints)
                             
                         }
                     }catch{

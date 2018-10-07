@@ -415,7 +415,36 @@ extension DualMeetViewController : UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            //COME BACK they can delete an event if it isnt finished
+            let ev = eventList![indexPath.row + indexPath.section]
+            let evResults = ev.eventResults
+            do {
+                try realm.write {
+                    
+                    //remove the event result from the member
+                    for eResult in evResults {
+                        if  let thismem = eResult.myMember.first {
+                            //print(thismem.memberName)
+                            if let mxm = thismem.eventResults.index(where: {$0.eventResultId == eResult.eventResultId}) {
+                                thismem.eventResults.remove(at: mxm)
+                            }
+                            
+                            
+                        }
+                        
+                    }
+                    if let mxm = currentMeet.selectedEvents.index(where:{$0.eventID == ev.eventID}) {
+                        currentMeet.selectedEvents.remove(at: mxm)
+                    }
+                    
+                    realm.delete(evResults)
+                    realm.delete(ev)
+                    
+                }
+            }catch{
+                showError(errmsg: "Cant remove result")
+            }
+            loadEvents()
+            myTableView.reloadData()
         }
     }
     

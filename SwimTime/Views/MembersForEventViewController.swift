@@ -223,16 +223,20 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                     er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                                     
                                     
-                                    
-                                    let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
-                                    
-                                    if let psage = pse?.PresetAgeGroup {
-                                        er.selectedAgeCategory = psage
-                                        if useStagger {
-                                            er.staggerStartBy = psage.staggerSeconds
-                                            er.expectedSeconds += psage.staggerSeconds
+                                
+                                        let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
+                                        //print("\(pse.)
+                                        if let psage = pse?.PresetAgeGroup {
+                                            if psage.presetAgeGroupID != 0 {
+                                                er.selectedAgeCategory = psage
+                                                if useStagger {
+                                                    er.staggerStartBy = psage.staggerSeconds
+                                                    er.expectedSeconds += psage.staggerSeconds
+                                                }
+                                            }
                                         }
-                                    }
+                                
+                                
                                     if isRelay {
                                         er.relayNo = pse!.relayNo
                                         er.relayOrder = pse!.relayOrder
@@ -535,7 +539,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                     if pse.maxPerGenderAndAgeGroup != 0 && pse.eventAgeGroups.count != 0 {
                         if let myclub = mem.myClub.first {
                             //print("\(mem.gender) agegrpid=\(lastAgeGroupFilter!.presetAgeGroupID) clubid=\(myclub.clubID)")
-                            let matchingmems  = memForEvent.filter({$0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID})
+                            let matchingmems  = memForEvent.filter({$0.clubID == myclub.clubID && $0.gender == mem.gender && $0.PresetAgeGroup!.presetAgeGroupID == lastAgeGroupFilter!.presetAgeGroupID})
                                 if matchingmems.count == pse.maxPerGenderAndAgeGroup {
                                     errMsg = "Maximum number per club, gender and age group exceeded. Max entrants for \(mem.gender) for \(lastAgeGroupFilter!.presetAgeGroupName) each club is \(pse.maxPerGenderAndAgeGroup)"
                                 }

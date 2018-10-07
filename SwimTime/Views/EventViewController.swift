@@ -687,9 +687,14 @@ class EventViewController: UIViewController,
     
         if useAgeGroupSectionsinTableView() || useRelaySectionsInTableView() {
             if useAgeGroupSectionsinTableView() {
-                sHeader = sectionAgeGroups[section].presetAgeGroupName
-                if let myArray = groupDict[sectionAgeGroups[section].presetAgeGroupName] {
+                let grp = sectionAgeGroups[section]
+                sHeader = grp.presetAgeGroupName
+                if let myArray = groupDict[grp.presetAgeGroupName] {
                     sHeader += String(format:"  (%d entrants)" ,myArray.count)
+                }
+                
+                if grp.staggerSeconds != 0 {
+                    sHeader += String(format:" Start:%@ behind",myFunc.convertSecondsToTime(timeinseconds: grp.staggerSeconds,showMinuteOnly: true))
                 }
             }else{
                 sHeader = sectionRelayGroups[section].displayname
@@ -958,6 +963,8 @@ class EventViewController: UIViewController,
             if isDualMeet {
                 vc.selectedTeams = Array(selectedDualMeet.selectedTeams)
                 
+            }else{
+                vc.selectedTeams.append(defSwimClub)
             }
             //vc.usePreset = usePresetEvents
             if let sc = lastSelectedTeam {
@@ -966,6 +973,8 @@ class EventViewController: UIViewController,
             }else{
                 if isDualMeet {
                     vc.lastTeamFilter = selectedDualMeet.selectedTeams[0]
+                }else{
+                    vc.lastTeamFilter = defSwimClub
                 }
                 
             }

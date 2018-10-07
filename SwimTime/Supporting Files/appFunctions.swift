@@ -76,7 +76,7 @@ class appFunctions {
         
     }
     
-    func convertSecondsToTime(timeinseconds:Int) -> String{
+    func convertSecondsToTime(timeinseconds:Int,showMinuteOnly:Bool = false) -> String{
         
        
         
@@ -85,7 +85,12 @@ class appFunctions {
         let seconds = Int(abs(timeinseconds)  % 60)
         let  minutes = Int((abs(timeinseconds) / 60) % 60)
    
-        return String(format: "%02d:%02d:%02d",hours, minutes, seconds)
+        if showMinuteOnly {
+            return String(format: "%02d:%02d", minutes, seconds)
+        }else{
+           return String(format: "%02d:%02d:%02d",hours, minutes, seconds)
+        }
+        
         
     
     }
@@ -168,10 +173,7 @@ class appFunctions {
         let calendar = NSCalendar.current
        
         let hour = calendar.component(.hour, from: fromDate)
-        //let comp = calendar.c
-        //let components = calendar.dateComponents([.hour], from: fromDate, to: toDate)
         
-        //return components.hour!
         return hour
     }
     func isDuplicateClub(newClubname: String) -> Bool {

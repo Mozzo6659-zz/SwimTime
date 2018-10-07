@@ -16,5 +16,7 @@ class PresetEventMember {
     var clubID : Int = 0
     var relayNo : Int = 0
     var relayOrder : Int = 1
-    var PresetAgeGroup = PresetEventAgeGroups() //chad is gonna pick this
+    
+    //var selectedAgeCategory: PresetEventAgeGroups? = nil
+    var PresetAgeGroup : PresetEventAgeGroups?  = nil //chad is gonna pick this
 }

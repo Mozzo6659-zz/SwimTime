@@ -51,6 +51,7 @@ class EventsListViewController: UITableViewController {
     func loadEvents() -> Bool{
         var found : Bool = false
         
+        eventsList.removeAll()
         let filterstring : String = showFinished ? "isFinished=true" : "isFinished=false"
         
         
@@ -113,7 +114,7 @@ class EventsListViewController: UITableViewController {
             
             //tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         }else{
-            eventsList = eventsList.sorted(by: {$0.eventDate < $1.eventDate})
+            eventsList = eventsList.sorted(by: {$0.eventDate > $1.eventDate})
             tableView.backgroundView=nil;
             found = true
         }
@@ -244,7 +245,9 @@ class EventsListViewController: UITableViewController {
             }catch{
                 showError(errmsg: "Cant delete event")
             }
-            
+            if loadEvents() {
+                
+            }
             tableView.reloadData()
             
         }

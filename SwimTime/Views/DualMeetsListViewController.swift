@@ -151,6 +151,13 @@ class DualMeetsListViewController: UITableViewController {
                     for ev in events {
                         if ev.eventResults.count != 0 {
                             let evResults = ev.eventResults
+                            for eresult in evResults {
+                                if let mem = eresult.myMember.first {
+                                    if let mxm = mem.eventResults.index(where: {$0.eventResultId == eresult.eventResultId}) {
+                                        mem.eventResults.remove(at: mxm)
+                                    }
+                                }
+                            }
                             realm.delete(evResults)
                         }
                         
