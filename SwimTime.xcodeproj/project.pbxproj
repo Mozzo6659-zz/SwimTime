@@ -27,6 +27,7 @@
 		6F3F16EC213B972B007862B1 /* Member.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3F16EB213B972B007862B1 /* Member.swift */; };
 		6F3F16EE213B9915007862B1 /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3F16ED213B9915007862B1 /* Group.swift */; };
 		6F3F16F0213BA3C5007862B1 /* MembersListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F3F16EF213BA3C5007862B1 /* MembersListViewController.swift */; };
+		6F704973216C06E0001223AE /* cloudDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F704972216C06E0001223AE /* cloudDB.swift */; };
 		6FABBE6F214870C0004B8198 /* seedDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FABBE6E214870C0004B8198 /* seedDatabase.swift */; };
 		6FABBE712148CF6E004B8198 /* PresetEventAgeGroups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FABBE702148CF6E004B8198 /* PresetEventAgeGroups.swift */; };
 		6FABBE732148CFF3004B8198 /* PresetEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FABBE722148CFF3004B8198 /* PresetEvent.swift */; };
@@ -63,6 +64,7 @@
 		6F3F16EB213B972B007862B1 /* Member.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Member.swift; sourceTree = "<group>"; };
 		6F3F16ED213B9915007862B1 /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
 		6F3F16EF213BA3C5007862B1 /* MembersListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembersListViewController.swift; sourceTree = "<group>"; };
+		6F704972216C06E0001223AE /* cloudDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cloudDB.swift; sourceTree = "<group>"; };
 		6FABBE6E214870C0004B8198 /* seedDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = seedDatabase.swift; sourceTree = "<group>"; };
 		6FABBE702148CF6E004B8198 /* PresetEventAgeGroups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetEventAgeGroups.swift; sourceTree = "<group>"; };
 		6FABBE722148CFF3004B8198 /* PresetEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetEvent.swift; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 				6F3D7243214A085D006C575E /* RequirementNotes.rtf */,
 				6F3D7245214A25FE006C575E /* PresetEventMember.swift */,
 				6FC91F132165800E00F11A9A /* EventList.swift */,
+				6F704972216C06E0001223AE /* cloudDB.swift */,
 			);
 			path = "Supporting Files";
 			sourceTree = "<group>";
@@ -268,6 +271,7 @@
 				"${BUILT_PRODUCTS_DIR}/ProgressHUD/ProgressHUD.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -276,6 +280,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -307,6 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F704973216C06E0001223AE /* cloudDB.swift in Sources */,
 				6FC91F142165800E00F11A9A /* EventList.swift in Sources */,
 				6F1A6CA9213CC9D400A69AC9 /* MembersViewController.swift in Sources */,
 				6F0B018E213F69390034CC2B /* EventsListViewController.swift in Sources */,

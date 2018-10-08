@@ -332,8 +332,7 @@ class EventViewController: UIViewController,
         }
         if (bContinue) {
             if timerOn {
-                timer.invalidate()
-                //finish the event
+                stopTimer()
                 finishTheEvent = true
                 
             }else {
@@ -345,7 +344,12 @@ class EventViewController: UIViewController,
             //timerOn = !timerOn
             
             if finishTheEvent {
-                finishEvent()
+                if isAnyResults() {
+                    finishEvent()
+                }else{
+                    resetEvent()
+                }
+                
             }else{
                  myTableView.reloadData()
             }
@@ -395,6 +399,7 @@ class EventViewController: UIViewController,
     //MARK: - TableView stuff
     
     func finishEvent() {
+        //finish clicked
         do {
             try realm.write {
                 currentEvent.isFinished = true
@@ -437,7 +442,7 @@ class EventViewController: UIViewController,
     
     func stopTimer() {
         timer.invalidate()
-        timerOn = false
+        
     }
     
     func removeKeyBoard() {
@@ -999,7 +1004,12 @@ class EventViewController: UIViewController,
         
     }
     
-    
+    func isAnyResults() -> Bool {
+        let res = eventResults.filter({$0.resultSeconds != 0})
+        return res.count != 0
+        
+       
+    }
     func saveEvent() -> Bool {
         var ok = false
             if validateEvent() {
