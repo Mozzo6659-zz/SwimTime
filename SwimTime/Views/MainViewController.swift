@@ -129,30 +129,33 @@ class MainViewController: UIViewController {
     
     //MARK: - Dev Stuff
     @IBAction func btnDevClicked(_ sender: UIButton) {
-        let realm = try! Realm()
+        //let realm = try! Realm()
         
         
-        let mySC = realm.objects(SwimClub.self)
+        let mcldb = cloudDB()
         
-        print("Swim Clubs")
-        for sc in mySC {
-            
-            print(String(format:"%@ id=%d webid=%d",sc.clubName,sc.clubID,sc.webID))
-        }
-        
-        
-        //I was getting age groups with no name ??
-         let pickerAgeGroupItems = Array(realm.objects(PresetEventAgeGroups.self).sorted(byKeyPath: "presetAgeGroupID"))
-        print("Age Groups")
-        for ag in pickerAgeGroupItems {
-            var sptext = ""
-            if ag.presetAgeGroupName.isEmpty {
-                sptext = "fuckin nuthin"
-            }else{
-               sptext = ag.presetAgeGroupName
-            }
-            print(sptext)
-        }
+        mcldb.addClubs()
+//        let mySC = realm.objects(SwimClub.self)
+//
+//        print("Swim Clubs")
+//        for sc in mySC {
+//
+//            print(String(format:"%@ id=%d webid=%d",sc.clubName,sc.clubID,sc.webID))
+//        }
+//
+//
+//        //I was getting age groups with no name ??
+//         let pickerAgeGroupItems = Array(realm.objects(PresetEventAgeGroups.self).sorted(byKeyPath: "presetAgeGroupID"))
+//        print("Age Groups")
+//        for ag in pickerAgeGroupItems {
+//            var sptext = ""
+//            if ag.presetAgeGroupName.isEmpty {
+//                sptext = "fuckin nuthin"
+//            }else{
+//               sptext = ag.presetAgeGroupName
+//            }
+//            print(sptext)
+//        }
         
     }
 }
