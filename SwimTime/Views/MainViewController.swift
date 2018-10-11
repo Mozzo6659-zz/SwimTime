@@ -134,7 +134,7 @@ class MainViewController: UIViewController {
         
         let mcldb = cloudDB()
         
-        mcldb.addClubs()
+        //mcldb.addClubs()
 //        let mySC = realm.objects(SwimClub.self)
 //
 //        print("Swim Clubs")
