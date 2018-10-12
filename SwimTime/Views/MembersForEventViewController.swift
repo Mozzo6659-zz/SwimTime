@@ -283,8 +283,9 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
         setNavTitle()
         
         if loadMembers() {
-            myTableView.reloadData()
+            
         }
+        myTableView.reloadData()
     }
     
     
@@ -640,8 +641,13 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                     }
             
             //print("age is ok count=\(memidsForAge.count)")
+            //we only want members that are in this age group. There may be none especialy for new clubs
             if memidsForAge.count != 0 {
                 membersNotInEvent = membersNotInEvent.filter("memberID IN %@",memidsForAge)
+            }else{
+                //noone of correct age so clear the list
+                //cant clear the Result using removeall so filter it out
+                membersNotInEvent = membersNotInEvent.filter("memberID = %@",0)
             }
            //print("not in event count=\(membersNotInEvent.count)")
             
@@ -660,6 +666,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
             
             myTableView.backgroundView = noDataLabel;
             membersList = membersNotInEvent
+            //myTableView.reloadData()
             //tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         }else{
             myTableView.backgroundView=nil
@@ -949,7 +956,7 @@ extension MembersForEventViewController : UIPickerViewDelegate,UIPickerViewDataS
             
             return pickerTeamItems[row].clubName
         }else{
-            print(pickerAgeGroupItems[row].presetAgeGroupName)
+            //print(pickerAgeGroupItems[row].presetAgeGroupName)
             return pickerAgeGroupItems[row].presetAgeGroupName
             
         }

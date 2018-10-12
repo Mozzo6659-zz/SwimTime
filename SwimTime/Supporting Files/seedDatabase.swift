@@ -328,18 +328,18 @@ class seedDatabase {
         
         if clubArray.count == 0 {
             let defsc = SwimClub()
-            let otherSwimClub = SwimClub()
+            
             defsc.clubName = "Seas the Limit"
             defsc.clubID = myDefs.getNextClubId()
             defsc.isDefault = true
-            
-            otherSwimClub.clubName = "Maroubra"
-            otherSwimClub.clubID = myDefs.getNextClubId()
+            //let otherSwimClub = SwimClub()
+//            otherSwimClub.clubName = "Maroubra"
+//            otherSwimClub.clubID = myDefs.getNextClubId()
             do {
                 
                 try realm.write {
                     realm.add(defsc)
-                    realm.add(otherSwimClub)
+                    //realm.add(otherSwimClub)
                 }
             }catch {
                 print("Error encoding Item array")

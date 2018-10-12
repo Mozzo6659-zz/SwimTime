@@ -188,12 +188,13 @@ class appFunctions {
         
     }
     
-    func getPickerViewFrame() -> CGRect {
-        return CGRect(x: 120.0, y: 100.0, width: 600.00, height: 143.0)
+    func getPickerViewFrame(yCoord: Double = 100.0) -> CGRect {
+        return CGRect(x: 120.0, y: yCoord, width: 600.00, height: 143.0)
     }
-    func makePickerView() -> UIPickerView {
+    
+    func makePickerView(yVal: Double = 100.0) -> UIPickerView {
         
-        let pView = UIPickerView(frame: getPickerViewFrame())
+        let pView = UIPickerView(frame: getPickerViewFrame(yCoord: yVal))
        
         pView.backgroundColor = UIColor(hexString: "FDB05F")
         pView.layer.cornerRadius = 10.0

@@ -26,6 +26,9 @@ class appUserDefaults {
     let runningEventSecondsStopped = "runningEventSeconds"
     let nextPresetAgeGroupID = "NextPesetAgeGroupId"
     
+    func setInitSwimClubId() {
+        defaults.set(1, forKey: nextClubIDKey)
+    }
     
     func setRunningDualMeetId(dualMeetID : Int) {
         defaults.set(dualMeetID, forKey: runningDualMeetIDKey)

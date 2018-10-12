@@ -442,6 +442,7 @@ class EventViewController: UIViewController,
     
     func stopTimer() {
         timer.invalidate()
+        timerOn = false
         
     }
     

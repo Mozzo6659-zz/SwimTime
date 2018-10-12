@@ -128,24 +128,36 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
     }
     
     //MARK: - Button functions
+   
+    
     @IBAction func groupBtnClicked(_ sender: UIButton) {
-        removeKeyBoard()
+        //removeKeyBoard()
         
         if sender.tag == 1 {
-            if pickerItems?.count != 0 {
-                var pnt : CGPoint = lblGroup.center
-                pnt.x = pnt.x - 60.0
-                pnt.y = pnt.y + 60.0
-
-                pickerTeams.center = pnt
-                pickerTeams.isHidden = false
-            }
+                if pickerTeams.isHidden {
+                    if let itemcount = pickerItems?.count {
+                        if itemcount > 1 {
+                            var pnt : CGPoint = lblGroup.center
+                            pnt.x = pnt.x - 60.0
+                            pnt.y = pnt.y + 100.0
+                            
+                            pickerTeams.center = pnt
+                            pickerTeams.isHidden = false
+                        }else{
+                            showError(errmsg: "You only have one team in the database. You will need to create another team using the + buttons on the left")
+                        }
+                    }
+                }else{
+                    pickerTeams.isHidden = true
+                }
+            
         }else{
             addNewTeam()
         }
     }
     
     func addNewTeam() {
+        removeKeyBoard()
         var userTextField = UITextField() //module lel textfile used in the closure
         userTextField.autocapitalizationType = .words
         var bContinue = false
@@ -241,11 +253,12 @@ class MembersViewController: UIViewController, UIPickerViewDelegate, UIPickerVie
         return UIImage(named: "openbox")!
     }
     func removeKeyBoard() {
+        pickerTeams.isHidden = true
         self.view.endEditing(true)
     }
     
     @IBAction func saveBtnClicked(_ sender: UIButton) {
-        
+        removeKeyBoard()
         if validateEventDetails() {
             let thetime = String(format:"%02d:%02d:%02d",getIntValueFromTextField(txt: txtOnekHrs),
                                  getIntValueFromTextField(txt: txtOnekMinutes),getIntValueFromTextField(txt: txtOnekSeconds))

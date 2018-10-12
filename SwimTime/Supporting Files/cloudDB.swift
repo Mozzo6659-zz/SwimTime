@@ -13,178 +13,102 @@ import RealmSwift
 
 class cloudDB {
     
-    var pitems : [String : Any] = [:]
+    var pitems : [String : Any] = [:] //this is used everywhere
     
-    func getURL() -> String {
-        return  "https://hammerheadsoftware.com.au/swimclubws2/api/SwimClub/"
+    func getURL(serviceendPoint: String) -> String {
+        return  "https://hammerheadsoftware.com.au/swimclubws2/api/SwimClub/" + serviceendPoint
     }
     
-    func addClubs() {
-        let realm = try! Realm()
-        
-        
-        let path =  "/AddClubList"
-        
-        let sURL = getURL() + path
-        
+    func getJSONHeader() -> [String:String] {
         let header = [
             "Content-Type" : "application/json"
         ]
-        //let sURL = URL(string: getURL(), relativeTo: nil)
-        //let sURL = NSURL(string: getURL())!
-        
-        //let baseUrl = sURL as! URLConvertible
-        
-        
-        var pArray : [[String:Any]] = []
-        var params: [String:Any] = [:]
-        
-        //var pArray : [String:Any] = [:]
-        //var params = ["swimclubid" : "", "remoteid" : "", "swimclubname" : ""]
-        
-        let sc = Array(realm.objects(SwimClub.self).filter("webid=0"))
-        
-        for scb in sc {
-            pitems.removeAll()
-            pitems["swimclubid"] = scb.webID
-            pitems["remoteid"] = scb.clubID
-            pitems["clubname"] = scb.clubName
-            pArray.append(pitems)
-            
-            //("swimclubid" : scb.webID, "remoteid" : scb.clubID, "swimclubname" : scb.clubName)
-        }
-        params["data"] = pArray
-            // "swimclubid":0, //this is the webid
-            // "remoteid":1,
-            // "swimclubname":"Seas the Limit"
-        
-        //params like this work
-        //let params = ["swimclubid" : "0", "swimtool" : "thtool", "swimclubname"  : "fickoff"]
-        //these let alamofire complie
-        
-        Alamofire.request(sURL, method: .post, parameters: params, encoding: JSONEncoding.default, headers: header).responseJSON {response in
-
-            }
-        
-//        Alamofire.request(URLRequest, method: .put, parameters: params, encoding: JSONEncoding.default, headers: [:]).responseJSON { response in
-//        }
-        //let ec = Alamofire.ParameterEncoding.encode(JSONEncoding.default)
-        
-        //let encoding = Alamofire.ParameterEncoding.encode(JSONEncoding.default)
-        
-        //let myRequest = encoding.encode(URLRequest, parameters: params).0
-        
-        
-        //let myRequest = Alamofire.ParameterEncoding.encode(URLRequest, method: .post, parameters: params, encoding: JSONEncoding.default, headers: [:]))
-        
-        //(URLRequest, parameters: params)
-        
-       //let myRequest = encoding.encode(URLRequest, parameters: params).0
-        
-//        Alamofire.request(myRequest).responseJSON { response in
-//                        if response.result.isSuccess {
-//                            let weatherJSON : JSON = JSON(response.result.value!)
-//                            print(weatherJSON)
-//                        }else {
-//                            print("Error:\(response.result.error!)")
-//            
-//                        }
-//                    }
+        return header
     }
-//    func addClubs() {
-//        //testing adding swim clubs using Alamofire
-//
-//
-//
-//
-//               /*REST
-//
-// [{
-//
-// "swimclubid":0, //this is the webid
-// "remoteid":1,
-// "swimclubname":"Seas the Limit"
-//
-// },
-// {
-//
-// "swimclubid":0,
-// "remoteid":2,
-// "swimclubname":"Botany"
-// }]
-//*/
-//        let realm = try! Realm()
-//
-//        let sURL = getURL() + "/AddClubList"
-////        var params = "[{\n"
-////        params = params + "\"swimclub\":0,\n"
-////        params = params + "\"remoteid\":1,\n"
-////        params = params + "\"swimclubname\":\"Seas the Limit\",\n"
-////        params = params + "},\n"
-////        params = params + "{\n"
-////        params = params + "\"swimclub\":0,\n"
-////        params = params + "\"remoteid\":2,\n"
-////        params = params + "\"swimclubname\":\"Botany\",\n"
-////        params = params + "}]"
-////
-//        let params = realm.objects(SwimClub.self).filter("webid=0")
-//
-//         //print(params)
-//
-//        //Alamofire.request(sURL)
-////                Alamofire.request(params).responseJSON {
-////                    response in
-////                    if response.result.isSuccess {
-////                        let respJSON : JSON = JSON(response.result.value!)
-////                        print("\(respJSON)")
-////                    }else {
-////                        print("Error:\(response.result.error!)")
-////
-////                    }
-////                }
-//        //Alamofire.request(sURL, method: .post, parameters: params).responseString {
-//
-//
-////        let config = URLSessionConfiguration.default
-////        let session = URLSession(configuration: config)
-////        let urlRequest = session(configuration: sURL)
-//
-//        Alamofire.Request(sURL, method: .post, parameters: params, encoding: JSONEncoding.default).responseJSON { response in
-//            if response.result.isSuccess {
-//                let weatherJSON : JSON = JSON(response.result.value!)
-//                print(weatherJSON)
-//            }else {
-//                print("Error:\(response.result.error!)")
-//
-//            }
-//        }
-//
-////        Alamofire.Request(URLRequest, method: .post, Parameters: params).responseJSON
-////         {
-////            response in
-////            if response.result.isSuccess {
-////                let weatherJSON : JSON = JSON(response.result.value!)
-////                print(weatherJSON)
-////            }else {
-////                print("Error:\(response.result.error!)")
-////
-////            }
-////        }
-//
-////        Alamofire.request(xmlRequest).responseString(completionHandler: {response in
-////            if response.result.isSuccess {
-////                let respJSON : JSON = JSON(response.result.value!)
-////                print("\(respJSON)")
-////                //print(response.result.value)
-////            }else {
-////                print("Error:\(response.result.error!)")
-////
-////            }
-////        })
-//        //**************
-//
-//
-//
-//
-//    }
+    
+    func addClubs(endPoint: String) {
+        let realm = try! Realm()
+        
+        // endPoin = /AddClubList"
+        
+        let sURL = getURL(serviceendPoint: endPoint)
+        
+        let header = getJSONHeader()
+        
+        //making a dictionary wiht a key of "data" and an array of the objects that match my web service
+        
+       
+        let sc = Array(realm.objects(SwimClub.self).filter("webID=0"))
+        
+        if sc.count != 0 {
+            var pArray : [[String:Any]] = []
+            var params: [String:Any] = [:]
+            
+            for scb in sc {
+                pitems.removeAll()
+                pitems["swimclubid"] = scb.webID
+                pitems["remoteid"] = scb.clubID
+                pitems["swimclubname"] = scb.clubName
+                pArray.append(pitems)
+                
+                
+            }
+            params["data"] = pArray
+            
+            
+            Alamofire.request(sURL, method: .post, parameters: params, encoding: JSONEncoding.default, headers: header).responseJSON {response in
+                    if response.result.isSuccess {
+                            let resultJSON : JSON = JSON(response.result.value!)
+                            self.updatenewMembers(result: resultJSON)
+                            //print(resultJSON)
+                    }else {
+                            print("Error:\(response.result.error!)")
+                    
+                    }
+                }
+            }
+    }
+    
+    func updatenewMembers(result: JSON) {
+        let realm = try! Realm()
+        
+        //weatherData.city = result["name"].stringValue
+        //weatherData.condition = result["weather"][0]["id"].intValue
+        
+//        "remoteid": 1,
+//        "webidid": 3,
+//        "errormsg": ""
+        var index = 0
+        var clubids : [Int] = []
+        var webids : [Int] = []
+        
+        for _ in result {
+            let webid = result[index]["remoteid"].intValue
+            if webid != 0 {
+                clubids.append(result[index]["remoteid"].intValue)
+                webids.append(webid)
+            }
+            
+            index += 1
+        }
+        
+        if clubids.count != 0 {
+            index = 0
+            let clubs = realm.objects(SwimClub.self).filter("clubID IN %@",clubids)
+            
+            do {
+                try realm.write {
+                    for club in clubs {
+                        if let idx = webids.index(where: {$0 == club.clubID}) {
+                            club.webID = webids[idx]
+                        }
+                        
+                    }
+                }
+            }catch{
+                print(error)
+            }
+        }
+    }
+
 }

@@ -43,7 +43,7 @@ class MainViewController: UIViewController {
        btnPresetEvent.layer.borderColor = UIColor.red.cgColor
         
         self.navigationController?.setToolbarHidden(true, animated: false)
-        
+        btnDev.isHidden = true
         
     }
 
@@ -134,7 +134,7 @@ class MainViewController: UIViewController {
         
         let mcldb = cloudDB()
         
-        //mcldb.addClubs()
+        mcldb.addClubs(endPoint: "AddClubs")
 //        let mySC = realm.objects(SwimClub.self)
 //
 //        print("Swim Clubs")
