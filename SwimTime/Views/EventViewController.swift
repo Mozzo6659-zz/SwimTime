@@ -230,8 +230,12 @@ class EventViewController: UIViewController,
     
     @IBAction func btnPickPresetEvent(_ sender: UIButton) {
         removeKeyBoard()
-        pickerPresetEvent.isHidden = false
-         pickerPresetEvent.bringSubviewToFront(self.view)
+        if pickerPresetEvent.isHidden {
+            pickerPresetEvent.isHidden = false
+             pickerPresetEvent.bringSubviewToFront(self.view)
+        }else{
+           pickerPresetEvent.isHidden = true
+        }
     }
     
     
@@ -608,7 +612,7 @@ class EventViewController: UIViewController,
                 //var sectionRelayGroups : [(displayname:String, clubname:String, relayLetter:String)] = []
                 if let em = er.myMember.first {
                     if let cb = em.myClub.first {
-                        let sDisplay = String(format:"%@ - Team %@",cb.clubName,er.getRelayLetter())
+                        let sDisplay = String(format:"%@ - Relay %@",cb.clubName,er.getRelayLetter())
                         //print("RelayNo \(er.relayNo) order= \(er.relayOrder)")
                         if sectionRelayGroups.count == 0 {
                             sectionRelayGroups.append((displayname: sDisplay, clubname: cb.clubName, relayNo: er.relayNo))

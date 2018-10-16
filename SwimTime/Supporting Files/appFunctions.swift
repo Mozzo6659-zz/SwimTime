@@ -194,6 +194,8 @@ class appFunctions {
     
     func makePickerView(yVal: Double = 100.0) -> UIPickerView {
         
+        
+        
         let pView = UIPickerView(frame: getPickerViewFrame(yCoord: yVal))
        
         pView.backgroundColor = UIColor(hexString: "FDB05F")

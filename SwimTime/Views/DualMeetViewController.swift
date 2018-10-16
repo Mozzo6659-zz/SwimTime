@@ -285,19 +285,24 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
        
         pickingTeam1 = sender.tag == 1
         
-        if !pickingTeam1 && pickerTeamItems?.count == 1  {
-            showError(errmsg: "You only have one team in the database. You will need to create another team using the + buttons on the left")
-            bok = false
-        }else{
-            if currentMeet.selectedEvents.count != 0 {
-                showError(errmsg: "Cant change teams once races are entered")
+        if pickerTeams.isHidden {
+            if !pickingTeam1 && pickerTeamItems?.count == 1  {
+                showError(errmsg: "You only have one team in the database. You will need to create another team using the + buttons on the left")
                 bok = false
+            }else{
+                if currentMeet.selectedEvents.count != 0 {
+                    showError(errmsg: "Cant change teams once races are entered")
+                    bok = false
+                }
             }
+        }else{
+            bok = false
         }
-       
         if bok {
             pickerTeams.isHidden = false
             pickerTeams.bringSubviewToFront(self.view)
+        }else{
+            pickerTeams.isHidden = true
         }
     }
     //MARK: - Errors

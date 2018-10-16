@@ -432,7 +432,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     func updateGroupRelayTitle(index:Int,points:Int) {
         let sr = sectionGroupRelay[index]
         sectionGroupRelay[index].points = points
-        sectionGroupRelay[index].groupTitle = String(format:"%@ - Team %@ %@ (%d points)",sr.clubname,sr.relayLetter,myfunc.convertSecondsToTime(timeinseconds: sr.totalTimeinseconds) ,points)
+        sectionGroupRelay[index].groupTitle = String(format:"%@ - Relay %@ %@ (%d points)",sr.clubname,sr.relayLetter,myfunc.convertSecondsToTime(timeinseconds: sr.totalTimeinseconds) ,points)
         
     }
     
