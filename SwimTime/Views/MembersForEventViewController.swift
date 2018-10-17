@@ -223,7 +223,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                     er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                                     
                                     
-                                
+                                        //this is the preset event for this members event
                                         let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
                                         //print("\(pse.)
                                         if let psage = pse?.PresetAgeGroup {
@@ -307,7 +307,7 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
     func setNavTitle() {
         
         if isRelay {
-            self.navigationItem.title = lastTeamFilter!.clubName + " Team " + getRelayLetter()
+            self.navigationItem.title = lastTeamFilter!.clubName + " Relay " + getRelayLetter()
         }else{
             self.navigationItem.title = selectedEvent.getRaceName()
         }

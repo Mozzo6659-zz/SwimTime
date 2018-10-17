@@ -275,6 +275,9 @@ class EventViewController: UIViewController,
                         er.raceNo = myDefs.getNextRaceNo()
                     }
                     er.activeForRelay = false
+                    if isRelay {
+                        er.expectedSeconds = er.expectedSeconds / 4
+                    }
                     //print("\(er.expectedSeconds)")
                 }
                 
@@ -771,7 +774,7 @@ class EventViewController: UIViewController,
                 
                 cell.textLabel?.font = UIFont(name: "Helvetica", size: 30.0)
                 
-                txtLabel = String(format:"%@ Team %@ - ",grp.clubName, er.getRelayLetter())
+                txtLabel = String(format:"%@ Relay %@ - ",grp.clubName, er.getRelayLetter())
             }
         }
         
