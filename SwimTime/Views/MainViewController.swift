@@ -134,28 +134,10 @@ class MainViewController: UIViewController {
         
         let mcldb = cloudDB()
         
-        mcldb.addClubs(endPoint: "AddClubs")
-//        let mySC = realm.objects(SwimClub.self)
-//
-//        print("Swim Clubs")
-//        for sc in mySC {
-//
-//            print(String(format:"%@ id=%d webid=%d",sc.clubName,sc.clubID,sc.webID))
-//        }
-//
-//
-//        //I was getting age groups with no name ??
-//         let pickerAgeGroupItems = Array(realm.objects(PresetEventAgeGroups.self).sorted(byKeyPath: "presetAgeGroupID"))
-//        print("Age Groups")
-//        for ag in pickerAgeGroupItems {
-//            var sptext = ""
-//            if ag.presetAgeGroupName.isEmpty {
-//                sptext = "fuckin nuthin"
-//            }else{
-//               sptext = ag.presetAgeGroupName
-//            }
-//            print(sptext)
-//        }
+        mcldb.addClubs()
+        mcldb.addMembers()
+        
+
         
     }
 }

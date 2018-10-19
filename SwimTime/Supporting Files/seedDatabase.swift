@@ -254,6 +254,9 @@ class seedDatabase {
                 addmember(memid: 215,memName: "Lucia Sarcasmo",memDOB: "2007-02-15",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
                 addmember(memid: 217,memName: "Ella Summeraver",memDOB: "2005-09-21",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
                 addmember(memid: 219,memName: "Aria Stopher",memDOB: "2004-10-13",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
+//                addmember(memid: 301,memName: "Test First",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
+//                addmember(memid: 302,memName: "Test Secind",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
+//                addmember(memid: 303,memName: "Test Third",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
             }else{
                 
                 addmember(memid: 188,memName: "Daisy Message",memDOB: "2001-06-26",memGroupID: 0,email: "",oneKSeconds: 795,gender: "Female",clubid: thisclubid)
@@ -272,6 +275,7 @@ class seedDatabase {
                 addmember(memid: 216,memName: "Emersen Stopher",memDOB: "2007-06-25",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
                 addmember(memid: 218,memName: "Zali Summeraver",memDOB: "2007-06-11",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
                 addmember(memid: 220,memName: "Dan Stopher",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
+                
             }
         
             
@@ -294,16 +298,16 @@ class seedDatabase {
         
         let dtf = DateFormatter()
         
-//        if clubid == 2 {
-//            membername = "MA" + memName
-//            memberid += 200
-//        }
+        //let webid = memberid < 300 ? memberid : 0
+        
+        //let webid = memberid
+
         dtf.dateFormat = "yyyy-MM-dd"
         do {
             try realm.write {
                 let mem = Member()
                 mem.memberID = memberid
-                mem.webID = memid
+                mem.webID = memberid //members from here already exist
                 mem.memberName = membername
                 mem.dateOfBirth = dtf.date(from: memDOB)!
                 mem.onekSeconds = oneKSeconds
@@ -341,6 +345,7 @@ class seedDatabase {
             
             defsc.clubName = "STL Team A"
             defsc.clubID = myDefs.getNextClubId()
+            defsc.webID = defsc.clubID //set the web id so it doenst go up.
             defsc.isDefault = true
             let otherSwimClub = SwimClub()
             otherSwimClub.clubName = "STL Team B"
