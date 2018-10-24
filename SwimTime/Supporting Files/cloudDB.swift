@@ -14,9 +14,17 @@ import SVProgressHUD
 
 class cloudDB {
     
+    let resultIndMember = "Members"
+    let resultIndClub = "Clubs"
+    
+    
     let myfunc = appFunctions()
     var pitems : [String : Any] = [:] //this is used everywhere
+    var params: [String:Any] = [:] //this is passed to the web service
     
+    var returnVals = [(remoteid: 0, webid: 0)]
+    
+    //MARK:- Service stuff
     func getURL(serviceendPoint: String) -> String {
         return  "https://hammerheadsoftware.com.au/swimclubws2/api/" + serviceendPoint
     }
@@ -28,67 +36,10 @@ class cloudDB {
         return header
     }
     
-    func addMembers() {
-        let realm = try! Realm()
-        
-        
-        let endPoint = "Member/AddMemberList"
-        
-        let sURL = getURL(serviceendPoint: endPoint)
-        
-        let header = getJSONHeader()
-        let mymems = Array(realm.objects(Member.self).filter("webID=0 OR dataChanged=true"))
-        //print("\(mymems.count)")
-        pitems.removeAll()
-        
-        if mymems.count != 0 {
-            startProgress()
-            
-            var pArray : [[String:Any]] = []
-            var params: [String:Any] = [:]
-            
-            for mem in mymems {
-                pitems.removeAll()
-                pitems["memberid"] = mem.webID
-                pitems["remoteid"] = mem.memberID
-                pitems["membername"] = mem.memberName
-                //pitems["swimclubid"] = 1 testing
-                pitems["gender"] = mem.gender
-                if let sc = mem.myClub.first {
-                    pitems["swimclubid"] = sc.webID
-                }
-                pitems["dateofbirth"] = myfunc.formatDate(thedate: mem.dateOfBirth, theformat:"yyyy-MM-dd")
-                pitems["onekseconds"] = mem.onekSeconds
-                pitems["emailaddress"] = mem.emailAddress
-                pitems["groupid"] = 0
-                
-                pArray.append(pitems)
-                
-                
-            }
-            
-            
-            params["data"] = pArray
-            //use this JSON in postman of any issues
-//            let myJSON = JSON(params)
-//
-//            print(myJSON)
-
-            
-            
-            Alamofire.request(sURL, method: .post, parameters: params, encoding: JSONEncoding.default, headers: header).responseJSON {response in
-                if response.result.isSuccess {
-                    let resultJSON : JSON = JSON(response.result.value!)
-                    self.updateNewMembers(result: resultJSON)
-                    self.dismissProgress()
-                }else {
-                    print("Error:\(response.result.error!)")
-                    
-                }
-            }
-        
-        }
-    }
+    
+    
+    
+    //MARK:- Progress
     
     func startProgress(pmsg: String = "Uploading...") {
         SVProgressHUD.show(withStatus: pmsg)
@@ -104,25 +55,87 @@ class cloudDB {
         
     }
     
-    func addClubs() {
-        let realm = try! Realm()
+    //MARK: - Uploads
+    
+    func uploadData() {
+        uploadClubs()
+        uploadMembers()
         
-        let endPoint = "SwimClub/AddClubList"
+        
+        processUpload()
+    }
+    
+    func processUpload() {
+        let endPoint = "AddAll"
         
         let sURL = getURL(serviceendPoint: endPoint)
         
         let header = getJSONHeader()
+        Alamofire.request(sURL, method: .post, parameters: params, encoding: JSONEncoding.default, headers: header).responseJSON {response in
+            if response.result.isSuccess {
+                let resultJSON : JSON = JSON(response.result.value!)
+                self.updateWebIds(result: resultJSON)
+                self.dismissProgress()
+            }else {
+                print("Error:\(response.result.error!)")
+                
+            }
+        }
         
-        //making a dictionary wiht a key of "data" and an array of the objects that match my web service
+    }
+    
+    func uploadMembers() {
+        let realm = try! Realm()
         
-       pitems.removeAll()
+        
+        let mymems = Array(realm.objects(Member.self).filter("webID=0 OR dataChanged=true"))
+        //print("\(mymems.count)")
+        pitems.removeAll()
+        
+        if mymems.count != 0 {
+            startProgress()
+            
+            var pArray : [[String:Any]] = []
+            
+            
+            for mem in mymems {
+                pitems.removeAll()
+                pitems["memberid"] = mem.webID
+                pitems["remoteid"] = mem.memberID
+                pitems["membername"] = mem.memberName
+                //pitems["swimclubid"] = 1 testing
+                pitems["gender"] = mem.gender
+                if let sc = mem.myClub.first {
+                    pitems["swimclubid"] = sc.webID
+                    pitems["swimclubremoteid"] = sc.clubID
+                }
+                pitems["dateofbirth"] = myfunc.formatDate(thedate: mem.dateOfBirth, theformat:"yyyy-MM-dd")
+                pitems["onekseconds"] = mem.onekSeconds
+                pitems["emailaddress"] = mem.emailAddress
+                pitems["groupid"] = 0
+                
+                pArray.append(pitems)
+                
+                
+            }
+            
+            
+            params["Members"] = pArray
+            
+            
+        }
+    }
+    func uploadClubs() {
+        let realm = try! Realm()
+        
+       
         
         let sc = Array(realm.objects(SwimClub.self).filter("webID=0"))
         
         if sc.count != 0 {
             startProgress()
             var pArray : [[String:Any]] = []
-            var params: [String:Any] = [:]
+            
             
             for scb in sc {
                 pitems.removeAll()
@@ -133,57 +146,73 @@ class cloudDB {
                 
                 
             }
-            params["data"] = pArray
+            params["Clubs"] = pArray
+        }
             
             
-            Alamofire.request(sURL, method: .post, parameters: params, encoding: JSONEncoding.default, headers: header).responseJSON {response in
-                    if response.result.isSuccess {
-                            let resultJSON : JSON = JSON(response.result.value!)
-                            self.updateNewClubs(result: resultJSON)
-                            self.dismissProgress()
-                            //maybe here add new members ??
-                            //print(resultJSON)
-                    }else {
-                            print("Error:\(response.result.error!)")
-                    
-                    }
-                }
-            }
     }
-    func updateNewMembers(result: JSON) {
-        let realm = try! Realm()
+    
+    //MARK:- Data Update
+    func updateWebIds(result: JSON) {
+        //this stamps the webids ont to local data
+        if getUpdateIdsfromJSON(rawJSON: result, thekey: resultIndClub) {
+            updateNewClubs()
+        }
         
+        if getUpdateIdsfromJSON(rawJSON: result, thekey: resultIndMember) {
+            updateNewMembers()
+        }
+    }
+    
+    func getUpdateIdsfromJSON(rawJSON: JSON,thekey:String) -> Bool {
         
+        var bFound = false
         var index = 0
-        var memids : [Int] = []
-        var webids : [Int] = []
         
-        for _ in result {
-            let webid = result[index]["webid"].intValue
-            let memberid = result[index]["remoteid"].intValue
-            //print("webid=\(webid )memid=\(memberid)")
-            if webid != 0 {
-                memids.append(memberid)
-                webids.append(webid)
-            }else{
-                print(result[index]["errormsg"])
+//        switch self.json.type {
+//        case .array:
+//            for (index,subJson):(String, JSON) in self.json {
+//                // Do something you want
+//            }
+//        case .dictionary:
+//            for (key,subJson):(String, JSON) in self.json {
+//                // Do something you want
+//            }
+//        default:
+//            // Do some error handling
+//        }
+        returnVals.removeAll()
+        
+        for _ in rawJSON {
+            if rawJSON[index]["rettype"].stringValue == thekey {
+                if !rawJSON[index]["errormsg"].stringValue.isEmpty {
+                    returnVals.append((remoteid: rawJSON[index]["remoteid"].intValue, webid: rawJSON[index]["webid"].intValue))
+                    bFound = true
+                }else{
+                    //should workout something for errors. Maybe a new Realm table ??
+                }
             }
             
             index += 1
         }
+        return bFound
         
-        if memids.count != 0 {
-            index = 0
-            let members = realm.objects(Member.self).filter("memberID IN %@",memids)
+    }
+    func updateNewMembers() {
+        let realm = try! Realm()
+        
+        
+        if returnVals.count != 0 {
             
+            //let members = realm.objects(Member.self).filter("memberID IN %@",memids)
+            let members = Array(realm.objects(Member.self))
             do {
                 try realm.write {
-                    for mem in members {
-                        if let idx = webids.index(where: {$0 == mem.memberID}) {
-                            mem.webID = webids[idx]
-                            mem.dataChanged = false
-                        }
+                    for val in returnVals {
+                        let mem = members.filter({$0.memberID == val.remoteid}).first
                         
+                        mem?.webID = val.webid
+                        mem?.dataChanged = false
                     }
                 }
             }catch{
@@ -193,36 +222,23 @@ class cloudDB {
     }
 
     
-    func updateNewClubs(result: JSON) {
+    func updateNewClubs() {
         let realm = try! Realm()
         
-        
-        var index = 0
-        var clubids : [Int] = []
-        var webids : [Int] = []
-        
-        for _ in result {
-            let webid = result[index]["webid"].intValue
-            if webid != 0 {
-                clubids.append(result[index]["remoteid"].intValue)
-                webids.append(webid)
-            }
+        if returnVals.count != 0 {
             
-            index += 1
-        }
-        
-        if clubids.count != 0 {
-            index = 0
-            let clubs = realm.objects(SwimClub.self).filter("clubID IN %@",clubids)
+            let clubs = realm.objects(SwimClub.self)
             
             do {
                 try realm.write {
-                    for club in clubs {
-                        if let idx = webids.index(where: {$0 == club.clubID}) {
-                            club.webID = webids[idx]
-                        }
-                        
+                   
+                    for val in returnVals {
+                        let club = clubs.filter({$0.clubID == val.remoteid}).first
+                            
+                        club?.webID = val.webid
+                           
                     }
+                    
                 }
             }catch{
                 print(error)
