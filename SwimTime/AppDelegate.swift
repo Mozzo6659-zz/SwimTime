@@ -37,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         seedDB.addGroups()
         seedDB.addInitSwimClub()
         seedDB.addtheseMembers(thisclubid:1)
-        seedDB.addtheseMembers(thisclubid:2)
+        //seedDB.addtheseMembers(thisclubid:2)
         seedDB.addThesePresetEvents()
         
         

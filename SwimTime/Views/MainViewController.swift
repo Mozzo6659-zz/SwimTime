@@ -43,7 +43,7 @@ class MainViewController: UIViewController {
        btnPresetEvent.layer.borderColor = UIColor.red.cgColor
         
         self.navigationController?.setToolbarHidden(true, animated: false)
-        btnDev.isHidden = true
+        //btnDev.isHidden = true
         
     }
 
@@ -134,8 +134,8 @@ class MainViewController: UIViewController {
         
         let mcldb = cloudDB()
         
-        mcldb.addClubs()
-        mcldb.addMembers()
+        mcldb.uploadData()
+    
         
 
         
