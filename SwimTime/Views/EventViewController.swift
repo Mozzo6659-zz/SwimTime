@@ -780,17 +780,19 @@ class EventViewController: UIViewController,
         
         if currentEvent.useRaceNos {
             txtLabel = ("\(er.raceNo) - ")
-        }else{
+        }
+         txtLabel += mem.memberName
+        
             if isRelay && timerOn {
                 
                 cell.textLabel?.font = UIFont(name: "Helvetica", size: 30.0)
                 
-                txtLabel = String(format:"%@ Relay %@ - ",grp.clubName, er.getRelayLetter())
+                txtLabel += String(format:" (Relay %@) ",er.getRelayLetter())
             }
-        }
         
         
-        txtLabel += mem.memberName
+        
+       
         
         var dtText = String(format:"  (%@)   Age: %d",mem.gender,mem.age())
         dtText = dtText + String(format:"  Team: %@",grp.clubName)

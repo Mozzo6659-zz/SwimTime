@@ -22,12 +22,10 @@ class EventResult : Object {
      @objc dynamic var relayOrder : Int = 0
      @objc dynamic var ageAtEvent : Int = 0
     @objc dynamic var diffSeconds : Int = 0
-    
-    //for reporting Im gonna need this. Chad can put you in any category regardless of how old you are. Im using a lits raher than a blank object. A lst can be empty whihc is fine for this purpose
-    //var selectedAgeCategory = List<PresetEventAgeGroups>()
+
     
     @objc dynamic var selectedAgeCategory: PresetEventAgeGroups? = nil
-    @objc dynamic var memberClubforRace: SwimClub? = nil //this is the club the member belonged to at the time of this race. Not he club the are in now. embers can chnage clubs
+    @objc dynamic var memberClubforRace: SwimClub? = nil //this is the club the member belonged to at the time of this race. Not the club they are in now. Members can change clubs
     
     let myMember = LinkingObjects(fromType: Member.self, property: "eventResults")
     
@@ -62,10 +60,10 @@ class EventResult : Object {
     }
     func getClubID() -> Int {
         var clubid = 0
-        if let mem = myMember.first {
-            if let theclub = mem.myClub.first {
-                clubid = theclub.clubID
-            }
+        if let memClub = memberClubforRace {
+            
+                clubid = memClub.clubID
+            
         }
         return clubid
     }
