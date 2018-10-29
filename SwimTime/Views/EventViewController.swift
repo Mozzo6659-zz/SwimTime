@@ -112,9 +112,11 @@ class EventViewController: UIViewController,
         super.viewDidLoad()
         
         
+        //print(useRaceNos)
         
         if selectedDualMeet.dualMeetID != 0 {
             isDualMeet = true
+            
             defSwimClub = selectedDualMeet.selectedTeams[0]
         }else{
            defSwimClub = myDefs.getDefSwimClub()
@@ -264,16 +266,21 @@ class EventViewController: UIViewController,
                 if let dist = Int(txtDistance.text!) {
                     currentEvent.eventDistance = dist
                 }
-                currentEvent.useRaceNos = opRaceNo.isOn
+                if !isDualMeet {
+                    //userecanos is set by the dual meet
+                    currentEvent.useRaceNos = opRaceNo.isOn
+                }else{
+                    currentEvent.useRaceNos = selectedDualMeet.useRaceNos
+                }
+                
                 
                 for er in currentEvent.eventResults {
                     let mem = er.myMember.first!
                     er.resultSeconds = 0
                     er.activeForRelay = false
                     er.expectedSeconds = myFunc.adjustOnekSecondsForDistance(distance: currentEvent.eventDistance , timeinSeconds: mem.onekSeconds)
-                    if useRaceNos && er.raceNo == 0 {
-                        er.raceNo = myDefs.getNextRaceNo()
-                    }
+
+                    
                     er.activeForRelay = false
                     if isRelay {
                         er.expectedSeconds = er.expectedSeconds / 4
@@ -483,8 +490,12 @@ class EventViewController: UIViewController,
             
         }
         
-        opRaceNo.isOn = currentEvent.useRaceNos
-        useRaceNos = currentEvent.useRaceNos
+        if !isDualMeet {
+            opRaceNo.isOn = currentEvent.useRaceNos
+            useRaceNos = currentEvent.useRaceNos
+        }else{
+            useRaceNos = selectedDualMeet.useRaceNos
+        }
         
         lblEventDate.text = sDateText
         txtLocation.text = sLocation
@@ -613,8 +624,8 @@ class EventViewController: UIViewController,
        
             for er in eventResults {
                 //var sectionRelayGroups : [(displayname:String, clubname:String, relayLetter:String)] = []
-                if let em = er.myMember.first {
-                    if let cb = em.myClub.first {
+                
+                    if let cb = er.memberClubforRace {
                         let sDisplay = String(format:"%@ - Relay %@",cb.clubName,er.getRelayLetter())
                         //print("RelayNo \(er.relayNo) order= \(er.relayOrder)")
                         if sectionRelayGroups.count == 0 {
@@ -628,7 +639,7 @@ class EventViewController: UIViewController,
                         }
                     }
                     
-                }
+                
             }
             
             sectionRelayGroups = sectionRelayGroups.sorted(by: {$0.relayNo < $1.relayNo})
@@ -636,13 +647,13 @@ class EventViewController: UIViewController,
                 var mArr : [EventResult]=[]
                 //cant filter using myMeber.MyClub.clbname in realm
                 for er in eventResults {
-                    if let mem = er.myMember.first {
-                        if let myclub = mem.myClub.first {
+                   
+                        if let myclub = er.memberClubforRace {
                             if myclub.clubName == sd.clubname && er.relayNo == sd.relayNo {
                                 mArr.append(er)
                             }
                         }
-                    }
+                    
                 }
                 mArr = mArr.sorted(by: {$0.relayOrder < $1.relayOrder})
                 //print(sd.displayname)
@@ -759,7 +770,7 @@ class EventViewController: UIViewController,
         }
         
         let mem = er.myMember.first!
-        let grp = mem.myClub.first!
+        let grp = er.memberClubforRace!
         
         cell.textLabel?.font = UIFont(name: "Helvetica", size: 35.0)
         cell.detailTextLabel?.font = UIFont(name: "Helvetica", size: 20.0)
@@ -921,8 +932,9 @@ class EventViewController: UIViewController,
                     // for a rlay remove all membes of the relay
                     if let myGroup = groupDict[sectionRelayGroups[indexPath.section].displayname] {
                         let er = myGroup[indexPath.row]
-                        if let mem = er.myMember.first {
-                            mydelArray = myGroup.filter({$0.getClubID() == mem.myClub.first?.clubID && $0.relayNo == er.relayNo})
+                        
+                        if let thisclub = er.memberClubforRace {
+                            mydelArray = myGroup.filter({$0.getClubID() == thisclub.clubID && $0.relayNo == er.relayNo})
                         }
                         
                     }
@@ -1025,13 +1037,15 @@ class EventViewController: UIViewController,
                 do {
                     try realm.write {
                         currentEvent.eventLocation = txtLocation.text!
+                        currentEvent.useRaceNos = useRaceNos
+                        //print(useRaceNos)
                         if isDualMeet {
                             currentEvent.hasPresetEvent=true
                             currentEvent.eventDistance = currentEvent.presetEvent!.distance
                             
                         }else{
                             currentEvent.eventDistance = Int(txtDistance.text!)!
-                            currentEvent.useRaceNos = useRaceNos
+                            
                         }
                         
                         currentEvent.eventDate = myFunc.dateFromString(stringdate: self.lblEventDate.text!)

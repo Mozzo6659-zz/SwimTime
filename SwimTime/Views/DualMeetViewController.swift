@@ -24,6 +24,7 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
     let eventSeg = "DualMeetToEvent"
     let resultSeg = "DualMeetToResults"
     
+    
     var defSwimClub = SwimClub()
     private var datepicker : UIDatePicker?
     var eventList : List<Event>?
@@ -38,6 +39,7 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
     
     @IBOutlet weak var lblMeetDate: UILabel!
     
+    @IBOutlet weak var useRaceNos: UISwitch!
     @IBOutlet weak var txtLocation: UITextField!
     
     @IBOutlet weak var myTableView: UITableView!
@@ -83,6 +85,7 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
             try realm.write {
                 currentMeet.meetDate = self.myFunc.dateFromString(stringdate: self.lblMeetDate.text!)
                 currentMeet.meetLocation = self.txtLocation.text!
+                currentMeet.useRaceNos = useRaceNos.isOn
                 if currentMeet.dualMeetID == 0 {
                     currentMeet.dualMeetID = self.myDefs.getNextDualMeetId()
                     realm.add(currentMeet)
@@ -191,6 +194,12 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
     }
     
     
+    @IBAction func useRaceNosCanged(_ sender: UISwitch) {
+        
+        if currentMeet.dualMeetID == 0 {
+            saveDetails()
+        }
+    }
     @IBAction func goBack(_ sender: Any) {
         self.navigationController?.popViewController(animated: true)
         
@@ -327,6 +336,7 @@ class DualMeetViewController: UIViewController, DualMeetDelegate {
         if segue.identifier == eventSeg {
             let vc = segue.destination as! EventViewController
             vc.selectedDualMeet = currentMeet
+            vc.useRaceNos = useRaceNos.isOn
             vc.currentEvent = selectedEvent
             vc.dualMeetdelegate = self
         }else{

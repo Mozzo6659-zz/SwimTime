@@ -15,6 +15,7 @@ class DualMeet : Object {
     @objc dynamic var meetLocation : String = ""
     @objc dynamic var meetDate : Date = Date()
     @objc dynamic var dataChanged : Bool = false
+    @objc dynamic var useRaceNos : Bool = true
     @objc dynamic var isFinished : Bool = false
     let selectedTeams = List<SwimClub>()
     

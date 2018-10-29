@@ -29,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         
-        doMigration()
+        //doMigration()
         
         let seedDB = seedDatabase()
 
@@ -37,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         seedDB.addGroups()
         seedDB.addInitSwimClub()
         seedDB.addtheseMembers(thisclubid:1)
-        //seedDB.addtheseMembers(thisclubid:2)
+        seedDB.addtheseMembers(thisclubid:2)
         seedDB.addThesePresetEvents()
         
         

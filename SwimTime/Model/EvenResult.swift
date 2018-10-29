@@ -27,6 +27,7 @@ class EventResult : Object {
     //var selectedAgeCategory = List<PresetEventAgeGroups>()
     
     @objc dynamic var selectedAgeCategory: PresetEventAgeGroups? = nil
+    @objc dynamic var memberClubforRace: SwimClub? = nil //this is the club the member belonged to at the time of this race. Not he club the are in now. embers can chnage clubs
     
     let myMember = LinkingObjects(fromType: Member.self, property: "eventResults")
     

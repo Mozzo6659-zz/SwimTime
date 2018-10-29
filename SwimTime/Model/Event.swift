@@ -25,7 +25,8 @@ class Event : Object {
     @objc dynamic var isExhibitionRelay : Bool = false //allow for an exhibiton relay event
     @objc dynamic var presetEvent : PresetEvent?
     
-    let clubRelayPoints = List<Int>()
+    var clubRelayPoints = List<ClubRelayPoints>()
+    
     
     let eventResults = List<EventResult>()
     //let selectedTeams = List<SwimClub>() //moved to dual meet

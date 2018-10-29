@@ -163,13 +163,17 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     func calcAllPoints() {
         // firts calculate points from the current race
         let club1 = selectedTeams[0].clubName
+        let club1Id = selectedTeams[0].clubID
         //let club1Id = selectedTeams[0].clubID
         //var club2Id = 0
         var club2 = ""
+        
+        var club2Id = 0
         var team1pts = 0
         var team2pts = 0
         if selectedTeams.count > 1 {
             club2 = selectedTeams[1].clubName
+            club2Id = selectedTeams[1].clubID
             //club2Id = selectedTeams[1].clubID
         }
         
@@ -178,21 +182,21 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
            
             
             for er in currentEvent.eventResults {
-                if let mem = er.myMember.first {
-                    if let sc = mem.myClub.first {
-                        if sc.clubName == club1 {
+               
+                    if let sc = er.memberClubforRace {
+                        if sc.clubID == club1Id {
                             team1pts += er.pointsEarned
                         }else{
                             team2pts += er.pointsEarned
                         }
                     }
-                }
+                
                 
             }
             
             if isRelay() {
                 for sr in sectionGroupRelay {
-                    if sr.clubname == club1 {
+                    if sr.clubid == club1Id {
                         team1pts += sr.points
                     }else{
                         team2pts += sr.points
@@ -223,19 +227,19 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                         }
                         if let pse = ev.presetEvent {
                             if pse.isRelay {
-                                if let idx = selectedTeams.index(where: {$0.clubID == team.clubID}) {
+                                //if let idx = selectedTeams.index(where: {$0.clubID == team.clubID}) {
                                     
                                         if ev.clubRelayPoints.count != 0 {
-                                            if team.clubName == club1 {
-                                                team1pts += ev.clubRelayPoints[idx]
+                                            if team.clubID == club1Id {
+                                                team1pts += ev.clubRelayPoints[0].points
                                                 //print(String(format:"Team1 Relay pts=%d",ev.clubRelayPoints[idx]))
                                             }else{
-                                                team2pts += ev.clubRelayPoints[idx]
+                                                team2pts += ev.clubRelayPoints[1].points
                                                 //print(String(format:"Team2 Relay pts=%d",ev.clubRelayPoints[idx]))
                                             }
                                         }
                                     
-                                }
+                                //}
                                 
                             }
                         }
@@ -324,14 +328,14 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
                         
                         if isRelay() {
                             
-                            if let thisclub = mem.myClub.first {
+                            if let thisclub = er.memberClubforRace {
                                 if sectionGroupRelay.index(where: {$0.clubid == thisclub.clubID && $0.relayNo == er.relayNo}) == nil {
                                     
                                     let mr = evResults.filter({$0.getClubID() == thisclub.clubID && $0.relayNo == er.relayNo})
                                     
                                     let totseconds = mr.reduce(0) { $0 + $1.resultSeconds }
-                                    
-                                    
+                                    //print(thisclub.clubName)
+                                    //print(totseconds)
                                     sectionGroupRelay.append((clubid: thisclub.clubID
                                         , relayNo: er.relayNo, relayLetter: er.getRelayLetter(),clubname:thisclub.clubName, groupTitle: "", totalTimeinseconds: totseconds, points: 0))
                                 }
@@ -374,7 +378,10 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     func calcRelayPoints() {
-        sectionGroupRelay = sectionGroupRelay.sorted(by: {$0.relayNo < $1.relayNo && $0.clubid < $1.clubid && $0.totalTimeinseconds < $1.totalTimeinseconds})
+        //sorted by: works if sorting by 2 things
+        //sectionGroupRelay = sectionGroupRelay.sorted(by: {$0.relayNo < $1.relayNo && $0.totalTimeinseconds < $1.totalTimeinseconds})
+        sectionGroupRelay = sectionGroupRelay.sorted(by: {$0.totalTimeinseconds < $1.totalTimeinseconds})
+        
         var Apoints = 25
         var Bpoints = 20
         var Cpoints = 15
@@ -383,6 +390,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
         var pointsassigned = 0
         for sr in sectionGroupRelay {
             pointsassigned = 0
+            
             switch sr.relayNo {
             case 1 :
                 pointsassigned = Apoints
@@ -403,22 +411,35 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             default :
                 break
             }
+            //print(sr.clubname + " relayNo=\(sr.relayNo) points=\(pointsassigned) time=\(sr.totalTimeinseconds)")
             updateGroupRelayTitle(index: idx, points: pointsassigned)
             idx += 1
         }
+        
+//        idx = 0
+//        for sc in selectedDualMeet.selectedTeams {
+//            print(sc.clubName)
+//            print(currentEvent.clubRelayPoints[idx])
+//            idx += 1
+//        }
         
         idx = 0
         if currentEvent.clubRelayPoints.count == 0 {
             for sr in selectedDualMeet.selectedTeams {
                 //print(sr.clubName)
                 let myarr = sectionGroupRelay.filter({$0.clubname == sr.clubName})
+                //print(sr.clubName)
                 if myarr.count != 0 {
                     let totpoints = myarr.reduce(0) { $0 + $1.points }
+                    //print(totpoints)
                     //print(String(format:"Seconds=%d",totseconds))
                     do {
                         try realm.write {
-                            
-                            currentEvent.clubRelayPoints.append(totpoints)
+                            let cr = ClubRelayPoints()
+                            cr.eventID = currentEvent.eventID
+                            cr.clubID = sr.clubID
+                            cr.points = totpoints
+                            currentEvent.clubRelayPoints.append(cr)
                             
                         }
                     }catch{
@@ -560,7 +581,7 @@ class ResultsViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
             hdrText += mem.memberName
             if usePreset {
-                hdrText += String(format: "  (%@)", (mem.myClub.first?.clubName)!)
+                hdrText += String(format: "  (%@)", (er.memberClubforRace!.clubName))
             }
         }
         

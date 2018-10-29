@@ -214,15 +214,21 @@ class MembersForEventViewController: UIViewController,UITableViewDelegate,UITabl
                                     mem.selectedForEvent = false
                                     let er = EventResult()
                                     er.eventResultId = mydefs.getNextEventResultId()
-                                    if selectedEvent.useRaceNos {
-                                        er.raceNo = mydefs.getNextRaceNo()
-                                        
-                                    }
+                                
+                                    //change raceno to be thr id or webid if any
+                                
+                                
                                     er.ageAtEvent = myfunc.getAgeFromDate(fromDate: mem.dateOfBirth, toDate: selectedEvent.eventDate)//mem.age()
                                     
                                     er.expectedSeconds = myfunc.adjustOnekSecondsForDistance(distance: selectedEvent.eventDistance , timeinSeconds: mem.onekSeconds)
                                     
-                                    
+                                    if let clubforRace = mem.myClub.first {
+                                        er.memberClubforRace = clubforRace
+                                        //use racenos anyways jutsdont show them if flag not on
+                                        er.raceNo = mem.webID == 0 ? mem.memberID : mem.webID
+                                        //print(er.raceNo)
+                                        
+                                    }
                                         //this is the preset event for this members event
                                         let pse = self.memForEvent.filter({$0.memberid == mem.memberID}).first
                                         //print("\(pse.)
