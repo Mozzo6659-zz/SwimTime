@@ -254,11 +254,7 @@ class seedDatabase {
                 addmember(memid: 215,memName: "Lucia Sarcasmo",memDOB: "2007-02-15",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
                 addmember(memid: 217,memName: "Ella Summeraver",memDOB: "2005-09-21",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
                 addmember(memid: 219,memName: "Aria Stopher",memDOB: "2004-10-13",memGroupID: 0,email: "",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
-//                addmember(memid: 301,memName: "Test First",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
-//                addmember(memid: 302,memName: "Test Secind",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
-//                addmember(memid: 303,memName: "Test Third",memDOB: "1973-05-09",memGroupID: 0,email: "",oneKSeconds: 960,gender: "Male",clubid: thisclubid)
             }else{
-                
                 addmember(memid: 188,memName: "Daisy Message",memDOB: "2001-06-26",memGroupID: 0,email: "",oneKSeconds: 795,gender: "Female",clubid: thisclubid)
                 addmember(memid: 191,memName: "Milla McKellar",memDOB: "2007-04-17",memGroupID: 0,email: "milla07@optusnet.com.au",oneKSeconds: 1200,gender: "Female",clubid: thisclubid)
                 addmember(memid: 193,memName: "Anthony Sinapi",memDOB: "2003-01-28",memGroupID: 0,email: "anthony@rothesayconstructions.com.au",oneKSeconds: 1200,gender: "Male",clubid: thisclubid)
